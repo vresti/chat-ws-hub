@@ -373,39 +373,77 @@
     .contactos-panel-close:hover { color: #E9EDEF; }
     
     /* ===== MOBILE RESPONSIVE ===== */
-    @media (max-width: 768px) {
+  @media (max-width: 768px) {
       .sidebar { width: 100%; min-width: 100%; }
       .chat-panel { display: none; }
       .app-container.chat-open .sidebar { display: none; }
       .app-container.chat-open .chat-panel { display: flex; }
       .btn-back { display: flex !important; }
       
-      .sidebar-header { height: 48px; padding: 6px 12px; }
-      .sidebar-header h2 { font-size: 20px; }
-      .sidebar-header .badge { font-size: 14px; padding: 3px 12px; }
-      .search-box input { font-size: 16px; padding: 10px 14px; }
+      /* Header compacto */
+      .sidebar-header { height: 42px; padding: 4px 8px; }
+      .sidebar-header h2 { font-size: 16px; }
+      .sidebar-header .badge { font-size: 11px; padding: 2px 8px; }
+      .sidebar-empresa { font-size: 9px; }
+      .sidebar-header-right { gap: 3px; }
+      .btn-sync, .btn-clean { min-width: 28px; height: 28px; font-size: 11px; padding: 2px 5px; }
       
-      .contact-item { padding: 16px 16px; min-height: 76px; }
-      .contact-avatar { width: 52px; height: 52px; font-size: 22px; margin-right: 14px; }
-      .contact-name { font-size: 17px; }
-      .contact-last-msg { font-size: 14px; margin-top: 4px; }
-      .contact-time { font-size: 13px; }
-      .contact-count { width: 22px; height: 22px; font-size: 12px; }
+      /* Buscar OK */
+      .search-box { padding: 4px 8px; }
+      .search-box input { font-size: 15px; padding: 8px 12px; }
       
-      .chat-header { height: 56px; padding: 8px 12px; }
-      .chat-header-name { font-size: 18px; }
-      .chat-header-status { font-size: 14px; }
-      .chat-header .contact-avatar { width: 40px; height: 40px; font-size: 16px; margin-right: 10px; }
+      /* Contactos - 8 visibles */
+      .contact-item { padding: 10px 12px; min-height: 62px; }
+      .contact-avatar { width: 44px; height: 44px; font-size: 18px; margin-right: 10px; }
+      .contact-name { font-size: 15px; }
+      .contact-last-msg { font-size: 12px; margin-top: 2px; }
+      .contact-time { font-size: 11px; }
+      .contact-count { width: 18px; height: 18px; font-size: 10px; }
+      .btn-archive, .btn-pin { font-size: 12px; }
       
-      .chat-messages { padding: 10px 10px; }
-      .message-bubble { max-width: 88%; }
-      .message-text { font-size: 16px; }
-      .message-time { font-size: 12px; }
-      .message-app { font-size: 12px; }
+      /* Chat header reducido */
+      .chat-header { height: 48px; padding: 6px 10px; }
+      .chat-header-name { font-size: 14px; }
+      .chat-header-status { font-size: 11px; }
+      .chat-header-phone { font-size: 11px; }
+      .chat-header .contact-avatar { width: 34px; height: 34px; font-size: 14px; margin-right: 8px; }
       
-      .chat-input-area { padding: 6px 8px; gap: 4px; }
-      .chat-input { font-size: 16px; padding: 8px 10px; }
-      .btn-send { width: 36px; height: 36px; font-size: 16px; }
+      /* Burbujas reducidas */
+      .chat-messages { padding: 8px 8px; }
+      .message-bubble { max-width: 90%; }
+      .message-text { font-size: 13px; }
+      .message-time { font-size: 10px; }
+      .message-app { font-size: 10px; }
+      .message-response { font-size: 12px; }
+      .message-response-ia { font-size: 12px; }
+      .date-separator span { font-size: 11px; }
+      
+      /* Input y botones en 2 líneas */
+      .chat-input-area { 
+        flex-wrap: wrap; 
+        padding: 6px 8px; 
+        gap: 4px; 
+      }
+      .chat-input { 
+        width: 100%; 
+        flex: none; 
+        font-size: 15px; 
+        padding: 8px 10px; 
+        order: 1; 
+      }
+      .btn-send { 
+        width: 32px; 
+        height: 32px; 
+        font-size: 14px; 
+        order: 2; 
+        flex: 1; 
+      }
+      
+      .suggestions-bar { padding: 4px 8px; }
+      .btn-suggestion { font-size: 11px; padding: 4px 10px; }
+      
+      .welcome-screen h2 { font-size: 22px; }
+      .welcome-screen p { font-size: 14px; }
     }
     
     .btn-back {
