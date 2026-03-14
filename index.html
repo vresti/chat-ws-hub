@@ -380,18 +380,26 @@
       .app-container.chat-open .chat-panel { display: flex; }
       .btn-back { display: flex !important; }
       
-      /* Header un poco más alto para botones */
-      .sidebar-header { height: 46px; padding: 5px 8px; }
-      .sidebar-header h2 { font-size: 16px; }
-      .sidebar-header .badge { font-size: 11px; padding: 2px 8px; }
+      /* Header: empresa abajo, botones al lado del badge */
+      .sidebar-header { height: auto; padding: 4px 8px; flex-wrap: wrap; }
+      .sidebar-header-left { width: 100%; justify-content: space-between; }
+      .sidebar-title-row { gap: 4px; }
+      .sidebar-header h2 { font-size: 15px; }
+      .sidebar-header .badge { font-size: 10px; padding: 1px 6px; }
       .sidebar-empresa { font-size: 9px; }
-      .sidebar-header-right { gap: 3px; }
-      .btn-sync, .btn-clean { min-width: 28px; height: 28px; font-size: 11px; padding: 2px 5px; }
+      .sidebar-header-right { 
+        position: absolute; 
+        right: 8px; 
+        top: 4px;
+        gap: 2px; 
+      }
+      .sidebar-title-block { max-width: 55%; }
+      .btn-sync, .btn-clean { min-width: 26px; height: 26px; font-size: 10px; padding: 2px 4px; }
       
       .search-box { padding: 4px 8px; }
       .search-box input { font-size: 15px; padding: 8px 12px; }
       
-      /* Contactos: círculo 15% menos, fila 10% menos alto */
+      /* Contactos */
       .contact-item { padding: 8px 12px; min-height: 56px; }
       .contact-avatar { width: 38px; height: 38px; font-size: 16px; margin-right: 10px; }
       .contact-name { font-size: 15px; }
@@ -400,13 +408,14 @@
       .contact-count { width: 18px; height: 18px; font-size: 10px; }
       .btn-archive, .btn-pin { font-size: 12px; }
       
-      /* Chat header */
-      .chat-header { height: 46px; padding: 4px 8px; }
-      .chat-header-name { font-size: 14px; }
-      .chat-header-status { font-size: 11px; }
-      .chat-header-phone { font-size: 11px; }
-      .chat-header .contact-avatar { width: 32px; height: 32px; font-size: 13px; margin-right: 6px; }
-      .btn-back { width: 28px; height: 28px; font-size: 18px; margin-right: 2px; }
+      /* Chat header compacto en una línea */
+      .chat-header { height: 42px; padding: 2px 4px; gap: 4px; }
+      .chat-header-name { font-size: 13px; }
+      .chat-header-status { font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .chat-header-phone { font-size: 10px; margin-left: 6px; }
+      .chat-header .contact-avatar { width: 28px; height: 28px; font-size: 12px; margin-right: 4px; }
+      .chat-header-info { min-width: 0; }
+      .btn-back { width: 24px; height: 24px; font-size: 16px; margin-right: 0px; margin-left: -2px; }
       
       /* Burbujas compactas */
       .chat-messages { padding: 6px 6px; }
@@ -457,12 +466,12 @@
             <div class="sidebar-empresa" id="empresaInfo"></div>
           </div>
         </div>
-        <div class="sidebar-header-right">
+<div class="sidebar-header-right">
           <button class="btn-clean" id="btnClean" onclick="limpiarHistorial()">🧹</button>
-          <button class="btn-sync" id="btnArchivados" onclick="toggleArchivados()">📦 0</button>
-          <button class="btn-sync" id="btnSync" onclick="sincTelefonos()">📱 Sync</button>
-          <button class="btn-sync" onclick="mostrarContactosNuevo()" style="padding:4px 8px;">C</button>
-          <button class="btn-sync" id="btnAutoIA" onclick="toggleAutoIA()" style="padding:4px 8px;">🤖</button>
+          <button class="btn-sync" id="btnArchivados" onclick="toggleArchivados()">📦</button>
+          <button class="btn-sync" id="btnSync" onclick="sincTelefonos()">📱</button>
+          <button class="btn-sync" onclick="mostrarContactosNuevo()">C</button>
+          <button class="btn-sync" id="btnAutoIA" onclick="toggleAutoIA()">🤖</button>
         </div>
       </div>
       <div class="search-box">
