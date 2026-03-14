@@ -380,64 +380,52 @@
       .app-container.chat-open .chat-panel { display: flex; }
       .btn-back { display: flex !important; }
       
-      /* Header compacto */
-      .sidebar-header { height: 42px; padding: 4px 8px; }
+      /* Header un poco más alto para botones */
+      .sidebar-header { height: 46px; padding: 5px 8px; }
       .sidebar-header h2 { font-size: 16px; }
       .sidebar-header .badge { font-size: 11px; padding: 2px 8px; }
       .sidebar-empresa { font-size: 9px; }
       .sidebar-header-right { gap: 3px; }
       .btn-sync, .btn-clean { min-width: 28px; height: 28px; font-size: 11px; padding: 2px 5px; }
       
-      /* Buscar OK */
       .search-box { padding: 4px 8px; }
       .search-box input { font-size: 15px; padding: 8px 12px; }
       
-      /* Contactos - 8 visibles */
-      .contact-item { padding: 10px 12px; min-height: 62px; }
-      .contact-avatar { width: 44px; height: 44px; font-size: 18px; margin-right: 10px; }
+      /* Contactos: círculo 15% menos, fila 10% menos alto */
+      .contact-item { padding: 8px 12px; min-height: 56px; }
+      .contact-avatar { width: 38px; height: 38px; font-size: 16px; margin-right: 10px; }
       .contact-name { font-size: 15px; }
       .contact-last-msg { font-size: 12px; margin-top: 2px; }
       .contact-time { font-size: 11px; }
       .contact-count { width: 18px; height: 18px; font-size: 10px; }
       .btn-archive, .btn-pin { font-size: 12px; }
       
-      /* Chat header reducido */
-      .chat-header { height: 48px; padding: 6px 10px; }
+      /* Chat header */
+      .chat-header { height: 46px; padding: 4px 8px; }
       .chat-header-name { font-size: 14px; }
       .chat-header-status { font-size: 11px; }
       .chat-header-phone { font-size: 11px; }
-      .chat-header .contact-avatar { width: 34px; height: 34px; font-size: 14px; margin-right: 8px; }
+      .chat-header .contact-avatar { width: 32px; height: 32px; font-size: 13px; margin-right: 6px; }
+      .btn-back { width: 28px; height: 28px; font-size: 18px; margin-right: 2px; }
       
-      /* Burbujas reducidas */
-      .chat-messages { padding: 8px 8px; }
-      .message-bubble { max-width: 90%; }
+      /* Burbujas compactas */
+      .chat-messages { padding: 6px 6px; }
+      .message-bubble { max-width: 90%; padding: 4px 6px 4px 7px; margin-bottom: 2px; }
       .message-text { font-size: 13px; }
-      .message-time { font-size: 10px; }
-      .message-app { font-size: 10px; }
-      .message-response { font-size: 12px; }
-      .message-response-ia { font-size: 12px; }
+      .message-time { font-size: 10px; margin-top: 2px; }
+      .message-app { font-size: 10px; display: inline; margin-right: 6px; }
+      .message-response { font-size: 12px; padding: 4px 8px; margin-top: 3px; }
+      .message-response-ia { font-size: 12px; padding: 4px 8px; margin-top: 3px; }
+      .message-response-label { font-size: 9px; }
+      .message-response-ia-label { font-size: 9px; }
       .date-separator span { font-size: 11px; }
+      .message-header-row { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+      .btn-save-response { font-size: 10px; padding: 2px 6px; margin-top: 0; }
       
       /* Input y botones en 2 líneas */
-      .chat-input-area { 
-        flex-wrap: wrap; 
-        padding: 6px 8px; 
-        gap: 4px; 
-      }
-      .chat-input { 
-        width: 100%; 
-        flex: none; 
-        font-size: 15px; 
-        padding: 8px 10px; 
-        order: 1; 
-      }
-      .btn-send { 
-        width: 32px; 
-        height: 32px; 
-        font-size: 14px; 
-        order: 2; 
-        flex: 1; 
-      }
+      .chat-input-area { flex-wrap: wrap; padding: 6px 8px; gap: 4px; }
+      .chat-input { width: 100%; flex: none; font-size: 15px; padding: 8px 10px; order: 1; }
+      .btn-send { width: 32px; height: 32px; font-size: 14px; order: 2; flex: 1; }
       
       .suggestions-bar { padding: 4px 8px; }
       .btn-suggestion { font-size: 11px; padding: 4px 10px; }
@@ -547,6 +535,7 @@
     var appColor = "#00A884";
     var configData = {};
     var autoIAactivo = false;
+    var esMobile = window.innerWidth <= 768;
     
     // === CARGAR CONFIG ===
     api("getConfig").then(function(cfg) {
@@ -809,11 +798,17 @@
           '</div><div class="clearfix"></div>';
         } else {
           html += '<div class="message-bubble message-incoming">' +
-            '<div class="message-app" style="color:' + appColor + '">' + m.app + '</div>' +
-            '<div class="message-text">' + m.mensaje + '</div>' +
-            '<div class="message-time">' + hora + '</div>';
+            '<div class="message-header-row">' +
+              '<span class="message-app" style="color:' + appColor + '">' + m.app + '</span>' +
+              '<span class="message-time">' + hora + '</span>' +
+              (!m.respuestaPropuesta ? '<button class="btn-save-response" onclick="prepararGuardar(\'' + 
+                m.mensaje.replace(/'/g, "\\'").replace(/"/g, '&quot;') + 
+                '\')">💾</button>' : '') +
+            '</div>' +
+            '<div class="message-text">' + m.mensaje + '</div>';
           
           if (m.respuestaPropuesta) {
+
             var esIA = m.respuestaPropuesta.indexOf('🤖') === 0;
             var textoResp = esIA ? m.respuestaPropuesta.substring(2).trim() : m.respuestaPropuesta;
             
@@ -829,7 +824,8 @@
             sugerencias[m.respuestaPropuesta] = true;
           }
           
-          if (!m.respuestaPropuesta) {
+// En desktop el botón guardar va acá, en mobile va en el header-row
+          if (!m.respuestaPropuesta && !esMobile) {
             html += '<div><button class="btn-save-response" onclick="prepararGuardar(\'' + 
               m.mensaje.replace(/'/g, "\\'").replace(/"/g, '&quot;') + 
               '\')">💾 Guardar respuesta</button></div>';
