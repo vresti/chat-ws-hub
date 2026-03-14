@@ -723,6 +723,8 @@
       if (c) {
         document.getElementById('chatName').textContent = c.alias || c.nombre;
         document.getElementById('chatAvatar').textContent = (c.alias || c.nombre).charAt(0).toUpperCase();
+        var _colors = ['#00A884','#25D366','#128C7E','#075E54','#34B7F1','#ECE5DD'];
+        document.getElementById('chatAvatar').style.background = _colors[c.nombre.length % _colors.length];
         document.getElementById('chatStatus').textContent = c.totalMensajes + ' mensajes';
         telefonoActual = c.telefono;
         timestampActual = c.timestamp || 0;
