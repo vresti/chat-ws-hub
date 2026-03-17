@@ -372,6 +372,7 @@
     .contactos-panel-close { position: absolute; top: 12px; right: 12px; background: none; border: none; color: #8696A0; font-size: 20px; cursor: pointer; }
     .contactos-panel-close:hover { color: #E9EDEF; }
     
+    .message-header-row { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
     /* ===== MOBILE RESPONSIVE ===== */
   @media (max-width: 768px) {
       .sidebar { width: 100%; min-width: 100%; }
@@ -825,32 +826,7 @@
                 m.mensaje.replace(/'/g, "\\'").replace(/"/g, '&quot;') + 
                 '\')">💾</button>' : '') +
             '</div>' +
-            '<div class="message-text">' + m.mensaje + '</div>';
-          
-          if (m.respuestaPropuesta) {
-
-            var esIA = m.respuestaPropuesta.indexOf('🤖') === 0;
-            var textoResp = esIA ? m.respuestaPropuesta.substring(2).trim() : m.respuestaPropuesta;
-            
-            if (esIA) {
-              html += '<div class="message-response-ia">' +
-                '<div class="message-response-ia-label">🤖 Respuesta IA automática</div>' +
-                textoResp + '</div>';
-            } else {
-              html += '<div class="message-response">' +
-                '<div class="message-response-label">💡 Respuesta propuesta</div>' +
-                textoResp + '</div>';
-            }
-            sugerencias[m.respuestaPropuesta] = true;
-          }
-          
-// En desktop el botón guardar va acá, en mobile va en el header-row
-          if (!m.respuestaPropuesta && !esMobile) {
-            html += '<div><button class="btn-save-response" onclick="prepararGuardar(\'' + 
-              m.mensaje.replace(/'/g, "\\'").replace(/"/g, '&quot;') + 
-              '\')">💾 Guardar respuesta</button></div>';
-          }
-          
+            '<div class="message-text">' + m.mensaje + '</div>';          
           html += '</div><div class="clearfix"></div>';
         }
       });
