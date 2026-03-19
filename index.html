@@ -628,7 +628,18 @@
     
     setInterval(function() {
       api("getContactos").then(function(d) { contactosGlobal=d; if(document.getElementById('searchInput').value==='') renderContactos(d); else filtrarContactos(); });
-      if(contactoActual) api("getMensajesPorContacto",{contacto:contactoActual}).then(renderMensajes);
+      if(contactoActual) {
+        api("getMensajesPorContacto",{contacto:contactoActual}).then(renderMensajes);
+        var c = contactosGlobal.find(function(x) { return x.nombre === contactoActual; });
+        if (c) {
+          var btn = document.getElementById('btnSend');
+          var maxTs = Math.max.apply(null, contactosGlobal.map(function(x) { return x.timestamp || 0; }));
+          var esUltimo = c.timestamp === maxTs;
+          var min = (new Date().getTime() - (c.timestamp || 0)) / 60000;
+          btn.style.background = (esUltimo && min < 30) ? appColor : '#FF9800';
+          btn.dataset.usarTu = (esUltimo && min < 30) ? "true" : "false";
+        }
+      }
     }, 15000);
     
     function volverAContactos() { document.getElementById('appContainer').classList.remove('chat-open'); }
