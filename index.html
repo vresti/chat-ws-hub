@@ -438,8 +438,8 @@
         var maxTimestamp = Math.max.apply(null, contactosGlobal.map(function(x) { return x.timestamp || 0; }));
         var esUltimoContacto = c.timestamp === maxTimestamp;
         var min = (new Date().getTime() - (c.timestamp || 0)) / 60000;
-        btn.style.background = (esUltimoContacto && min < 30) ? appColor : '#FF9800';
-        btn.dataset.usarTu = (esUltimoContacto && min < 30) ? "true" : "false";
+        btn.style.background = appColor;
+        btn.dataset.usarTu = "true";
         mensajesVistos[contacto] = c.totalMensajes; renderContactos(contactosGlobal);
       }
       document.getElementById('chatMessages').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando...</div>';
