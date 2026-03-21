@@ -130,6 +130,13 @@
     .message-response-ia { background: #2A1A3A; border-left: 3px solid #7C3AED; padding: 6px 10px; margin-top: 4px; border-radius: 4px; font-size: 13px; color: #C4A8E0; }
     .message-response-ia-label { font-size: 11px; color: #7C3AED; font-weight: 600; margin-bottom: 2px; }
     
+    /* ── MEDIA ── */
+    .media-placeholder { color: #8696A0; font-size: 13px; padding: 6px 2px; display: flex; align-items: center; gap: 6px; }
+    .media-audio audio { max-width: 240px; width: 100%; border-radius: 8px; margin: 4px 0; display: block; }
+    .media-imagen img { max-width: 240px; border-radius: 8px; cursor: pointer; margin: 4px 0; display: block; }
+    .media-doc a { color: #00A884; text-decoration: none; display: flex; align-items: center; gap: 6px; font-size: 13px; padding: 4px 0; }
+    .media-doc a:hover { text-decoration: underline; }
+    
     .clearfix { clear: both; }
     
     .chat-input-area { background: #202C33; padding: 8px 10px; display: flex; align-items: center; gap: 6px; flex-shrink: 0; position: relative; }
@@ -245,6 +252,9 @@
       .welcome-screen h2 { font-size: 22px; }
       .welcome-screen p { font-size: 14px; }
       
+      .media-audio audio { max-width: 100%; }
+      .media-imagen img { max-width: 180px; }
+      
       .contactos-panel { width: 90%; max-height: 80vh; }
       .contactos-panel-header { padding: 10px 12px; }
       .contactos-panel-title { font-size: 14px; margin-bottom: 8px; }
@@ -311,8 +321,10 @@
         <div class="suggestions-bar" id="suggestionsBar"></div>
         
         <div class="chat-input-area">
+          <input type="file" id="fileInput" style="display:none" onchange="enviarArchivo(this)">
           <input type="text" class="chat-input" id="messageInput" placeholder="Mensaje..." onkeypress="if(event.key==='Enter') enviarMensaje()">
           <button class="btn-send" id="btnSend" onclick="enviarMensaje()">➤</button>
+          <button class="btn-send" style="background:#E67E22;font-size:16px;" onclick="document.getElementById('fileInput').click()" title="Enviar archivo">📎</button>
           <button class="btn-send" style="background:#7C3AED;font-size:11px;" id="btnIA" onclick="pedirIA()">IA</button>
         </div>
       </div>
@@ -321,6 +333,7 @@
 
   <script>
     var API_URL = "https://script.google.com/macros/s/AKfycbxLCyafHzG5GIHxQuo2SVUoQ4gfJOYsdvdmbXIizWOl13OJ6Mmia7Vy6Jax1kkj7OKXDQ/exec";
+    var BRIDGE_URL = "http://167.172.27.158:3000";
     
     function api(action, params) {
       var url = API_URL + "?action=" + action;
@@ -330,6 +343,7 @@
     
     var contactosGlobal = [], contactoActual = "", telefonoActual = "", timestampActual = 0;
     var mostrarArchivados = false, mensajesVistos = {}, appColor = "#00A884", configData = {}, autoIAactivo = false;
+    var mediaCache = {}; // Cache de archivos ya cargados { fileId: { base64, mimetype, filename } }
     
     api("getConfig").then(function(cfg) {
       configData = cfg; appColor = cfg.color || "#00A884";
@@ -347,12 +361,22 @@
     api("getContactos").then(function(data) { contactosGlobal = data; renderContactos(data); })
     .catch(function() { document.getElementById('contactsList').innerHTML = '<div class="loading" style="color:#ff6b6b;">Error</div>'; });
     
+    // Formatea el último mensaje para media
+    function formatUltimoMensaje(msg) {
+      if (!msg) return '';
+      if (msg.indexOf('[audio:') === 0) return '🎵 Audio';
+      if (msg.indexOf('[imagen:') === 0) return '🖼️ Imagen';
+      if (msg.indexOf('[video:') === 0) return '🎬 Video';
+      if (msg.indexOf('[doc:') === 0) return '📄 Documento';
+      if (msg.indexOf('[📎') === 0) return msg;
+      return msg;
+    }
+    
     function renderContactos(contactos) {
-      var html = '', totalArchivados = 0, totalActivos = 0;
+      var html = '', totalActivos = 0;
       contactos.forEach(function(c) {
-        if (c.archivado) totalArchivados++; else totalActivos++;
-        if (c.archivado && !mostrarArchivados) return;
-        if (!c.archivado && mostrarArchivados) return;
+        if (c.archivado) return;
+        totalActivos++;
         var esNuevo = false;
         if (mensajesVistos[c.nombre] !== undefined && c.totalMensajes > mensajesVistos[c.nombre]) esNuevo = true;
         if (mensajesVistos[c.nombre] === undefined) mensajesVistos[c.nombre] = c.totalMensajes;
@@ -364,7 +388,7 @@
           '<div class="contact-avatar" style="background:' + color + '" onclick="abrirChat(\'' + esc + '\')">' + inicial + '</div>' +
           '<div class="contact-info" onclick="abrirChat(\'' + esc + '\')">' +
             '<div class="contact-name">' + (c.alias || c.nombre) + '</div>' +
-            '<div class="contact-last-msg">' + c.ultimoMensaje + '</div></div>' +
+            '<div class="contact-last-msg">' + formatUltimoMensaje(c.ultimoMensaje) + '</div></div>' +
           '<div class="contact-meta"><div class="contact-time">' + c.ultimaFecha + '</div>' +
             '<div class="contact-meta-row">' +
               '<div class="contact-count" style="background:' + appColor + '">' + c.totalMensajes + '</div>' +
@@ -375,25 +399,11 @@
       document.getElementById('contactsList').innerHTML = html || '<div class="loading">No hay contactos</div>';
       document.getElementById('totalContactos').textContent = totalActivos;
       document.getElementById('totalContactos').style.background = appColor;
-      document.getElementById('btnArchivados').textContent = '📦 ' + totalArchivados;
     }
     
     function filtrarContactos() {
       var f = document.getElementById('searchInput').value.toLowerCase();
       renderContactos(contactosGlobal.filter(function(c) { return c.nombre.toLowerCase().indexOf(f) > -1 || c.alias.toLowerCase().indexOf(f) > -1; }));
-    }
-    
-    function toggleArchivados() {
-      mostrarArchivados = !mostrarArchivados;
-      var b = document.getElementById('btnArchivados');
-      b.style.background = mostrarArchivados ? appColor : 'none'; b.style.color = mostrarArchivados ? 'white' : '#8696A0';
-      renderContactos(contactosGlobal);
-    }
-    
-    function archivarDesdelista(contacto) {
-      event.stopPropagation();
-      var c = contactosGlobal.find(function(x) { return x.nombre === contacto; });
-      if (c) api(c.archivado ? "desarchivarContacto" : "archivarContacto", { contacto: contacto }).then(recargarContactos);
     }
     
     function togglePin(contacto) {
@@ -433,6 +443,65 @@
       api("getMensajesPorContacto", { contacto: contacto }).then(renderMensajes);
     }
     
+    // ── Detecta si un texto es un mensaje de media y devuelve el HTML apropiado ──
+    function renderContenidoMensaje(texto) {
+      var mediaMatch = texto.match(/^\[(audio|imagen|video|doc):([^\]]+)\]$/);
+      if (!mediaMatch) return '<div class="message-text">' + texto + '</div>';
+      
+      var tipo = mediaMatch[1];
+      var fileId = mediaMatch[2];
+      var icons = { audio: '🎵', imagen: '🖼️', video: '🎬', doc: '📄' };
+      
+      // Si ya está en cache, renderizar directo
+      if (mediaCache[fileId]) {
+        return renderMediaHtml(tipo, fileId, mediaCache[fileId]);
+      }
+      
+      // Placeholder con data attributes para carga async
+      return '<div class="media-placeholder" data-fileid="' + fileId + '" data-mediatype="' + tipo + '">'
+        + icons[tipo] + ' Cargando...</div>';
+    }
+    
+    function renderMediaHtml(tipo, fileId, cacheData) {
+      var src = 'data:' + cacheData.mimetype + ';base64,' + cacheData.base64;
+      if (tipo === 'audio') {
+        return '<div class="media-audio"><audio controls src="' + src + '"></audio></div>';
+      } else if (tipo === 'imagen') {
+        return '<div class="media-imagen"><img src="' + src + '" onclick="window.open(this.src)" title="Click para ampliar"></div>';
+      } else if (tipo === 'video') {
+        return '<div class="media-audio"><video controls src="' + src + '" style="max-width:240px;border-radius:8px;"></video></div>';
+      } else {
+        return '<div class="media-doc"><a href="' + src + '" download="' + (cacheData.filename || 'archivo') + '">📄 ' + (cacheData.filename || 'Descargar documento') + '</a></div>';
+      }
+    }
+    
+    // ── Carga los placeholders de media async ──
+    function cargarMediaPendiente() {
+      var placeholders = document.querySelectorAll('.media-placeholder');
+      placeholders.forEach(function(el) {
+        var fileId = el.getAttribute('data-fileid');
+        var tipo = el.getAttribute('data-mediatype');
+        if (!fileId) return;
+        if (mediaCache[fileId]) {
+          el.outerHTML = renderMediaHtml(tipo, fileId, mediaCache[fileId]);
+          return;
+        }
+        api('getMedia', { fileId: fileId }).then(function(data) {
+          if (data.status === 'ok') {
+            mediaCache[fileId] = data;
+            var current = document.querySelector('[data-fileid="' + fileId + '"]');
+            if (current) current.outerHTML = renderMediaHtml(tipo, fileId, data);
+          } else {
+            var current = document.querySelector('[data-fileid="' + fileId + '"]');
+            if (current) current.textContent = '⚠️ No se pudo cargar el archivo';
+          }
+        }).catch(function() {
+          var current = document.querySelector('[data-fileid="' + fileId + '"]');
+          if (current) current.textContent = '⚠️ Error de conexión';
+        });
+      });
+    }
+    
     function renderMensajes(mensajes) {
       var container = document.getElementById('chatMessages'), html = '', fechaAnt = '', sug = {}, tr = [];
       mensajes.forEach(function(m, idx) {
@@ -454,13 +523,15 @@
               } break;
             }
           }
-          html += '<div class="message-bubble message-outgoing"><div class="message-text">' + m.mensaje.substring(2) + '</div><div class="message-time">' + hora + ' ✓' + ind + '</div></div><div class="clearfix"></div>';
+          var textoEnv = m.mensaje.substring(2);
+          html += '<div class="message-bubble message-outgoing">' + renderContenidoMensaje(textoEnv) + '<div class="message-time">' + hora + ' ✓' + ind + '</div></div><div class="clearfix"></div>';
         } else {
+          var esMedia = /^\[(audio|imagen|video|doc):/.test(m.mensaje);
           html += '<div class="message-bubble message-incoming"><div class="message-header-row">' +
             '<span class="message-app" style="color:' + appColor + '">' + m.app + '</span>' +
             '<span class="message-time">' + hora + '</span>' +
-            (!m.respuestaPropuesta ? '<button class="btn-save-response" onclick="prepararGuardar(\'' + m.mensaje.replace(/'/g, "\\'").replace(/"/g, '&quot;') + '\')">💾</button>' : '') +
-            '</div><div class="message-text">' + m.mensaje + '</div>';
+            (!m.respuestaPropuesta && !esMedia ? '<button class="btn-save-response" onclick="prepararGuardar(\'' + m.mensaje.replace(/'/g, "\\'").replace(/"/g, '&quot;') + '\')">💾</button>' : '') +
+            '</div>' + renderContenidoMensaje(m.mensaje);
           if (m.respuestaPropuesta) {
             var esIA = m.respuestaPropuesta.indexOf('🤖') === 0;
             var txt = esIA ? m.respuestaPropuesta.substring(2).trim() : m.respuestaPropuesta;
@@ -473,6 +544,8 @@
       });
       container.innerHTML = html || '<div class="loading">No hay mensajes</div>';
       setTimeout(function() { container.scrollTop = container.scrollHeight; }, 100);
+      // Cargar media pendiente después del render
+      setTimeout(cargarMediaPendiente, 50);
       if (tr.length > 0) {
         var prom = Math.round(tr.reduce(function(a,b){return a+b;},0) / tr.length);
         var tb = configData.tiempoBien||5, tg = configData.tiempoRegular||15;
@@ -499,6 +572,59 @@
         if (u) { var t = u.querySelector('.message-time'); if (t) t.textContent = hr + ' ✓ vía ' + r.app; }
       });
       mensajesVistos[contactoActual] = (mensajesVistos[contactoActual]||0) + 1;
+    }
+    
+    // ── Enviar archivo al bridge ──
+    function enviarArchivo(input) {
+      var file = input.files[0];
+      if (!file) return;
+      if (!contactoActual || !telefonoActual) {
+        mostrarToast('⚠️ Sin teléfono para este contacto');
+        input.value = '';
+        return;
+      }
+      var maxMB = 16;
+      if (file.size > maxMB * 1024 * 1024) {
+        mostrarToast('⚠️ Archivo demasiado grande (máx ' + maxMB + 'MB)');
+        input.value = '';
+        return;
+      }
+      mostrarToast('📎 Preparando ' + file.name + '...');
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var base64 = e.target.result.split(',')[1];
+        fetch(BRIDGE_URL + '/enviar-archivo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contacto: contactoActual,
+            telefono: telefonoActual,
+            base64: base64,
+            mimetype: file.type || 'application/octet-stream',
+            filename: file.name
+          })
+        }).then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.status === 'ok') {
+            mostrarToast('✓ ' + file.name + ' enviado');
+            // Mostrar burbuja de confirmación en el chat
+            var ct = document.getElementById('chatMessages');
+            var ah = new Date();
+            var hr = ah.getHours().toString().padStart(2,'0') + ':' + ah.getMinutes().toString().padStart(2,'0');
+            var d = document.createElement('div');
+            d.innerHTML = '<div class="message-bubble message-outgoing"><div class="media-doc"><span style="color:#99BEB7;">📎 ' + file.name + '</span></div><div class="message-time">' + hr + ' ✓</div></div><div class="clearfix"></div>';
+            ct.appendChild(d); ct.scrollTop = ct.scrollHeight;
+          } else {
+            mostrarToast('❌ Error: ' + (data.mensaje || 'no se pudo enviar'));
+          }
+          input.value = '';
+        }).catch(function() {
+          mostrarToast('❌ No se pudo conectar con el bridge');
+          input.value = '';
+        });
+      };
+      reader.onerror = function() { mostrarToast('❌ Error leyendo el archivo'); input.value = ''; };
+      reader.readAsDataURL(file);
     }
     
     function pedirIA() {
