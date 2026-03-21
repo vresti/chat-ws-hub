@@ -276,7 +276,6 @@
         </div>
         <div class="sidebar-header-right">
           <button class="btn-clean" id="btnClean" onclick="limpiarHistorial()">🧹</button>
-          <button class="btn-sync" id="btnArchivados" onclick="toggleArchivados()">📦</button>
           <button class="btn-sync" id="btnSync" onclick="sincTelefonos()">📱</button>
           <button class="btn-sync" onclick="mostrarContactosNuevo()">C</button>
           <button class="btn-sync" id="btnAutoIA" onclick="toggleAutoIA()">🤖</button>
@@ -371,7 +370,6 @@
               '<div class="contact-count" style="background:' + appColor + '">' + c.totalMensajes + '</div>' +
               (esNuevo ? '<div class="contact-new"></div>' : '') +
               '<button class="' + (c.fijado ? 'btn-pin btn-pin-active' : 'btn-pin') + '" onclick="togglePin(\'' + esc + '\')">' + (c.fijado ? '📌' : '📍') + '</button>' +
-              '<button class="btn-archive" onclick="archivarDesdelista(\'' + esc + '\')">' + (c.archivado ? '📤' : '📦') + '</button>' +
             '</div></div></div>';
       });
       document.getElementById('contactsList').innerHTML = html || '<div class="loading">No hay contactos</div>';
