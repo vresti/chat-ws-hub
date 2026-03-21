@@ -172,11 +172,6 @@
     @keyframes toastIn { from { opacity: 0; top: 0; } to { opacity: 1; top: 20px; } }
     @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
     
-    .archivos-panel { position: absolute; bottom: 60px; right: 16px; background: #202C33; border-radius: 12px; padding: 8px 0; max-height: 300px; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 100; min-width: 250px; }
-    .archivo-item { padding: 10px 16px; color: #E9EDEF; font-size: 14px; cursor: pointer; transition: background 0.15s; display: flex; align-items: center; gap: 8px; }
-    .archivo-item:hover { background: #2A3942; }
-    .archivo-icon { color: #E67E22; font-size: 16px; }
-    
     .contactos-panel { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #202C33; border-radius: 12px; width: 350px; max-height: 500px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); z-index: 1001; display: flex; flex-direction: column; }
     .contactos-panel-header { padding: 16px; border-bottom: 1px solid #2A3942; }
     .contactos-panel-title { color: #E9EDEF; font-size: 16px; font-weight: 500; margin-bottom: 10px; }
@@ -319,9 +314,7 @@
         <div class="chat-input-area">
           <input type="text" class="chat-input" id="messageInput" placeholder="Mensaje..." onkeypress="if(event.key==='Enter') enviarMensaje()">
           <button class="btn-send" id="btnSend" onclick="enviarMensaje()">➤</button>
-          <button class="btn-send" style="background:#128C7E;font-size:11px;" onclick="enviarWaMe()">wa</button>
           <button class="btn-send" style="background:#7C3AED;font-size:11px;" id="btnIA" onclick="pedirIA()">IA</button>
-          <button class="btn-send" style="background:#E67E22;font-size:14px;" onclick="mostrarArchivos()">📎</button>
         </div>
       </div>
     </div>
@@ -345,6 +338,7 @@
       document.getElementById('welcomeTitle').textContent = cfg.empresa || 'Chat de Notificaciones';
       document.querySelectorAll('.badge').forEach(function(el) { el.style.background = appColor; });
       document.getElementById('welcomeIcon').style.background = appColor;
+      document.getElementById('btnSend').style.background = appColor;
       api("getAutoIA").then(function(val) {
         autoIAactivo = val;
         if (autoIAactivo) { var b = document.getElementById('btnAutoIA'); b.style.background = '#7C3AED'; b.style.color = 'white'; b.style.borderColor = '#7C3AED'; }
@@ -434,12 +428,6 @@
         document.getElementById('chatStatus').textContent = c.totalMensajes + ' mensajes';
         telefonoActual = c.telefono; timestampActual = c.timestamp || 0;
         document.getElementById('chatPhone').textContent = c.telefono || 'Sin tel';
-        var btn = document.getElementById('btnSend');
-        var maxTimestamp = Math.max.apply(null, contactosGlobal.map(function(x) { return x.timestamp || 0; }));
-        var esUltimoContacto = c.timestamp === maxTimestamp;
-        var min = (new Date().getTime() - (c.timestamp || 0)) / 60000;
-        btn.style.background = appColor;
-        btn.dataset.usarTu = "true";
         mensajesVistos[contacto] = c.totalMensajes; renderContactos(contactosGlobal);
       }
       document.getElementById('chatMessages').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando...</div>';
@@ -505,43 +493,14 @@
       if (!msg || !contactoActual) return;
       var ct = document.getElementById('chatMessages'), ah = new Date();
       var hr = ah.getHours().toString().padStart(2,'0') + ':' + ah.getMinutes().toString().padStart(2,'0');
-      var na = document.getElementById('btnSend').dataset.usarTu === "true";
       var d = document.createElement('div');
       d.innerHTML = '<div class="message-bubble message-outgoing"><div class="message-text">' + msg + '</div><div class="message-time">' + hr + ' ⏳</div></div><div class="clearfix"></div>';
       ct.appendChild(d); ct.scrollTop = ct.scrollHeight; inp.value = '';
-      if (na) {
-        api("guardarRespuestaEnviada", { contacto: contactoActual, mensaje: msg }).then(function(r) {
-          var bs = ct.querySelectorAll('.message-outgoing'), u = bs[bs.length-1];
-          if (u) { var t = u.querySelector('.message-time'); if (t) t.textContent = hr + ' ✓ vía ' + r.app; }
-        });
-      } else {
-        api("guardarRespuestaEnviada", { contacto: contactoActual, mensaje: msg });
-        if (telefonoActual) {
-          var tel = telefonoActual.replace(/[\s\-\(\)]/g, ''); if (tel.charAt(0)==='+') tel=tel.substring(1);
-          window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(msg), '_blank');
-          var bs = ct.querySelectorAll('.message-outgoing'), u = bs[bs.length-1];
-          if (u) { var t = u.querySelector('.message-time'); if (t) t.textContent = hr + ' ✓ wa.me'; }
-        } else mostrarToast('Sin teléfono');
-      }
+      api("guardarRespuestaEnviada", { contacto: contactoActual, mensaje: msg }).then(function(r) {
+        var bs = ct.querySelectorAll('.message-outgoing'), u = bs[bs.length-1];
+        if (u) { var t = u.querySelector('.message-time'); if (t) t.textContent = hr + ' ✓ vía ' + r.app; }
+      });
       mensajesVistos[contactoActual] = (mensajesVistos[contactoActual]||0) + 1;
-    }
-    
-    function enviarWaMe() {
-      if (!contactoActual) return; if (!telefonoActual) { mostrarToast('Sin teléfono'); return; }
-      var inp = document.getElementById('messageInput'), msg = inp.value.trim();
-      var tel = telefonoActual.replace(/[\s\-\(\)]/g, ''); if (tel.charAt(0)==='+') tel=tel.substring(1);
-      var url = 'https://wa.me/' + tel;
-      if (msg) {
-        url += '?text=' + encodeURIComponent(msg);
-        var ct = document.getElementById('chatMessages'), ah = new Date();
-        var hr = ah.getHours().toString().padStart(2,'0') + ':' + ah.getMinutes().toString().padStart(2,'0');
-        var d = document.createElement('div');
-        d.innerHTML = '<div class="message-bubble message-outgoing"><div class="message-text">' + msg + '</div><div class="message-time">' + hr + ' ✓ wa.me</div></div><div class="clearfix"></div>';
-        ct.appendChild(d); ct.scrollTop = ct.scrollHeight; inp.value = '';
-        api("guardarRespuestaEnviada", { contacto: contactoActual, mensaje: msg });
-        mensajesVistos[contactoActual] = (mensajesVistos[contactoActual]||0) + 1;
-      }
-      window.open(url, '_blank');
     }
     
     function pedirIA() {
@@ -568,16 +527,6 @@
     }
     function confirmarGuardar() { var i=document.getElementById('modalInput'), r=i?i.value.trim():''; cerrarModal(); if(r) api("guardarRespuestaModelo",{mensaje:mensajeParaGuardar,respuesta:r}).then(function(x){mostrarToast('✓ Guardada ('+x.status+')');}); }
     function cerrarModal() { var o=document.querySelector('.modal-overlay'); if(o) o.remove(); }
-    
-    var archivosCache = null;
-    function mostrarArchivos() { var p=document.querySelector('.archivos-panel'); if(p){p.remove();return;} if(archivosCache) renderArchivos(archivosCache); else api("getArchivos").then(function(d){archivosCache=d;renderArchivos(d);}); }
-    function renderArchivos(ar) {
-      var p = document.createElement('div'); p.className='archivos-panel';
-      if(!ar.length) p.innerHTML='<div class="archivo-item" style="color:#8696A0;">Sin archivos</div>';
-      else ar.forEach(function(a){ var d=document.createElement('div'); d.className='archivo-item'; var l=a.link.toLowerCase(); var ic=l.indexOf('youtube')>-1||l.indexOf('youtu.be')>-1?'🎬':l.indexOf('.pdf')>-1?'📕':l.indexOf('.jpg')>-1||l.indexOf('.png')>-1?'🖼️':l.indexOf('.xls')>-1?'📊':l.indexOf('.doc')>-1?'📝':'📄'; d.innerHTML='<span class="archivo-icon">'+ic+'</span>'+a.nombre; d.onclick=function(){document.getElementById('messageInput').value=a.link;document.getElementById('messageInput').focus();document.querySelector('.archivos-panel').remove();}; p.appendChild(d); });
-      document.querySelector('.chat-input-area').appendChild(p);
-    }
-    document.addEventListener('click', function(e) { if(!e.target.closest('.archivos-panel')&&!e.target.closest('[onclick="mostrarArchivos()"]')){var p=document.querySelector('.archivos-panel');if(p)p.remove();} });
     
     var todosContactosCache = null;
     function mostrarContactosNuevo() {
@@ -606,8 +555,7 @@
       document.getElementById('chatAvatar').textContent=(c?c.alias:contacto).charAt(0).toUpperCase();
       document.getElementById('chatStatus').textContent='Nueva conversación';
       document.getElementById('chatPhone').textContent=telefono;
-      document.getElementById('btnSend').style.background='#FF9800';
-      document.getElementById('chatMessages').innerHTML='<div class="loading" style="color:#8696A0;">Escribí un mensaje para iniciar vía wa.me</div>';
+      document.getElementById('chatMessages').innerHTML='<div class="loading" style="color:#8696A0;">Escribí un mensaje para iniciar la conversación</div>';
       document.getElementById('suggestionsBar').innerHTML='';
       document.getElementById('messageInput').focus();
     }
@@ -628,18 +576,7 @@
     
     setInterval(function() {
       api("getContactos").then(function(d) { contactosGlobal=d; if(document.getElementById('searchInput').value==='') renderContactos(d); else filtrarContactos(); });
-      if(contactoActual) {
-        api("getMensajesPorContacto",{contacto:contactoActual}).then(renderMensajes);
-        var c = contactosGlobal.find(function(x) { return x.nombre === contactoActual; });
-        if (c) {
-          var btn = document.getElementById('btnSend');
-          var maxTs = Math.max.apply(null, contactosGlobal.map(function(x) { return x.timestamp || 0; }));
-          var esUltimo = c.timestamp === maxTs;
-          var min = (new Date().getTime() - (c.timestamp || 0)) / 60000;
-          btn.style.background = (esUltimo && min < 30) ? appColor : '#FF9800';
-          btn.dataset.usarTu = (esUltimo && min < 30) ? "true" : "false";
-        }
-      }
+      if(contactoActual) api("getMensajesPorContacto",{contacto:contactoActual}).then(renderMensajes);
     }, 15000);
     
     function volverAContactos() { document.getElementById('appContainer').classList.remove('chat-open'); }
