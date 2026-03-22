@@ -565,7 +565,7 @@
       var ct = document.getElementById('chatMessages'), ah = new Date();
       var hr = ah.getHours().toString().padStart(2,'0') + ':' + ah.getMinutes().toString().padStart(2,'0');
       var d = document.createElement('div');
-      d.innerHTML = '<div class="message-bubble message-outgoing"><div class="message-text" style="color:#99BEB7;font-size:12px;">📎 ' + file.name + ' ✓ ' + hr + '</div></div><div class="clearfix"></div>';
+      d.innerHTML = '<div class="message-bubble message-outgoing"><div class="message-text">' + msg + '</div><div class="message-time">' + hr + ' ⏳</div></div><div class="clearfix"></div>';
       ct.appendChild(d); ct.scrollTop = ct.scrollHeight; inp.value = '';
       api("guardarRespuestaEnviada", { contacto: contactoActual, mensaje: msg }).then(function(r) {
         var bs = ct.querySelectorAll('.message-outgoing'), u = bs[bs.length-1];
@@ -574,7 +574,7 @@
       mensajesVistos[contactoActual] = (mensajesVistos[contactoActual]||0) + 1;
     }
     
-    // ── Enviar archivo al bridge ──
+    // ── Enviar archivo al bridge --
     function enviarArchivo(input) {
       var file = input.files[0];
       if (!file) return;
