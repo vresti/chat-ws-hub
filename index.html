@@ -14,32 +14,37 @@
       width: 100%;
     }
     
+    /* ── LOGIN ── */
+    .login-screen {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: #111B21; display: flex; align-items: center; justify-content: center; z-index: 9999;
+    }
+    .login-box {
+      background: #202C33; border-radius: 16px; padding: 40px; width: 360px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4); text-align: center;
+    }
+    .login-icon { font-size: 48px; margin-bottom: 16px; }
+    .login-title { color: #E9EDEF; font-size: 22px; font-weight: 400; margin-bottom: 6px; }
+    .login-subtitle { color: #8696A0; font-size: 13px; margin-bottom: 24px; }
+    .login-input { width: 100%; padding: 12px 16px; border-radius: 8px; border: none; background: #2A3942; color: #E9EDEF; font-size: 15px; outline: none; margin-bottom: 16px; }
+    .login-input::placeholder { color: #8696A0; }
+    .login-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #00A884; color: white; font-size: 15px; cursor: pointer; transition: background 0.2s; }
+    .login-btn:hover { background: #02B898; }
+    .login-error { color: #E74C3C; font-size: 13px; margin-top: 12px; }
+
     .app-container {
-      display: flex;
-      height: 100vh;
-      height: 100dvh;
-      max-width: 1400px;
-      margin: 0 auto;
-      box-shadow: 0 0 30px rgba(0,0,0,0.5);
+      display: flex; height: 100vh; height: 100dvh;
+      max-width: 1400px; margin: 0 auto; box-shadow: 0 0 30px rgba(0,0,0,0.5);
     }
     
     .sidebar {
-      width: 380px;
-      min-width: 380px;
-      background: #111B21;
-      display: flex;
-      flex-direction: column;
-      border-right: 1px solid #2A3942;
-      height: 100%;
+      width: 380px; min-width: 380px; background: #111B21;
+      display: flex; flex-direction: column; border-right: 1px solid #2A3942; height: 100%;
     }
     
     .sidebar-header {
-      background: #202C33;
-      padding: 8px 12px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-shrink: 0;
+      background: #202C33; padding: 8px 12px; display: flex;
+      align-items: center; justify-content: space-between; flex-shrink: 0;
     }
     
     .sidebar-header-left { display: flex; align-items: center; gap: 8px; }
@@ -56,7 +61,21 @@
       min-width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
     }
     .btn-sync:hover, .btn-clean:hover { background: #2A3942; color: #E9EDEF; }
-    
+
+    /* ── BADGE ALERTAS ── */
+    .btn-alertas {
+      background: none; border: 1px solid #2A3942; color: #8696A0; border-radius: 6px;
+      padding: 4px 8px; font-size: 13px; cursor: pointer; transition: all 0.2s;
+      min-width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .btn-alertas:hover { background: #2A3942; color: #E9EDEF; }
+    .alertas-count {
+      position: absolute; top: -4px; right: -4px; background: #E74C3C;
+      color: white; border-radius: 50%; width: 16px; height: 16px;
+      font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+    }
+
     .search-box { padding: 8px 12px; background: #111B21; flex-shrink: 0; }
     .search-box input { width: 100%; padding: 8px 32px 8px 12px; border-radius: 8px; border: none; background: #202C33; color: #E9EDEF; font-size: 14px; outline: none; }
     .search-box input::placeholder { color: #8696A0; }
@@ -78,6 +97,9 @@
     .contact-time { color: #8696A0; font-size: 12px; }
     .contact-meta-row { display: flex; align-items: center; gap: 5px; }
     .contact-count { color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
+
+    /* ── PUNTO DE ESTADO en lista ── */
+    .estado-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
     
     .contact-new { width: 10px; height: 10px; border-radius: 50%; background: #FF3B30; flex-shrink: 0; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
@@ -90,11 +112,37 @@
     
     .chat-header { background: #202C33; padding: 10px 16px; display: flex; align-items: center; height: 60px; border-bottom: 1px solid #2A3942; flex-shrink: 0; }
     .chat-header .contact-avatar { width: 40px; height: 40px; font-size: 16px; }
-    .chat-header-info { flex: 1; }
+    .chat-header-info { flex: 1; min-width: 0; }
     .chat-header-name { color: #E9EDEF; font-size: 16px; font-weight: 500; }
     .chat-header-status { color: #8696A0; font-size: 13px; }
-    .chat-header-phone { color: #00A884; font-size: 13px; font-weight: 500; margin-left: 12px; }
-    
+    .chat-header-phone { color: #00A884; font-size: 13px; font-weight: 500; margin-left: 8px; white-space: nowrap; }
+
+    /* ── SELECTOR DE ESTADO en header ── */
+    .estado-selector {
+      background: none; border: 1px solid #2A3942; color: #8696A0;
+      border-radius: 12px; padding: 3px 8px; font-size: 11px; cursor: pointer;
+      margin-left: 8px; white-space: nowrap; transition: all 0.2s; flex-shrink: 0;
+    }
+    .estado-selector:hover { background: #2A3942; }
+
+    /* ── PANEL DE ALERTAS ── */
+    .alertas-panel {
+      position: fixed; top: 0; right: 0; width: 320px; height: 100%;
+      background: #202C33; border-left: 1px solid #2A3942; z-index: 500;
+      display: flex; flex-direction: column; transform: translateX(100%);
+      transition: transform 0.3s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.3);
+    }
+    .alertas-panel.open { transform: translateX(0); }
+    .alertas-header { padding: 16px; border-bottom: 1px solid #2A3942; display: flex; align-items: center; justify-content: space-between; }
+    .alertas-title { color: #E9EDEF; font-size: 16px; font-weight: 500; }
+    .alertas-close { background: none; border: none; color: #8696A0; font-size: 20px; cursor: pointer; }
+    .alertas-list { flex: 1; overflow-y: auto; }
+    .alerta-item { padding: 12px 16px; border-bottom: 1px solid #2A3942; cursor: pointer; transition: background 0.15s; }
+    .alerta-item:hover { background: #2A3942; }
+    .alerta-nombre { color: #E9EDEF; font-size: 14px; font-weight: 500; }
+    .alerta-detalle { color: #8696A0; font-size: 12px; margin-top: 3px; }
+    .alerta-dias { color: #E74C3C; font-size: 11px; font-weight: 600; margin-top: 2px; }
+
     .chat-messages {
       flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 60px;
       background-color: #0B141A;
@@ -130,7 +178,6 @@
     .message-response-ia { background: #2A1A3A; border-left: 3px solid #7C3AED; padding: 6px 10px; margin-top: 4px; border-radius: 4px; font-size: 13px; color: #C4A8E0; }
     .message-response-ia-label { font-size: 11px; color: #7C3AED; font-weight: 600; margin-bottom: 2px; }
     
-    /* ── MEDIA ── */
     .media-placeholder { color: #8696A0; font-size: 13px; padding: 6px 2px; display: flex; align-items: center; gap: 6px; }
     .media-audio audio { max-width: 240px; width: 100%; height: 32px; border-radius: 8px; margin: 4px 0; display: block; }
     .media-imagen img { max-width: 144px; border-radius: 8px; cursor: pointer; margin: 4px 0; display: block; }
@@ -174,6 +221,16 @@
     .modal-btn-ok:hover { background: #02B898; }
     .modal-btn-danger { background: #E74C3C; color: white; }
     .modal-btn-danger:hover { background: #C0392B; }
+
+    /* ── DROPDOWN ESTADO ── */
+    .estado-dropdown {
+      position: fixed; background: #202C33; border-radius: 10px; padding: 6px 0;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5); z-index: 600; min-width: 200px;
+      border: 1px solid #2A3942;
+    }
+    .estado-option { padding: 10px 16px; color: #E9EDEF; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.15s; }
+    .estado-option:hover { background: #2A3942; }
+    .estado-option.activo { color: #00A884; }
     
     .toast-notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); color: white; padding: 12px 24px; border-radius: 8px; font-size: 14px; z-index: 1001; box-shadow: 0 4px 16px rgba(0,0,0,0.3); animation: toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards; }
     @keyframes toastIn { from { opacity: 0; top: 0; } to { opacity: 1; top: 20px; } }
@@ -199,7 +256,6 @@
       .app-container.chat-open .sidebar { display: none; }
       .app-container.chat-open .chat-panel { display: flex; }
       .btn-back { display: flex !important; }
-      
       .sidebar-header { height: auto; padding: 4px 8px; flex-wrap: wrap; }
       .sidebar-header-left { width: 100%; justify-content: space-between; }
       .sidebar-title-row { gap: 4px; }
@@ -208,27 +264,23 @@
       .sidebar-empresa { font-size: 9px; }
       .sidebar-header-right { position: absolute; right: 8px; top: 4px; gap: 2px; }
       .sidebar-title-block { max-width: 55%; }
-      .btn-sync, .btn-clean { min-width: 26px; height: 26px; font-size: 10px; padding: 2px 4px; }
-      
+      .btn-sync, .btn-clean, .btn-alertas { min-width: 26px; height: 26px; font-size: 10px; padding: 2px 4px; }
       .search-box { padding: 4px 8px; }
       .search-box input { font-size: 15px; padding: 8px 12px; }
-      
       .contact-item { padding: 8px 12px; min-height: 56px; }
       .contact-avatar { width: 38px; height: 38px; font-size: 16px; margin-right: 10px; }
       .contact-name { font-size: 15px; }
       .contact-last-msg { font-size: 12px; margin-top: 2px; }
       .contact-time { font-size: 11px; }
       .contact-count { width: 18px; height: 18px; font-size: 10px; }
-      .btn-archive, .btn-pin { font-size: 12px; }
-      
-      .chat-header { height: 42px; padding: 2px 4px; gap: 4px; }
+      .chat-header { height: auto; min-height: 50px; padding: 4px 8px; gap: 4px; flex-wrap: wrap; }
       .chat-header-name { font-size: 13px; }
-      .chat-header-status { font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .chat-header-phone { font-size: 10px; margin-left: 6px; }
+      .chat-header-status { font-size: 10px; }
+      .chat-header-phone { font-size: 10px; margin-left: 4px; }
       .chat-header .contact-avatar { width: 28px; height: 28px; font-size: 12px; margin-right: 4px; }
       .chat-header-info { min-width: 0; }
       .btn-back { width: 24px; height: 24px; font-size: 16px; margin-right: 0px; margin-left: -2px; }
-      
+      .estado-selector { font-size: 10px; padding: 2px 6px; }
       .chat-messages { padding: 6px 6px; }
       .message-bubble { max-width: 90%; padding: 4px 6px 4px 7px; margin-bottom: 2px; }
       .message-text { font-size: 13px; }
@@ -241,28 +293,17 @@
       .message-response-ia-label { font-size: 9px; }
       .date-separator span { font-size: 11px; }
       .btn-save-response { font-size: 9px; padding: 1px 4px; }
-      
       .chat-input-area { flex-wrap: wrap; padding: 6px 8px; gap: 4px; }
       .chat-input { width: 100%; flex: none; font-size: 15px; padding: 8px 10px; order: 1; }
       .btn-send { width: 32px; height: 32px; font-size: 14px; order: 2; flex: 1; }
-      
       .suggestions-bar { padding: 4px 8px; }
       .btn-suggestion { font-size: 11px; padding: 4px 10px; }
-      
       .welcome-screen h2 { font-size: 22px; }
       .welcome-screen p { font-size: 14px; }
-      
       .media-audio audio { max-width: 100%; }
       .media-imagen img { max-width: 180px; }
-      
       .contactos-panel { width: 90%; max-height: 80vh; }
-      .contactos-panel-header { padding: 10px 12px; }
-      .contactos-panel-title { font-size: 14px; margin-bottom: 8px; }
-      .contactos-panel-search { font-size: 14px; padding: 6px 10px; }
-      .contactos-panel-item { padding: 8px 12px; }
-      .contactos-panel-nombre { font-size: 13px; }
-      .contactos-panel-tel { font-size: 11px; }
-      .contactos-panel-list { max-height: 60vh; }
+      .alertas-panel { width: 100%; }
     }
     
     .btn-back {
@@ -272,6 +313,20 @@
   </style>
 </head>
 <body>
+
+  <!-- LOGIN -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-box">
+      <div class="login-icon">💬</div>
+      <div class="login-title">Chat WS Hub</div>
+      <div class="login-subtitle">Ingresá tu email para acceder</div>
+      <input type="email" class="login-input" id="loginEmail" placeholder="tu@email.com">
+      <button class="login-btn" onclick="hacerLogin()">Ingresar</button>
+      <div class="login-error" id="loginError"></div>
+    </div>
+  </div>
+
+  <!-- APP -->
   <div class="app-container" id="appContainer">
     <div class="sidebar">
       <div class="sidebar-header">
@@ -285,6 +340,9 @@
           </div>
         </div>
         <div class="sidebar-header-right">
+          <button class="btn-alertas" id="btnAlertas" onclick="toggleAlertas()" title="Alertas de seguimiento">
+            🔔<span class="alertas-count" id="alertasCount" style="display:none">0</span>
+          </button>
           <button class="btn-clean" id="btnClean" onclick="limpiarHistorial()">🧹</button>
           <button class="btn-sync" id="btnSync" onclick="sincTelefonos()">📱</button>
           <button class="btn-sync" onclick="mostrarContactosNuevo()">C</button>
@@ -315,6 +373,7 @@
             <div class="chat-header-status" id="chatStatus">mensajes</div>
           </div>
           <div class="chat-header-phone" id="chatPhone"></div>
+          <button class="estado-selector" id="btnEstado" onclick="mostrarEstadoDropdown(event)">● Nuevo ▾</button>
         </div>
         
         <div class="chat-messages" id="chatMessages"></div>
@@ -331,6 +390,17 @@
     </div>
   </div>
 
+  <!-- PANEL DE ALERTAS -->
+  <div class="alertas-panel" id="alertasPanel">
+    <div class="alertas-header">
+      <span class="alertas-title">🔔 Seguimiento pendiente</span>
+      <button class="alertas-close" onclick="toggleAlertas()">✕</button>
+    </div>
+    <div class="alertas-list" id="alertasList">
+      <div class="loading"><div class="spinner"></div>Cargando...</div>
+    </div>
+  </div>
+
   <script>
     var API_URL = "https://script.google.com/macros/s/AKfycbxLCyafHzG5GIHxQuo2SVUoQ4gfJOYsdvdmbXIizWOl13OJ6Mmia7Vy6Jax1kkj7OKXDQ/exec";
     var BRIDGE_URL = "https://bridge.tasks-on.com";
@@ -343,25 +413,109 @@
     
     var contactosGlobal = [], contactoActual = "", telefonoActual = "", timestampActual = 0;
     var mostrarArchivados = false, mensajesVistos = {}, appColor = "#00A884", configData = {}, autoIAactivo = false;
-    var mediaCache = {}; // Cache de archivos ya cargados { fileId: { base64, mimetype, filename } }
-    
-    api("getConfig").then(function(cfg) {
-      configData = cfg; appColor = cfg.color || "#00A884";
-      document.getElementById('empresaInfo').textContent = cfg.empresa + (cfg.telefono ? ' • ' + cfg.telefono : '');
-      document.getElementById('welcomeTitle').textContent = cfg.empresa || 'Chat de Notificaciones';
-      document.querySelectorAll('.badge').forEach(function(el) { el.style.background = appColor; });
-      document.getElementById('welcomeIcon').style.background = appColor;
-      document.getElementById('btnSend').style.background = appColor;
-      api("getAutoIA").then(function(val) {
-        autoIAactivo = val;
-        if (autoIAactivo) { var b = document.getElementById('btnAutoIA'); b.style.background = '#7C3AED'; b.style.color = 'white'; b.style.borderColor = '#7C3AED'; }
-      });
+    var mediaCache = {};
+    var usuarioActual = { email: "", nombre: "", rol: "" };
+    var estadoActual = "Nuevo";
+
+    // ── ESTADOS — colores y etiquetas ──
+    var ESTADOS = [
+      { valor: "Nuevo",            color: "#8696A0", emoji: "⚪" },
+      { valor: "Informado",        color: "#3498DB", emoji: "🔵" },
+      { valor: "Visita agendada",  color: "#F39C12", emoji: "🟡" },
+      { valor: "Visita realizada", color: "#9B59B6", emoji: "🟣" },
+      { valor: "Seña",             color: "#E74C3C", emoji: "🔴" },
+      { valor: "Compra",           color: "#00A884", emoji: "🟢" },
+      { valor: "Perdido",          color: "#374045", emoji: "⚫" }
+    ];
+
+    function getEstadoInfo(valor) {
+      return ESTADOS.find(function(e) { return e.valor === valor; }) || ESTADOS[0];
+    }
+
+    // ── LOGIN ──
+    document.getElementById('loginEmail').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') hacerLogin();
     });
-    
-    api("getContactos").then(function(data) { contactosGlobal = data; renderContactos(data); })
-    .catch(function() { document.getElementById('contactsList').innerHTML = '<div class="loading" style="color:#ff6b6b;">Error</div>'; });
-    
-    // Formatea el último mensaje para media
+
+    function hacerLogin() {
+      var email = document.getElementById('loginEmail').value.trim();
+      if (!email) { document.getElementById('loginError').textContent = 'Ingresá tu email'; return; }
+      document.getElementById('loginError').textContent = '';
+      api("getUsuario", { email: email }).then(function(data) {
+        if (data.status === "ok") {
+          usuarioActual = { email: email, nombre: data.nombre, rol: data.rol };
+          document.getElementById('loginScreen').style.display = 'none';
+          iniciarApp();
+        } else {
+          document.getElementById('loginError').textContent = '❌ Email no autorizado';
+        }
+      }).catch(function() {
+        document.getElementById('loginError').textContent = '❌ Error de conexión';
+      });
+    }
+
+    function iniciarApp() {
+      api("getConfig").then(function(cfg) {
+        configData = cfg; appColor = cfg.color || "#00A884";
+        document.getElementById('empresaInfo').textContent = cfg.empresa + (cfg.telefono ? ' • ' + cfg.telefono : '') + ' · ' + usuarioActual.nombre;
+        document.getElementById('welcomeTitle').textContent = cfg.empresa || 'Chat WS Hub';
+        document.querySelectorAll('.badge').forEach(function(el) { el.style.background = appColor; });
+        document.getElementById('welcomeIcon').style.background = appColor;
+        document.getElementById('btnSend').style.background = appColor;
+        api("getAutoIA").then(function(val) {
+          autoIAactivo = val;
+          if (autoIAactivo) { var b = document.getElementById('btnAutoIA'); b.style.background = '#7C3AED'; b.style.color = 'white'; b.style.borderColor = '#7C3AED'; }
+        });
+      });
+      api("getContactos").then(function(data) { contactosGlobal = data; renderContactos(data); })
+      .catch(function() { document.getElementById('contactsList').innerHTML = '<div class="loading" style="color:#ff6b6b;">Error</div>'; });
+      cargarAlertas();
+    }
+
+    // ── ALERTAS ──
+    function cargarAlertas() {
+      api("getAlertas").then(function(alertas) {
+        var count = alertas.length;
+        var badge = document.getElementById('alertasCount');
+        if (count > 0) {
+          badge.textContent = count > 9 ? '9+' : count;
+          badge.style.display = 'flex';
+        } else {
+          badge.style.display = 'none';
+        }
+        renderAlertas(alertas);
+      });
+    }
+
+    function renderAlertas(alertas) {
+      var html = '';
+      if (!alertas.length) {
+        html = '<div class="loading" style="color:#00A884;">✓ Todo al día</div>';
+      } else {
+        alertas.forEach(function(a) {
+          var ei = getEstadoInfo(a.estado);
+          html += '<div class="alerta-item" onclick="abrirChatDesdeAlerta(\'' + a.nombre.replace(/'/g,"\\'") + '\')">' +
+            '<div class="alerta-nombre">' + (a.alias || a.nombre) + '</div>' +
+            '<div class="alerta-detalle">' + ei.emoji + ' ' + a.estado + '</div>' +
+            '<div class="alerta-dias">Sin actividad: ' + a.diasSinActividad + ' día' + (a.diasSinActividad !== 1 ? 's' : '') + '</div>' +
+          '</div>';
+        });
+      }
+      document.getElementById('alertasList').innerHTML = html;
+    }
+
+    function toggleAlertas() {
+      var panel = document.getElementById('alertasPanel');
+      panel.classList.toggle('open');
+      if (panel.classList.contains('open')) cargarAlertas();
+    }
+
+    function abrirChatDesdeAlerta(nombre) {
+      toggleAlertas();
+      abrirChat(nombre);
+    }
+
+    // ── CONTACTOS ──
     function formatUltimoMensaje(msg) {
       if (!msg) return '';
       if (msg.indexOf('[audio:') === 0) return '🎵 Audio';
@@ -384,6 +538,7 @@
         var colors = ['#00A884','#25D366','#128C7E','#075E54','#34B7F1','#ECE5DD'];
         var color = colors[c.nombre.length % colors.length];
         var esc = c.nombre.replace(/'/g, "\\'");
+        var ei = getEstadoInfo(c.estado || "Nuevo");
         html += '<div class="contact-item">' +
           '<div class="contact-avatar" style="background:' + color + '" onclick="abrirChat(\'' + esc + '\')">' + inicial + '</div>' +
           '<div class="contact-info" onclick="abrirChat(\'' + esc + '\')">' +
@@ -391,6 +546,7 @@
             '<div class="contact-last-msg">' + formatUltimoMensaje(c.ultimoMensaje) + '</div></div>' +
           '<div class="contact-meta"><div class="contact-time">' + c.ultimaFecha + '</div>' +
             '<div class="contact-meta-row">' +
+              '<div class="estado-dot" style="background:' + ei.color + '" title="' + ei.valor + '"></div>' +
               '<div class="contact-count" style="background:' + appColor + '">' + c.totalMensajes + '</div>' +
               (esNuevo ? '<div class="contact-new"></div>' : '') +
               '<button class="' + (c.fijado ? 'btn-pin btn-pin-active' : 'btn-pin') + '" onclick="togglePin(\'' + esc + '\')">' + (c.fijado ? '📌' : '📍') + '</button>' +
@@ -436,56 +592,85 @@
         document.getElementById('chatStatus').textContent = c.totalMensajes + ' mensajes';
         telefonoActual = c.telefono; timestampActual = c.timestamp || 0;
         document.getElementById('chatPhone').textContent = c.telefono || 'Sin tel';
+        estadoActual = c.estado || "Nuevo";
+        actualizarBtnEstado(estadoActual);
         mensajesVistos[contacto] = c.totalMensajes; renderContactos(contactosGlobal);
       }
       document.getElementById('chatMessages').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando...</div>';
       document.getElementById('suggestionsBar').innerHTML = '';
       api("getMensajesPorContacto", { contacto: contacto }).then(renderMensajes);
     }
-    
-    // ── Detecta si un texto es un mensaje de media y devuelve el HTML apropiado ──
+
+    // ── PIPELINE — selector de estado ──
+    function actualizarBtnEstado(estado) {
+      var ei = getEstadoInfo(estado);
+      var btn = document.getElementById('btnEstado');
+      btn.textContent = ei.emoji + ' ' + estado + ' ▾';
+      btn.style.color = ei.color;
+      btn.style.borderColor = ei.color;
+    }
+
+    function mostrarEstadoDropdown(event) {
+      event.stopPropagation();
+      var existing = document.querySelector('.estado-dropdown');
+      if (existing) { existing.remove(); return; }
+      var btn = document.getElementById('btnEstado');
+      var rect = btn.getBoundingClientRect();
+      var dd = document.createElement('div');
+      dd.className = 'estado-dropdown';
+      dd.style.top = (rect.bottom + 4) + 'px';
+      dd.style.right = (window.innerWidth - rect.right) + 'px';
+      ESTADOS.forEach(function(e) {
+        var opt = document.createElement('div');
+        opt.className = 'estado-option' + (e.valor === estadoActual ? ' activo' : '');
+        opt.innerHTML = '<span style="color:' + e.color + '">' + e.emoji + '</span> ' + e.valor;
+        opt.onclick = function() { cambiarEstado(e.valor); dd.remove(); };
+        dd.appendChild(opt);
+      });
+      document.body.appendChild(dd);
+      setTimeout(function() { document.addEventListener('click', function handler() { dd.remove(); document.removeEventListener('click', handler); }); }, 10);
+    }
+
+    function cambiarEstado(nuevoEstado) {
+      if (!contactoActual) return;
+      api("setEstado", { contacto: contactoActual, estado: nuevoEstado }).then(function(r) {
+        if (r.status === 'ok') {
+          estadoActual = nuevoEstado;
+          actualizarBtnEstado(nuevoEstado);
+          var c = contactosGlobal.find(function(x) { return x.nombre === contactoActual; });
+          if (c) c.estado = nuevoEstado;
+          renderContactos(contactosGlobal);
+          mostrarToast('✓ Estado: ' + nuevoEstado);
+          cargarAlertas();
+        }
+      });
+    }
+
+    // ── MENSAJES ──
     function renderContenidoMensaje(texto) {
       var mediaMatch = texto.match(/^\[(audio|imagen|video|doc):([^\]]+)\]$/);
       if (!mediaMatch) return '<div class="message-text">' + texto + '</div>';
-      
-      var tipo = mediaMatch[1];
-      var fileId = mediaMatch[2];
+      var tipo = mediaMatch[1]; var fileId = mediaMatch[2];
       var icons = { audio: '🎵', imagen: '🖼️', video: '🎬', doc: '📄' };
-      
-      // Si ya está en cache, renderizar directo
-      if (mediaCache[fileId]) {
-        return renderMediaHtml(tipo, fileId, mediaCache[fileId]);
-      }
-      
-      // Placeholder con data attributes para carga async
-      return '<div class="media-placeholder" data-fileid="' + fileId + '" data-mediatype="' + tipo + '">'
-        + icons[tipo] + ' Cargando...</div>';
+      if (mediaCache[fileId]) return renderMediaHtml(tipo, fileId, mediaCache[fileId]);
+      return '<div class="media-placeholder" data-fileid="' + fileId + '" data-mediatype="' + tipo + '">' + icons[tipo] + ' Cargando...</div>';
     }
     
     function renderMediaHtml(tipo, fileId, cacheData) {
       var src = 'data:' + cacheData.mimetype + ';base64,' + cacheData.base64;
-      if (tipo === 'audio') {
-        return '<div class="media-audio"><audio controls src="' + src + '"></audio></div>';
-      } else if (tipo === 'imagen') {
-        return '<div class="media-imagen"><img src="' + src + '" onclick="window.open(this.src)" title="Click para ampliar"></div>';
-      } else if (tipo === 'video') {
-        return '<div class="media-audio"><video controls src="' + src + '" style="max-width:240px;border-radius:8px;"></video></div>';
-      } else {
-        return '<div class="media-doc"><a href="' + src + '" download="' + (cacheData.filename || 'archivo') + '">📄 ' + (cacheData.filename || 'Descargar documento') + '</a></div>';
-      }
+      if (tipo === 'audio') return '<div class="media-audio"><audio controls src="' + src + '"></audio></div>';
+      else if (tipo === 'imagen') return '<div class="media-imagen"><img src="' + src + '" onclick="window.open(this.src)" title="Click para ampliar"></div>';
+      else if (tipo === 'video') return '<div class="media-audio"><video controls src="' + src + '" style="max-width:240px;border-radius:8px;"></video></div>';
+      else return '<div class="media-doc"><a href="' + src + '" download="' + (cacheData.filename || 'archivo') + '">📄 ' + (cacheData.filename || 'Descargar documento') + '</a></div>';
     }
     
-    // ── Carga los placeholders de media async ──
     function cargarMediaPendiente() {
       var placeholders = document.querySelectorAll('.media-placeholder');
       placeholders.forEach(function(el) {
         var fileId = el.getAttribute('data-fileid');
         var tipo = el.getAttribute('data-mediatype');
         if (!fileId) return;
-        if (mediaCache[fileId]) {
-          el.outerHTML = renderMediaHtml(tipo, fileId, mediaCache[fileId]);
-          return;
-        }
+        if (mediaCache[fileId]) { el.outerHTML = renderMediaHtml(tipo, fileId, mediaCache[fileId]); return; }
         fetch(BRIDGE_URL + '/get-media?fileId=' + fileId).then(function(r) { return r.json(); }).then(function(data) {
           if (data.status === 'ok') {
             mediaCache[fileId] = data;
@@ -493,7 +678,7 @@
             if (current) current.outerHTML = renderMediaHtml(tipo, fileId, data);
           } else {
             var current = document.querySelector('[data-fileid="' + fileId + '"]');
-            if (current) current.textContent = '⚠️ No se pudo cargar el archivo';
+            if (current) current.textContent = '⚠️ No se pudo cargar';
           }
         }).catch(function() {
           var current = document.querySelector('[data-fileid="' + fileId + '"]');
@@ -544,7 +729,6 @@
       });
       container.innerHTML = html || '<div class="loading">No hay mensajes</div>';
       setTimeout(function() { container.scrollTop = container.scrollHeight; }, 100);
-      // Cargar media pendiente después del render
       setTimeout(cargarMediaPendiente, 50);
       if (tr.length > 0) {
         var prom = Math.round(tr.reduce(function(a,b){return a+b;},0) / tr.length);
@@ -574,54 +758,31 @@
       mensajesVistos[contactoActual] = (mensajesVistos[contactoActual]||0) + 1;
     }
     
-    // ── Enviar archivo al bridge --
     function enviarArchivo(input) {
       var file = input.files[0];
       if (!file) return;
-      if (!contactoActual || !telefonoActual) {
-        mostrarToast('⚠️ Sin teléfono para este contacto');
-        input.value = '';
-        return;
-      }
+      if (!contactoActual || !telefonoActual) { mostrarToast('⚠️ Sin teléfono para este contacto'); input.value = ''; return; }
       var maxMB = 16;
-      if (file.size > maxMB * 1024 * 1024) {
-        mostrarToast('⚠️ Archivo demasiado grande (máx ' + maxMB + 'MB)');
-        input.value = '';
-        return;
-      }
+      if (file.size > maxMB * 1024 * 1024) { mostrarToast('⚠️ Archivo demasiado grande (máx ' + maxMB + 'MB)'); input.value = ''; return; }
       mostrarToast('📎 Preparando ' + file.name + '...');
       var reader = new FileReader();
       reader.onload = function(e) {
         var base64 = e.target.result.split(',')[1];
         fetch(BRIDGE_URL + '/enviar-archivo', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contacto: contactoActual,
-            telefono: telefonoActual,
-            base64: base64,
-            mimetype: file.type || 'application/octet-stream',
-            filename: file.name
-          })
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contacto: contactoActual, telefono: telefonoActual, base64: base64, mimetype: file.type || 'application/octet-stream', filename: file.name })
         }).then(function(r) { return r.json(); })
         .then(function(data) {
           if (data.status === 'ok') {
             mostrarToast('✓ ' + file.name + ' enviado');
-            // Mostrar burbuja de confirmación en el chat
-            var ct = document.getElementById('chatMessages');
-            var ah = new Date();
+            var ct = document.getElementById('chatMessages'), ah = new Date();
             var hr = ah.getHours().toString().padStart(2,'0') + ':' + ah.getMinutes().toString().padStart(2,'0');
             var d = document.createElement('div');
-            d.innerHTML = '<div class="message-bubble message-outgoing"><div class="media-doc"><span style="color:#99BEB7;">📎 ' + file.name + '</span></div><div class="message-time">' + hr + ' ✓</div></div><div class="clearfix"></div>';
+            d.innerHTML = '<div class="message-bubble message-outgoing"><div class="message-text" style="color:#99BEB7;font-size:12px;">📎 ' + file.name + ' ✓ ' + hr + '</div></div><div class="clearfix"></div>';
             ct.appendChild(d); ct.scrollTop = ct.scrollHeight;
-          } else {
-            mostrarToast('❌ Error: ' + (data.mensaje || 'no se pudo enviar'));
-          }
+          } else { mostrarToast('❌ Error: ' + (data.mensaje || 'no se pudo enviar')); }
           input.value = '';
-        }).catch(function() {
-          mostrarToast('❌ No se pudo conectar con el bridge');
-          input.value = '';
-        });
+        }).catch(function() { mostrarToast('❌ No se pudo conectar con el bridge'); input.value = ''; });
       };
       reader.onerror = function() { mostrarToast('❌ Error leyendo el archivo'); input.value = ''; };
       reader.readAsDataURL(file);
@@ -679,6 +840,7 @@
       document.getElementById('chatAvatar').textContent=(c?c.alias:contacto).charAt(0).toUpperCase();
       document.getElementById('chatStatus').textContent='Nueva conversación';
       document.getElementById('chatPhone').textContent=telefono;
+      estadoActual = "Nuevo"; actualizarBtnEstado("Nuevo");
       document.getElementById('chatMessages').innerHTML='<div class="loading" style="color:#8696A0;">Escribí un mensaje para iniciar la conversación</div>';
       document.getElementById('suggestionsBar').innerHTML='';
       document.getElementById('messageInput').focus();
@@ -701,6 +863,7 @@
     setInterval(function() {
       api("getContactos").then(function(d) { contactosGlobal=d; if(document.getElementById('searchInput').value==='') renderContactos(d); else filtrarContactos(); });
       if(contactoActual) api("getMensajesPorContacto",{contacto:contactoActual}).then(renderMensajes);
+      cargarAlertas();
     }, 15000);
     
     function volverAContactos() { document.getElementById('appContainer').classList.remove('chat-open'); }
