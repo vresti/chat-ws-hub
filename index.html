@@ -586,13 +586,15 @@
           '<div class="contact-info" onclick="abrirChat(\'' + esc2 + '\')">' +
             '<div class="contact-name">' + (c.alias || c.nombre) + '</div>' +
             '<div class="contact-last-msg">' + formatUltimoMensaje(c.ultimoMensaje) + '</div></div>' +
-          '<div class="contact-meta"><div class="contact-time">' + c.ultimaFecha + '</div>' +
-            '<div class="contact-meta-row">' +
-              '<div class="estado-dot" style="background:' + ei.color + '" title="' + ei.valor + '"></div>' +
-              '<div class="contact-count" style="background:' + appColor + '">' + c.totalMensajes + '</div>' +
-              (esNuevo ? '<div class="contact-new"></div>' : '') +
-              '<button class="' + (c.fijado ? 'btn-pin btn-pin-active' : 'btn-pin') + '" onclick="togglePin(\'' + esc2 + '\')">' + (c.fijado ? '📌' : '📍') + '</button>' +
-            '</div></div></div>';
+       '<div class="contact-meta"><div class="contact-time">' + c.ultimaFecha + '</div>' +
+       '<div class="contact-meta-row">' +
+       '<div class="estado-dot" style="background:' + ei.color + '" title="' + ei.valor + '"></div>' +
+       '<div class="contact-count" style="background:' + appColor + '">' + c.totalMensajes + '</div>' +
+        (esNuevo ? '<div class="contact-new"></div>' : '') +
+       '<button class="' + (c.fijado ? 'btn-pin btn-pin-active' : 'btn-pin') + '" onclick="togglePin(\'' + esc2 + '\')">' + (c.fijado ? '📌' : '📍') + '</button>' +
+       '</div>' +
+       (c.fechaProxContacto ? '<div style="font-size:10px;color:' + colorFecha(c.fechaProxContacto) + ';margin-top:2px;">P.A.: ' + formatFechaCorta(c.fechaProxContacto) + '</div>' : '') +
+       '</div></div>';
       });
       document.getElementById('contactsList').innerHTML = html || '<div class="loading">No hay contactos</div>';
       document.getElementById('totalContactos').textContent = totalActivos;
@@ -859,6 +861,21 @@
       document.body.appendChild(o);
     }
     function confirmarSync() { cerrarModal(); var b=document.getElementById('btnSync'); b.textContent='⏳'; b.disabled=true; api("sincronizarTelefonos").then(function(r){b.textContent='📱';b.disabled=false;mostrarToast(r.actualizados+' actualizados');}).catch(function(){b.textContent='📱';b.disabled=false;mostrarToast('Error');}); }
+    
+    function colorFecha(fechaStr) {
+  if (!fechaStr) return '#8696A0';
+  var hoy = new Date(); hoy.setHours(0,0,0,0);
+  var f = new Date(fechaStr); f.setHours(0,0,0,0);
+  if (f < hoy) return '#E74C3C';
+  if (f.getTime() === hoy.getTime()) return '#F39C12';
+  return '#00A884';
+}
+
+function formatFechaCorta(fechaStr) {
+  if (!fechaStr) return '';
+  var f = new Date(fechaStr);
+  return f.getDate().toString().padStart(2,'0') + '/' + (f.getMonth()+1).toString().padStart(2,'0') + '/' + f.getFullYear();
+}
 
     setInterval(function() {
       api("getContactos").then(function(d) { contactosGlobal=d; if(document.getElementById('searchInput').value==='') renderContactos(d); else filtrarContactos(); });
