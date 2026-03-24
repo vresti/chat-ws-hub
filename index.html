@@ -5,24 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    html, body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #111B21;
-      height: 100%;
-      overflow: hidden;
-      width: 100%;
-    }
-    
+    html, body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #111B21; height: 100%; overflow: hidden; width: 100%; }
+
     /* ── LOGIN ── */
-    .login-screen {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: #111B21; display: flex; align-items: center; justify-content: center; z-index: 9999;
-    }
-    .login-box {
-      background: #202C33; border-radius: 16px; padding: 40px; width: 360px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4); text-align: center;
-    }
+    .login-screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #111B21; display: flex; align-items: center; justify-content: center; z-index: 9999; }
+    .login-box { background: #202C33; border-radius: 16px; padding: 40px; width: 360px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); text-align: center; }
     .login-icon { font-size: 48px; margin-bottom: 16px; }
     .login-title { color: #E9EDEF; font-size: 22px; font-weight: 400; margin-bottom: 6px; }
     .login-subtitle { color: #8696A0; font-size: 13px; margin-bottom: 24px; }
@@ -32,21 +19,9 @@
     .login-btn:hover { background: #02B898; }
     .login-error { color: #E74C3C; font-size: 13px; margin-top: 12px; }
 
-    .app-container {
-      display: flex; height: 100vh; height: 100dvh;
-      max-width: 1400px; margin: 0 auto; box-shadow: 0 0 30px rgba(0,0,0,0.5);
-    }
-    
-    .sidebar {
-      width: 380px; min-width: 380px; background: #111B21;
-      display: flex; flex-direction: column; border-right: 1px solid #2A3942; height: 100%;
-    }
-    
-    .sidebar-header {
-      background: #202C33; padding: 8px 12px; display: flex;
-      align-items: center; justify-content: space-between; flex-shrink: 0;
-    }
-    
+    .app-container { display: flex; height: 100vh; height: 100dvh; max-width: 1400px; margin: 0 auto; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+    .sidebar { width: 380px; min-width: 380px; background: #111B21; display: flex; flex-direction: column; border-right: 1px solid #2A3942; height: 100%; }
+    .sidebar-header { background: #202C33; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
     .sidebar-header-left { display: flex; align-items: center; gap: 8px; }
     .sidebar-title-block { display: flex; flex-direction: column; }
     .sidebar-title-row { display: flex; align-items: center; gap: 8px; }
@@ -54,84 +29,77 @@
     .sidebar-header .badge { border-radius: 20px; padding: 2px 10px; font-size: 12px; font-weight: 600; color: white; }
     .sidebar-empresa { color: #8696A0; font-size: 11px; margin-top: 2px; white-space: nowrap; }
     .sidebar-header-right { display: flex; align-items: center; gap: 4px; }
-    
-    .btn-sync, .btn-clean {
-      background: none; border: 1px solid #2A3942; color: #8696A0; border-radius: 6px;
-      padding: 4px 8px; font-size: 13px; cursor: pointer; transition: all 0.2s;
-      min-width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
-    }
+    .btn-sync, .btn-clean { background: none; border: 1px solid #2A3942; color: #8696A0; border-radius: 6px; padding: 4px 8px; font-size: 13px; cursor: pointer; transition: all 0.2s; min-width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
     .btn-sync:hover, .btn-clean:hover { background: #2A3942; color: #E9EDEF; }
-
-    /* ── BADGE ALERTAS ── */
-    .btn-alertas {
-      background: none; border: 1px solid #2A3942; color: #8696A0; border-radius: 6px;
-      padding: 4px 8px; font-size: 13px; cursor: pointer; transition: all 0.2s;
-      min-width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
-      position: relative;
-    }
+    .btn-alertas { background: none; border: 1px solid #2A3942; color: #8696A0; border-radius: 6px; padding: 4px 8px; font-size: 13px; cursor: pointer; transition: all 0.2s; min-width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; position: relative; }
     .btn-alertas:hover { background: #2A3942; color: #E9EDEF; }
-    .alertas-count {
-      position: absolute; top: -4px; right: -4px; background: #E74C3C;
-      color: white; border-radius: 50%; width: 16px; height: 16px;
-      font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center;
-    }
+    .alertas-count { position: absolute; top: -4px; right: -4px; background: #E74C3C; color: white; border-radius: 50%; width: 16px; height: 16px; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
 
     .search-box { padding: 8px 12px; background: #111B21; flex-shrink: 0; }
     .search-box input { width: 100%; padding: 8px 32px 8px 12px; border-radius: 8px; border: none; background: #202C33; color: #E9EDEF; font-size: 14px; outline: none; }
     .search-box input::placeholder { color: #8696A0; }
-    
     .contacts-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: #374045 transparent; }
     .contacts-list::-webkit-scrollbar { width: 6px; }
     .contacts-list::-webkit-scrollbar-thumb { background: #374045; border-radius: 3px; }
-    
     .contact-item { display: flex; align-items: center; padding: 12px 16px; cursor: pointer; border-bottom: 1px solid #202C33; transition: background 0.15s; }
     .contact-item:hover { background: #202C33; }
     .contact-item.active { background: #2A3942; }
-    
-    .contact-avatar { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; font-weight: 600; margin-right: 12px; flex-shrink: 0; }
+    .contact-avatar { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; font-weight: 600; margin-right: 12px; flex-shrink: 0; cursor: pointer; transition: opacity 0.2s; }
+    .contact-avatar:hover { opacity: 0.8; }
     .contact-info { flex: 1; min-width: 0; }
     .contact-name { color: #E9EDEF; font-size: 15px; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .contact-last-msg { color: #8696A0; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
-    
     .contact-meta { text-align: right; flex-shrink: 0; margin-left: 8px; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
     .contact-time { color: #8696A0; font-size: 12px; }
     .contact-meta-row { display: flex; align-items: center; gap: 5px; }
     .contact-count { color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
-
-    /* ── PUNTO DE ESTADO en lista ── */
     .estado-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-    
     .contact-new { width: 10px; height: 10px; border-radius: 50%; background: #FF3B30; flex-shrink: 0; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-    
     .btn-archive, .btn-pin { background: none; border: none; color: #8696A0; font-size: 14px; cursor: pointer; padding: 2px; border-radius: 4px; transition: all 0.2s; line-height: 1; }
     .btn-archive:hover, .btn-pin:hover { color: #00A884; }
     .btn-pin-active { color: #E67E22 !important; }
-    
+
     .chat-panel { flex: 1; display: flex; flex-direction: column; background: #0B141A; height: 100%; overflow: hidden; }
-    
     .chat-header { background: #202C33; padding: 10px 16px; display: flex; align-items: center; height: 60px; border-bottom: 1px solid #2A3942; flex-shrink: 0; }
     .chat-header .contact-avatar { width: 40px; height: 40px; font-size: 16px; }
     .chat-header-info { flex: 1; min-width: 0; }
     .chat-header-name { color: #E9EDEF; font-size: 16px; font-weight: 500; }
     .chat-header-status { color: #8696A0; font-size: 13px; }
     .chat-header-phone { color: #00A884; font-size: 13px; font-weight: 500; margin-left: 8px; white-space: nowrap; }
-
-    /* ── SELECTOR DE ESTADO en header ── */
-    .estado-selector {
-      background: none; border: 1px solid #2A3942; color: #8696A0;
-      border-radius: 12px; padding: 3px 8px; font-size: 11px; cursor: pointer;
-      margin-left: 8px; white-space: nowrap; transition: all 0.2s; flex-shrink: 0;
-    }
+    .estado-selector { background: none; border: 1px solid #2A3942; color: #8696A0; border-radius: 12px; padding: 3px 8px; font-size: 11px; cursor: pointer; margin-left: 8px; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; }
     .estado-selector:hover { background: #2A3942; }
 
-    /* ── PANEL DE ALERTAS ── */
-    .alertas-panel {
-      position: fixed; top: 0; right: 0; width: 320px; height: 100%;
-      background: #202C33; border-left: 1px solid #2A3942; z-index: 500;
-      display: flex; flex-direction: column; transform: translateX(100%);
-      transition: transform 0.3s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.3);
-    }
+    /* ── FICHA DEL CONTACTO ── */
+    .ficha-panel { position: fixed; top: 0; right: 0; width: 360px; height: 100%; background: #111B21; border-left: 1px solid #2A3942; z-index: 500; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.3s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.4); }
+    .ficha-panel.open { transform: translateX(0); }
+    .ficha-header { background: #202C33; padding: 16px; border-bottom: 1px solid #2A3942; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .ficha-avatar { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 22px; font-weight: 600; flex-shrink: 0; }
+    .ficha-header-info { flex: 1; min-width: 0; }
+    .ficha-nombre { color: #E9EDEF; font-size: 16px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ficha-tel { color: #00A884; font-size: 12px; margin-top: 2px; }
+    .ficha-close { background: none; border: none; color: #8696A0; font-size: 20px; cursor: pointer; padding: 4px; flex-shrink: 0; }
+    .ficha-close:hover { color: #E9EDEF; }
+    .ficha-body { flex: 1; overflow-y: auto; padding: 12px; scrollbar-width: thin; scrollbar-color: #374045 transparent; }
+    .ficha-section { margin-bottom: 16px; }
+    .ficha-section-title { color: #8696A0; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid #2A3942; }
+    .ficha-field { margin-bottom: 10px; }
+    .ficha-label { color: #8696A0; font-size: 11px; margin-bottom: 3px; }
+    .ficha-input { width: 100%; padding: 8px 10px; border-radius: 6px; border: none; background: #202C33; color: #E9EDEF; font-size: 13px; outline: none; font-family: inherit; transition: background 0.2s; }
+    .ficha-input:focus { background: #2A3942; }
+    .ficha-input::placeholder { color: #374045; }
+    .ficha-select { width: 100%; padding: 8px 10px; border-radius: 6px; border: none; background: #202C33; color: #E9EDEF; font-size: 13px; outline: none; font-family: inherit; cursor: pointer; }
+    .ficha-select:focus { background: #2A3942; }
+    .ficha-textarea { width: 100%; padding: 8px 10px; border-radius: 6px; border: none; background: #202C33; color: #E9EDEF; font-size: 13px; outline: none; font-family: inherit; resize: none; min-height: 70px; transition: background 0.2s; }
+    .ficha-textarea:focus { background: #2A3942; }
+    .ficha-footer { padding: 12px; border-top: 1px solid #2A3942; flex-shrink: 0; }
+    .ficha-save-btn { width: 100%; padding: 10px; border-radius: 8px; border: none; background: #00A884; color: white; font-size: 14px; cursor: pointer; font-family: inherit; transition: background 0.2s; }
+    .ficha-save-btn:hover { background: #02B898; }
+    .ficha-row { display: flex; gap: 8px; }
+    .ficha-row .ficha-field { flex: 1; }
+
+    /* ── PANEL ALERTAS ── */
+    .alertas-panel { position: fixed; top: 0; right: 0; width: 320px; height: 100%; background: #202C33; border-left: 1px solid #2A3942; z-index: 500; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.3s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.3); }
     .alertas-panel.open { transform: translateX(0); }
     .alertas-header { padding: 16px; border-bottom: 1px solid #2A3942; display: flex; align-items: center; justify-content: space-between; }
     .alertas-title { color: #E9EDEF; font-size: 16px; font-weight: 500; }
@@ -143,23 +111,15 @@
     .alerta-detalle { color: #8696A0; font-size: 12px; margin-top: 3px; }
     .alerta-dias { color: #E74C3C; font-size: 11px; font-weight: 600; margin-top: 2px; }
 
-    .chat-messages {
-      flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 60px;
-      background-color: #0B141A;
-      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23182229' fill-opacity='0.6'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-      scrollbar-width: thin; scrollbar-color: #374045 transparent; min-height: 0;
-    }
+    .chat-messages { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 60px; background-color: #0B141A; background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23182229' fill-opacity='0.6'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); scrollbar-width: thin; scrollbar-color: #374045 transparent; min-height: 0; }
     .chat-messages::-webkit-scrollbar { width: 6px; }
     .chat-messages::-webkit-scrollbar-thumb { background: #374045; border-radius: 3px; }
-    
     .welcome-screen { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #222E35; }
     .welcome-icon { width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; margin-bottom: 20px; }
     .welcome-screen h2 { color: #E9EDEF; font-size: 28px; font-weight: 300; margin-bottom: 10px; }
     .welcome-screen p { color: #8696A0; font-size: 14px; text-align: center; max-width: 400px; line-height: 1.5; }
-    
     .date-separator { text-align: center; margin: 16px 0; }
     .date-separator span { background: #182229; color: #8696A0; padding: 5px 12px; border-radius: 8px; font-size: 12px; box-shadow: 0 1px 1px rgba(0,0,0,0.2); }
-    
     .message-bubble { max-width: 65%; padding: 6px 8px 6px 9px; margin-bottom: 3px; border-radius: 8px; position: relative; word-wrap: break-word; line-height: 1.4; clear: both; }
     .message-incoming { background: #202C33; float: left; border-top-left-radius: 0; }
     .message-outgoing { background: #005C4B; float: right; border-top-right-radius: 0; }
@@ -167,46 +127,35 @@
     .message-time { color: #8696A0; font-size: 11px; float: right; margin-left: 12px; margin-top: 4px; }
     .message-outgoing .message-time { color: #99BEB7; }
     .message-app { font-size: 11px; font-weight: 600; margin-bottom: 2px; }
-    
     .message-header-row { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
     .message-header-row .message-app { margin-bottom: 0; display: inline; }
     .message-header-row .message-time { float: none; margin: 0; }
     .message-header-row .btn-save-response { margin-top: 0; }
-    
     .message-response { background: #1A3A2A; border-left: 3px solid #00A884; padding: 6px 10px; margin-top: 4px; border-radius: 4px; font-size: 13px; color: #82E0AA; }
     .message-response-label { font-size: 11px; color: #00A884; font-weight: 600; margin-bottom: 2px; }
     .message-response-ia { background: #2A1A3A; border-left: 3px solid #7C3AED; padding: 6px 10px; margin-top: 4px; border-radius: 4px; font-size: 13px; color: #C4A8E0; }
     .message-response-ia-label { font-size: 11px; color: #7C3AED; font-weight: 600; margin-bottom: 2px; }
-    
     .media-placeholder { color: #8696A0; font-size: 13px; padding: 6px 2px; display: flex; align-items: center; gap: 6px; }
     .media-audio audio { max-width: 240px; width: 100%; height: 32px; border-radius: 8px; margin: 4px 0; display: block; }
     .media-imagen img { max-width: 144px; border-radius: 8px; cursor: pointer; margin: 4px 0; display: block; }
     .media-doc a { color: #00A884; text-decoration: none; display: flex; align-items: center; gap: 6px; font-size: 13px; padding: 4px 0; }
     .media-doc a:hover { text-decoration: underline; }
-    
     .clearfix { clear: both; }
-    
     .chat-input-area { background: #202C33; padding: 8px 10px; display: flex; align-items: center; gap: 6px; flex-shrink: 0; position: relative; }
     .chat-input { flex: 1; padding: 10px 14px; border-radius: 8px; border: none; background: #2A3942; color: #E9EDEF; font-size: 14px; outline: none; font-family: inherit; min-width: 0; }
     .chat-input::placeholder { color: #8696A0; }
-    
     .btn-send { width: 40px; height: 40px; border-radius: 50%; border: none; background: #00A884; color: white; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; flex-shrink: 0; }
     .btn-send:hover { background: #02B898; }
     .btn-send:disabled { background: #2A3942; cursor: not-allowed; }
-    
     .btn-suggestion { padding: 6px 12px; border-radius: 16px; border: 1px solid #00A884; background: transparent; color: #00A884; font-size: 12px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
     .btn-suggestion:hover { background: #00A884; color: white; }
-    
     .suggestions-bar { background: #202C33; padding: 6px 16px; display: flex; gap: 8px; overflow-x: auto; border-top: 1px solid #2A3942; flex-shrink: 0; }
     .suggestions-bar:empty { display: none; padding: 0; }
-    
     .btn-save-response { background: none; border: 1px solid #c9a227; color: #c9a227; border-radius: 6px; padding: 2px 6px; font-size: 10px; cursor: pointer; transition: all 0.2s; }
     .btn-save-response:hover { background: #c9a227; color: #111B21; }
-    
     .loading { display: flex; align-items: center; justify-content: center; padding: 40px; color: #8696A0; font-size: 14px; }
     .spinner { width: 24px; height: 24px; border: 3px solid #2A3942; border-top-color: #00A884; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 10px; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    
     .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; }
     .modal-box { background: #202C33; border-radius: 12px; padding: 24px; max-width: 420px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
     .modal-title { color: #E9EDEF; font-size: 16px; font-weight: 500; margin-bottom: 8px; }
@@ -221,21 +170,13 @@
     .modal-btn-ok:hover { background: #02B898; }
     .modal-btn-danger { background: #E74C3C; color: white; }
     .modal-btn-danger:hover { background: #C0392B; }
-
-    /* ── DROPDOWN ESTADO ── */
-    .estado-dropdown {
-      position: fixed; background: #202C33; border-radius: 10px; padding: 6px 0;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5); z-index: 600; min-width: 200px;
-      border: 1px solid #2A3942;
-    }
+    .estado-dropdown { position: fixed; background: #202C33; border-radius: 10px; padding: 6px 0; box-shadow: 0 8px 32px rgba(0,0,0,0.5); z-index: 600; min-width: 200px; border: 1px solid #2A3942; }
     .estado-option { padding: 10px 16px; color: #E9EDEF; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.15s; }
     .estado-option:hover { background: #2A3942; }
     .estado-option.activo { color: #00A884; }
-    
     .toast-notification { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); color: white; padding: 12px 24px; border-radius: 8px; font-size: 14px; z-index: 1001; box-shadow: 0 4px 16px rgba(0,0,0,0.3); animation: toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards; }
     @keyframes toastIn { from { opacity: 0; top: 0; } to { opacity: 1; top: 20px; } }
     @keyframes toastOut { from { opacity: 1; } to { opacity: 0; } }
-    
     .contactos-panel { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #202C33; border-radius: 12px; width: 350px; max-height: 500px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); z-index: 1001; display: flex; flex-direction: column; }
     .contactos-panel-header { padding: 16px; border-bottom: 1px solid #2A3942; }
     .contactos-panel-title { color: #E9EDEF; font-size: 16px; font-weight: 500; margin-bottom: 10px; }
@@ -249,7 +190,7 @@
     .contactos-panel-sin-tel { color: #E74C3C; font-size: 12px; }
     .contactos-panel-close { position: absolute; top: 12px; right: 12px; background: none; border: none; color: #8696A0; font-size: 20px; cursor: pointer; }
     .contactos-panel-close:hover { color: #E9EDEF; }
-    
+
     @media (max-width: 768px) {
       .sidebar { width: 100%; min-width: 100%; }
       .chat-panel { display: none; }
@@ -280,7 +221,7 @@
       .chat-header .contact-avatar { width: 28px; height: 28px; font-size: 12px; margin-right: 4px; }
       .chat-header-info { min-width: 0; }
       .btn-back { width: 24px; height: 24px; font-size: 16px; margin-right: 0px; margin-left: -2px; }
-      .estado-selector { font-size: 10px; padding: 2px 6px; }
+      .estado-selector { display: none; }
       .chat-messages { padding: 6px 6px; }
       .message-bubble { max-width: 90%; padding: 4px 6px 4px 7px; margin-bottom: 2px; }
       .message-text { font-size: 13px; }
@@ -304,13 +245,10 @@
       .media-imagen img { max-width: 180px; }
       .contactos-panel { width: 90%; max-height: 80vh; }
       .alertas-panel { width: 100%; }
-      .estado-selector { display: none; }
+      .ficha-panel { width: 100%; }
     }
-    
-    .btn-back {
-      display: none; width: 36px; height: 36px; border: none; background: none; color: #E9EDEF;
-      font-size: 22px; cursor: pointer; margin-right: 4px; align-items: center; justify-content: center; flex-shrink: 0;
-    }
+
+    .btn-back { display: none; width: 36px; height: 36px; border: none; background: none; color: #E9EDEF; font-size: 22px; cursor: pointer; margin-right: 4px; align-items: center; justify-content: center; flex-shrink: 0; }
   </style>
 </head>
 <body>
@@ -357,18 +295,17 @@
         <div class="loading"><div class="spinner"></div>Cargando contactos...</div>
       </div>
     </div>
-    
+
     <div class="chat-panel" id="chatPanel">
       <div class="welcome-screen" id="welcomeScreen">
         <div class="welcome-icon" id="welcomeIcon">💬</div>
         <h2 id="welcomeTitle">Chat de Notificaciones</h2>
-        <p>Seleccioná un contacto para ver el historial de mensajes y enviar respuestas por WhatsApp</p>
+        <p>Seleccioná un contacto para ver el historial. Tocá el avatar para ver la ficha completa.</p>
       </div>
-      
       <div id="activeChat" style="display:none; flex-direction:column; flex:1; overflow:hidden; min-height:0;">
         <div class="chat-header">
           <button class="btn-back" onclick="volverAContactos()">←</button>
-          <div class="contact-avatar" id="chatAvatar">V</div>
+          <div class="contact-avatar" id="chatAvatar" onclick="abrirFichaActual()" style="cursor:pointer;" title="Ver ficha del contacto">V</div>
           <div class="chat-header-info">
             <div class="chat-header-name" id="chatName">Contacto</div>
             <div class="chat-header-status" id="chatStatus">mensajes</div>
@@ -376,10 +313,8 @@
           <div class="chat-header-phone" id="chatPhone"></div>
           <button class="estado-selector" id="btnEstado" onclick="mostrarEstadoDropdown(event)">● Nuevo ▾</button>
         </div>
-        
         <div class="chat-messages" id="chatMessages"></div>
         <div class="suggestions-bar" id="suggestionsBar"></div>
-        
         <div class="chat-input-area">
           <input type="file" id="fileInput" style="display:none" onchange="enviarArchivo(this)">
           <input type="text" class="chat-input" id="messageInput" placeholder="Mensaje..." onkeypress="if(event.key==='Enter') enviarMensaje()">
@@ -391,7 +326,25 @@
     </div>
   </div>
 
-  <!-- PANEL DE ALERTAS -->
+  <!-- FICHA DEL CONTACTO -->
+  <div class="ficha-panel" id="fichaPanel">
+    <div class="ficha-header">
+      <div class="ficha-avatar" id="fichaAvatar">V</div>
+      <div class="ficha-header-info">
+        <div class="ficha-nombre" id="fichaNombre">Contacto</div>
+        <div class="ficha-tel" id="fichaTel"></div>
+      </div>
+      <button class="ficha-close" onclick="cerrarFicha()">✕</button>
+    </div>
+    <div class="ficha-body" id="fichaBody">
+      <div class="loading"><div class="spinner"></div>Cargando...</div>
+    </div>
+    <div class="ficha-footer">
+      <button class="ficha-save-btn" onclick="guardarFicha()">💾 Guardar ficha</button>
+    </div>
+  </div>
+
+  <!-- PANEL ALERTAS -->
   <div class="alertas-panel" id="alertasPanel">
     <div class="alertas-header">
       <span class="alertas-title">🔔 Seguimiento pendiente</span>
@@ -405,20 +358,18 @@
   <script>
     var API_URL = "https://script.google.com/macros/s/AKfycbxLCyafHzG5GIHxQuo2SVUoQ4gfJOYsdvdmbXIizWOl13OJ6Mmia7Vy6Jax1kkj7OKXDQ/exec";
     var BRIDGE_URL = "https://bridge.tasks-on.com";
-    
+
     function api(action, params) {
       var url = API_URL + "?action=" + action;
       if (params) { Object.keys(params).forEach(function(key) { url += "&" + key + "=" + encodeURIComponent(params[key]); }); }
       return fetch(url).then(function(r) { return r.json(); });
     }
-    
+
     var contactosGlobal = [], contactoActual = "", telefonoActual = "", timestampActual = 0;
     var mostrarArchivados = false, mensajesVistos = {}, appColor = "#00A884", configData = {}, autoIAactivo = false;
-    var mediaCache = {};
-    var usuarioActual = { email: "", nombre: "", rol: "" };
-    var estadoActual = "Nuevo";
+    var mediaCache = {}, usuarioActual = { email: "", nombre: "", rol: "" }, estadoActual = "Nuevo";
+    var fichaContactoActual = "";
 
-    // ── ESTADOS — colores y etiquetas ──
     var ESTADOS = [
       { valor: "Nuevo",            color: "#8696A0", emoji: "⚪" },
       { valor: "Informado",        color: "#3498DB", emoji: "🔵" },
@@ -429,14 +380,15 @@
       { valor: "Perdido",          color: "#374045", emoji: "⚫" }
     ];
 
+    var TIPO_PROP = ["", "Lote", "Departamento", "Macrolote", "Casa", "PH", "Casa con pileta", "Otro"];
+    var ORIGENES  = ["", "WhatsApp", "Instagram", "Referido", "Web", "Otro"];
+
     function getEstadoInfo(valor) {
       return ESTADOS.find(function(e) { return e.valor === valor; }) || ESTADOS[0];
     }
 
     // ── LOGIN ──
-    document.getElementById('loginEmail').addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') hacerLogin();
-    });
+    document.getElementById('loginEmail').addEventListener('keypress', function(e) { if (e.key === 'Enter') hacerLogin(); });
 
     function hacerLogin() {
       var email = document.getElementById('loginEmail').value.trim();
@@ -450,9 +402,7 @@
         } else {
           document.getElementById('loginError').textContent = '❌ Email no autorizado';
         }
-      }).catch(function() {
-        document.getElementById('loginError').textContent = '❌ Error de conexión';
-      });
+      }).catch(function() { document.getElementById('loginError').textContent = '❌ Error de conexión'; });
     }
 
     function iniciarApp() {
@@ -473,48 +423,139 @@
       cargarAlertas();
     }
 
+    // ── FICHA ──
+    function abrirFicha(contacto) {
+      event && event.stopPropagation();
+      fichaContactoActual = contacto;
+      var c = contactosGlobal.find(function(x) { return x.nombre === contacto; });
+      var colors = ['#00A884','#25D366','#128C7E','#075E54','#34B7F1','#ECE5DD'];
+      var color = colors[contacto.length % colors.length];
+      document.getElementById('fichaAvatar').textContent = (c ? (c.alias || c.nombre) : contacto).charAt(0).toUpperCase();
+      document.getElementById('fichaAvatar').style.background = color;
+      document.getElementById('fichaNombre').textContent = c ? (c.alias || c.nombre) : contacto;
+      document.getElementById('fichaTel').textContent = c ? (c.telefono || '') : '';
+      document.getElementById('fichaBody').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando...</div>';
+      document.getElementById('fichaPanel').classList.add('open');
+      api("getContactoDetalle", { contacto: contacto }).then(function(data) {
+        if (data.status === "ok") renderFicha(data);
+        else document.getElementById('fichaBody').innerHTML = '<div class="loading" style="color:#ff6b6b;">Error al cargar</div>';
+      });
+    }
+
+    function abrirFichaActual() {
+      if (contactoActual) abrirFicha(contactoActual);
+    }
+
+    function cerrarFicha() {
+      document.getElementById('fichaPanel').classList.remove('open');
+    }
+
+    function renderFicha(d) {
+      var html = '';
+
+      // Datos básicos
+      html += '<div class="ficha-section">';
+      html += '<div class="ficha-section-title">👤 Datos básicos</div>';
+      html += '<div class="ficha-field"><div class="ficha-label">Alias / Nombre de trato</div><input class="ficha-input" id="f_alias" value="' + esc(d.alias) + '" placeholder="Como lo llamás..."></div>';
+      html += '<div class="ficha-field"><div class="ficha-label">Email</div><input class="ficha-input" id="f_email" type="email" value="' + esc(d.email) + '" placeholder="email@..."></div>';
+      html += '</div>';
+
+      // Perfil comercial
+      html += '<div class="ficha-section">';
+      html += '<div class="ficha-section-title">🏡 Perfil comercial</div>';
+
+      html += '<div class="ficha-field"><div class="ficha-label">Tipo de propiedad</div><select class="ficha-select" id="f_tipoProp">';
+      TIPO_PROP.forEach(function(t) { html += '<option value="' + t + '"' + (d.tipoProp === t ? ' selected' : '') + '>' + (t || '— Seleccionar —') + '</option>'; });
+      html += '</select></div>';
+
+      html += '<div class="ficha-field"><div class="ficha-label">Qué está buscando</div><input class="ficha-input" id="f_buscando" value="' + esc(d.buscando) + '" placeholder="Ej: lote con frente al río..."></div>';
+
+      html += '<div class="ficha-row">';
+      html += '<div class="ficha-field"><div class="ficha-label">Superficie (m²)</div><input class="ficha-input" id="f_superficie" value="' + esc(d.superficie) + '" placeholder="Ej: 600-900"></div>';
+      html += '<div class="ficha-field"><div class="ficha-label">Presupuesto (USD)</div><input class="ficha-input" id="f_presupuesto" value="' + esc(d.presupuesto) + '" placeholder="Ej: 80.000"></div>';
+      html += '</div>';
+
+      html += '<div class="ficha-field"><div class="ficha-label">Ubicación de interés</div><input class="ficha-input" id="f_ubicacion" value="' + esc(d.ubicacion) + '" placeholder="Ej: frente al lago, zona norte..."></div>';
+
+      html += '<div class="ficha-field"><div class="ficha-label">Cómo llegó</div><select class="ficha-select" id="f_origen">';
+      ORIGENES.forEach(function(o) { html += '<option value="' + o + '"' + (d.origen === o ? ' selected' : '') + '>' + (o || '— Seleccionar —') + '</option>'; });
+      html += '</select></div>';
+      html += '</div>';
+
+      // Seguimiento
+      html += '<div class="ficha-section">';
+      html += '<div class="ficha-section-title">📅 Seguimiento</div>';
+      html += '<div class="ficha-field"><div class="ficha-label">Próxima acción</div><input class="ficha-input" id="f_proxAccion" value="' + esc(d.proxAccion) + '" placeholder="Ej: Llamar para coordinar visita..."></div>';
+      html += '<div class="ficha-field"><div class="ficha-label">Fecha próximo contacto</div><input class="ficha-input" id="f_fecha" type="date" value="' + esc(d.fechaProxContacto) + '"></div>';
+      html += '<div class="ficha-field"><div class="ficha-label">Notas internas</div><textarea class="ficha-textarea" id="f_notas" placeholder="Observaciones, detalles de la conversación...">' + esc(d.notas) + '</textarea></div>';
+      html += '</div>';
+
+      document.getElementById('fichaBody').innerHTML = html;
+    }
+
+    function esc(str) { return (str || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+    function guardarFicha() {
+      if (!fichaContactoActual) return;
+      var datos = {
+        alias:             document.getElementById('f_alias').value.trim(),
+        email:             document.getElementById('f_email').value.trim(),
+        tipoProp:          document.getElementById('f_tipoProp').value,
+        buscando:          document.getElementById('f_buscando').value.trim(),
+        superficie:        document.getElementById('f_superficie').value.trim(),
+        presupuesto:       document.getElementById('f_presupuesto').value.trim(),
+        ubicacion:         document.getElementById('f_ubicacion').value.trim(),
+        origen:            document.getElementById('f_origen').value,
+        proxAccion:        document.getElementById('f_proxAccion').value.trim(),
+        fechaProxContacto: document.getElementById('f_fecha').value,
+        notas:             document.getElementById('f_notas').value.trim()
+      };
+      var btn = document.querySelector('.ficha-save-btn');
+      btn.textContent = '⏳ Guardando...'; btn.disabled = true;
+      api("setContactoDetalle", { contacto: fichaContactoActual, datos: JSON.stringify(datos) }).then(function(r) {
+        btn.textContent = '💾 Guardar ficha'; btn.disabled = false;
+        if (r.status === 'ok') {
+          mostrarToast('✓ Ficha guardada');
+          // Actualizar alias en la lista
+          var c = contactosGlobal.find(function(x) { return x.nombre === fichaContactoActual; });
+          if (c && datos.alias) { c.alias = datos.alias; renderContactos(contactosGlobal); }
+          document.getElementById('fichaNombre').textContent = datos.alias || fichaContactoActual;
+        } else { mostrarToast('❌ Error al guardar'); }
+      }).catch(function() { btn.textContent = '💾 Guardar ficha'; btn.disabled = false; mostrarToast('❌ Error de conexión'); });
+    }
+
     // ── ALERTAS ──
     function cargarAlertas() {
       api("getAlertas").then(function(alertas) {
         var count = alertas.length;
         var badge = document.getElementById('alertasCount');
-        if (count > 0) {
-          badge.textContent = count > 9 ? '9+' : count;
-          badge.style.display = 'flex';
-        } else {
-          badge.style.display = 'none';
-        }
+        if (count > 0) { badge.textContent = count > 9 ? '9+' : count; badge.style.display = 'flex'; }
+        else { badge.style.display = 'none'; }
         renderAlertas(alertas);
       });
     }
 
     function renderAlertas(alertas) {
       var html = '';
-      if (!alertas.length) {
-        html = '<div class="loading" style="color:#00A884;">✓ Todo al día</div>';
-      } else {
-        alertas.forEach(function(a) {
-          var ei = getEstadoInfo(a.estado);
-          html += '<div class="alerta-item" onclick="abrirChatDesdeAlerta(\'' + a.nombre.replace(/'/g,"\\'") + '\')">' +
-            '<div class="alerta-nombre">' + (a.alias || a.nombre) + '</div>' +
-            '<div class="alerta-detalle">' + ei.emoji + ' ' + a.estado + '</div>' +
-            '<div class="alerta-dias">Sin actividad: ' + a.diasSinActividad + ' día' + (a.diasSinActividad !== 1 ? 's' : '') + '</div>' +
-          '</div>';
-        });
-      }
+      if (!alertas.length) { html = '<div class="loading" style="color:#00A884;">✓ Todo al día</div>'; }
+      else { alertas.forEach(function(a) {
+        var ei = getEstadoInfo(a.estado);
+        html += '<div class="alerta-item" onclick="abrirChatDesdeAlerta(\'' + a.nombre.replace(/'/g,"\\'") + '\')">' +
+          '<div class="alerta-nombre">' + (a.alias || a.nombre) + '</div>' +
+          '<div class="alerta-detalle">' + ei.emoji + ' ' + a.estado + '</div>' +
+          '<div class="alerta-dias">Sin actividad: ' + a.diasSinActividad + ' día' + (a.diasSinActividad !== 1 ? 's' : '') + '</div></div>';
+      }); }
       document.getElementById('alertasList').innerHTML = html;
     }
 
     function toggleAlertas() {
       var panel = document.getElementById('alertasPanel');
+      cerrarFicha();
       panel.classList.toggle('open');
       if (panel.classList.contains('open')) cargarAlertas();
     }
 
-    function abrirChatDesdeAlerta(nombre) {
-      toggleAlertas();
-      abrirChat(nombre);
-    }
+    function abrirChatDesdeAlerta(nombre) { toggleAlertas(); abrirChat(nombre); }
 
     // ── CONTACTOS ──
     function formatUltimoMensaje(msg) {
@@ -526,7 +567,7 @@
       if (msg.indexOf('[📎') === 0) return msg;
       return msg;
     }
-    
+
     function renderContactos(contactos) {
       var html = '', totalActivos = 0;
       contactos.forEach(function(c) {
@@ -538,11 +579,11 @@
         var inicial = (c.alias || c.nombre).charAt(0).toUpperCase();
         var colors = ['#00A884','#25D366','#128C7E','#075E54','#34B7F1','#ECE5DD'];
         var color = colors[c.nombre.length % colors.length];
-        var esc = c.nombre.replace(/'/g, "\\'");
+        var esc2 = c.nombre.replace(/'/g, "\\'");
         var ei = getEstadoInfo(c.estado || "Nuevo");
         html += '<div class="contact-item">' +
-          '<div class="contact-avatar" style="background:' + color + '" onclick="abrirChat(\'' + esc + '\')">' + inicial + '</div>' +
-          '<div class="contact-info" onclick="abrirChat(\'' + esc + '\')">' +
+          '<div class="contact-avatar" style="background:' + color + '" onclick="abrirFicha(\'' + esc2 + '\')" title="Ver ficha">' + inicial + '</div>' +
+          '<div class="contact-info" onclick="abrirChat(\'' + esc2 + '\')">' +
             '<div class="contact-name">' + (c.alias || c.nombre) + '</div>' +
             '<div class="contact-last-msg">' + formatUltimoMensaje(c.ultimoMensaje) + '</div></div>' +
           '<div class="contact-meta"><div class="contact-time">' + c.ultimaFecha + '</div>' +
@@ -550,25 +591,25 @@
               '<div class="estado-dot" style="background:' + ei.color + '" title="' + ei.valor + '"></div>' +
               '<div class="contact-count" style="background:' + appColor + '">' + c.totalMensajes + '</div>' +
               (esNuevo ? '<div class="contact-new"></div>' : '') +
-              '<button class="' + (c.fijado ? 'btn-pin btn-pin-active' : 'btn-pin') + '" onclick="togglePin(\'' + esc + '\')">' + (c.fijado ? '📌' : '📍') + '</button>' +
+              '<button class="' + (c.fijado ? 'btn-pin btn-pin-active' : 'btn-pin') + '" onclick="togglePin(\'' + esc2 + '\')">' + (c.fijado ? '📌' : '📍') + '</button>' +
             '</div></div></div>';
       });
       document.getElementById('contactsList').innerHTML = html || '<div class="loading">No hay contactos</div>';
       document.getElementById('totalContactos').textContent = totalActivos;
       document.getElementById('totalContactos').style.background = appColor;
     }
-    
+
     function filtrarContactos() {
       var f = document.getElementById('searchInput').value.toLowerCase();
       renderContactos(contactosGlobal.filter(function(c) { return c.nombre.toLowerCase().indexOf(f) > -1 || c.alias.toLowerCase().indexOf(f) > -1; }));
     }
-    
+
     function togglePin(contacto) {
       event.stopPropagation();
       var c = contactosGlobal.find(function(x) { return x.nombre === contacto; });
       if (c) api(c.fijado ? "desfijarContacto" : "fijarContacto", { contacto: contacto }).then(recargarContactos);
     }
-    
+
     function limpiarHistorial() {
       var n = contactosGlobal.filter(function(c) { return c.fijado; }).length;
       var o = document.createElement('div'); o.className = 'modal-overlay';
@@ -577,8 +618,9 @@
     }
     function confirmarLimpiar() { cerrarModal(); mostrarToast('🧹 Limpiando...'); api("limpiarHistorial").then(function(r) { mostrarToast('✓ Limpio. ' + r.fijados + ' fijadas.'); recargarContactos(); }); }
     function recargarContactos() { api("getContactos").then(function(d) { contactosGlobal = d; renderContactos(d); }); }
-    
+
     function abrirChat(contacto) {
+      cerrarFicha();
       contactoActual = contacto;
       document.querySelectorAll('.contact-item').forEach(function(el) { el.classList.remove('active'); });
       document.getElementById('welcomeScreen').style.display = 'none';
@@ -602,13 +644,12 @@
       api("getMensajesPorContacto", { contacto: contacto }).then(renderMensajes);
     }
 
-    // ── PIPELINE — selector de estado ──
+    // ── PIPELINE ──
     function actualizarBtnEstado(estado) {
       var ei = getEstadoInfo(estado);
       var btn = document.getElementById('btnEstado');
       btn.textContent = ei.emoji + ' ' + estado + ' ▾';
-      btn.style.color = ei.color;
-      btn.style.borderColor = ei.color;
+      btn.style.color = ei.color; btn.style.borderColor = ei.color;
     }
 
     function mostrarEstadoDropdown(event) {
@@ -636,8 +677,7 @@
       if (!contactoActual) return;
       api("setEstado", { contacto: contactoActual, estado: nuevoEstado }).then(function(r) {
         if (r.status === 'ok') {
-          estadoActual = nuevoEstado;
-          actualizarBtnEstado(nuevoEstado);
+          estadoActual = nuevoEstado; actualizarBtnEstado(nuevoEstado);
           var c = contactosGlobal.find(function(x) { return x.nombre === contactoActual; });
           if (c) c.estado = nuevoEstado;
           renderContactos(contactosGlobal);
@@ -656,7 +696,7 @@
       if (mediaCache[fileId]) return renderMediaHtml(tipo, fileId, mediaCache[fileId]);
       return '<div class="media-placeholder" data-fileid="' + fileId + '" data-mediatype="' + tipo + '">' + icons[tipo] + ' Cargando...</div>';
     }
-    
+
     function renderMediaHtml(tipo, fileId, cacheData) {
       var src = 'data:' + cacheData.mimetype + ';base64,' + cacheData.base64;
       if (tipo === 'audio') return '<div class="media-audio"><audio controls src="' + src + '"></audio></div>';
@@ -664,30 +704,19 @@
       else if (tipo === 'video') return '<div class="media-audio"><video controls src="' + src + '" style="max-width:240px;border-radius:8px;"></video></div>';
       else return '<div class="media-doc"><a href="' + src + '" download="' + (cacheData.filename || 'archivo') + '">📄 ' + (cacheData.filename || 'Descargar documento') + '</a></div>';
     }
-    
+
     function cargarMediaPendiente() {
-      var placeholders = document.querySelectorAll('.media-placeholder');
-      placeholders.forEach(function(el) {
-        var fileId = el.getAttribute('data-fileid');
-        var tipo = el.getAttribute('data-mediatype');
+      document.querySelectorAll('.media-placeholder').forEach(function(el) {
+        var fileId = el.getAttribute('data-fileid'); var tipo = el.getAttribute('data-mediatype');
         if (!fileId) return;
         if (mediaCache[fileId]) { el.outerHTML = renderMediaHtml(tipo, fileId, mediaCache[fileId]); return; }
         fetch(BRIDGE_URL + '/get-media?fileId=' + fileId).then(function(r) { return r.json(); }).then(function(data) {
-          if (data.status === 'ok') {
-            mediaCache[fileId] = data;
-            var current = document.querySelector('[data-fileid="' + fileId + '"]');
-            if (current) current.outerHTML = renderMediaHtml(tipo, fileId, data);
-          } else {
-            var current = document.querySelector('[data-fileid="' + fileId + '"]');
-            if (current) current.textContent = '⚠️ No se pudo cargar';
-          }
-        }).catch(function() {
-          var current = document.querySelector('[data-fileid="' + fileId + '"]');
-          if (current) current.textContent = '⚠️ Error de conexión';
-        });
+          if (data.status === 'ok') { mediaCache[fileId] = data; var cur = document.querySelector('[data-fileid="' + fileId + '"]'); if (cur) cur.outerHTML = renderMediaHtml(tipo, fileId, data); }
+          else { var cur = document.querySelector('[data-fileid="' + fileId + '"]'); if (cur) cur.textContent = '⚠️ No se pudo cargar'; }
+        }).catch(function() { var cur = document.querySelector('[data-fileid="' + fileId + '"]'); if (cur) cur.textContent = '⚠️ Error'; });
       });
     }
-    
+
     function renderMensajes(mensajes) {
       var container = document.getElementById('chatMessages'), html = '', fechaAnt = '', sug = {}, tr = [];
       mensajes.forEach(function(m, idx) {
@@ -702,48 +731,27 @@
               var pr = mensajes[k].fecha.split(' '), fr = pr[0].split('/'), hr = pr[1].split(':');
               var frc = new Date(fr[2], fr[1]-1, fr[0], hr[0], hr[1]);
               var dm = Math.round((fe - frc) / 60000);
-              if (dm >= 0 && dm < 1440) {
-                var tb = configData.tiempoBien||5, tg = configData.tiempoRegular||15;
-                ind = ' ' + (dm <= tb ? (configData.textoBien||'✅') : dm <= tg ? (configData.textoRegular||'⚠️') : (configData.textoMalo||'🔴')) + ' ' + dm + 'm';
-                tr.push(dm);
-              } break;
+              if (dm >= 0 && dm < 1440) { var tb = configData.tiempoBien||5, tg = configData.tiempoRegular||15; ind = ' ' + (dm <= tb ? (configData.textoBien||'✅') : dm <= tg ? (configData.textoRegular||'⚠️') : (configData.textoMalo||'🔴')) + ' ' + dm + 'm'; tr.push(dm); } break;
             }
           }
-          var textoEnv = m.mensaje.substring(2);
-          html += '<div class="message-bubble message-outgoing">' + renderContenidoMensaje(textoEnv) + '<div class="message-time">' + hora + ' ✓' + ind + '</div></div><div class="clearfix"></div>';
+          html += '<div class="message-bubble message-outgoing">' + renderContenidoMensaje(m.mensaje.substring(2)) + '<div class="message-time">' + hora + ' ✓' + ind + '</div></div><div class="clearfix"></div>';
         } else {
           var esMedia = /^\[(audio|imagen|video|doc):/.test(m.mensaje);
-          html += '<div class="message-bubble message-incoming"><div class="message-header-row">' +
-            '<span class="message-app" style="color:' + appColor + '">' + m.app + '</span>' +
-            '<span class="message-time">' + hora + '</span>' +
-            (!m.respuestaPropuesta && !esMedia ? '<button class="btn-save-response" onclick="prepararGuardar(\'' + m.mensaje.replace(/'/g, "\\'").replace(/"/g, '&quot;') + '\')">💾</button>' : '') +
-            '</div>' + renderContenidoMensaje(m.mensaje);
-          if (m.respuestaPropuesta) {
-            var esIA = m.respuestaPropuesta.indexOf('🤖') === 0;
-            var txt = esIA ? m.respuestaPropuesta.substring(2).trim() : m.respuestaPropuesta;
-            html += esIA ? '<div class="message-response-ia"><div class="message-response-ia-label">🤖 IA automática</div>' + txt + '</div>'
-                        : '<div class="message-response"><div class="message-response-label">💡 Propuesta</div>' + txt + '</div>';
-            sug[m.respuestaPropuesta] = true;
-          }
+          html += '<div class="message-bubble message-incoming"><div class="message-header-row"><span class="message-app" style="color:' + appColor + '">' + m.app + '</span><span class="message-time">' + hora + '</span>' + (!m.respuestaPropuesta && !esMedia ? '<button class="btn-save-response" onclick="prepararGuardar(\'' + m.mensaje.replace(/'/g, "\\'").replace(/"/g, '&quot;') + '\')">💾</button>' : '') + '</div>' + renderContenidoMensaje(m.mensaje);
+          if (m.respuestaPropuesta) { var esIA = m.respuestaPropuesta.indexOf('🤖') === 0; var txt = esIA ? m.respuestaPropuesta.substring(2).trim() : m.respuestaPropuesta; html += esIA ? '<div class="message-response-ia"><div class="message-response-ia-label">🤖 IA automática</div>' + txt + '</div>' : '<div class="message-response"><div class="message-response-label">💡 Propuesta</div>' + txt + '</div>'; sug[m.respuestaPropuesta] = true; }
           html += '</div><div class="clearfix"></div>';
         }
       });
       container.innerHTML = html || '<div class="loading">No hay mensajes</div>';
       setTimeout(function() { container.scrollTop = container.scrollHeight; }, 100);
       setTimeout(cargarMediaPendiente, 50);
-      if (tr.length > 0) {
-        var prom = Math.round(tr.reduce(function(a,b){return a+b;},0) / tr.length);
-        var tb = configData.tiempoBien||5, tg = configData.tiempoRegular||15;
-        var ip = prom <= tb ? (configData.textoBien||'✅') : prom <= tg ? (configData.textoRegular||'⚠️') : (configData.textoMalo||'🔴');
-        document.getElementById('chatStatus').textContent = mensajes.length + ' msgs · Resp: ' + prom + 'm ' + ip;
-      }
-      var sh = '';
-      Object.keys(sug).slice(-3).forEach(function(s) { sh += '<button class="btn-suggestion" onclick="usarSugerencia(\'' + s.replace(/'/g, "\\'") + '\')">' + s.substring(0,30) + (s.length>30?'...':'') + '</button>'; });
+      if (tr.length > 0) { var prom = Math.round(tr.reduce(function(a,b){return a+b;},0)/tr.length); var tb=configData.tiempoBien||5, tg=configData.tiempoRegular||15; var ip=prom<=tb?(configData.textoBien||'✅'):prom<=tg?(configData.textoRegular||'⚠️'):(configData.textoMalo||'🔴'); document.getElementById('chatStatus').textContent = mensajes.length + ' msgs · Resp: ' + prom + 'm ' + ip; }
+      var sh = ''; Object.keys(sug).slice(-3).forEach(function(s) { sh += '<button class="btn-suggestion" onclick="usarSugerencia(\'' + s.replace(/'/g, "\\'") + '\')">' + s.substring(0,30) + (s.length>30?'...':'') + '</button>'; });
       document.getElementById('suggestionsBar').innerHTML = sh;
     }
-    
+
     function usarSugerencia(t) { document.getElementById('messageInput').value = t; document.getElementById('messageInput').focus(); }
-    
+
     function enviarMensaje() {
       var inp = document.getElementById('messageInput'), msg = inp.value.trim();
       if (!msg || !contactoActual) return;
@@ -758,26 +766,21 @@
       });
       mensajesVistos[contactoActual] = (mensajesVistos[contactoActual]||0) + 1;
     }
-    
+
     function enviarArchivo(input) {
-      var file = input.files[0];
-      if (!file) return;
+      var file = input.files[0]; if (!file) return;
       if (!contactoActual || !telefonoActual) { mostrarToast('⚠️ Sin teléfono para este contacto'); input.value = ''; return; }
-      var maxMB = 16;
-      if (file.size > maxMB * 1024 * 1024) { mostrarToast('⚠️ Archivo demasiado grande (máx ' + maxMB + 'MB)'); input.value = ''; return; }
+      if (file.size > 16 * 1024 * 1024) { mostrarToast('⚠️ Archivo demasiado grande (máx 16MB)'); input.value = ''; return; }
       mostrarToast('📎 Preparando ' + file.name + '...');
       var reader = new FileReader();
       reader.onload = function(e) {
         var base64 = e.target.result.split(',')[1];
-        fetch(BRIDGE_URL + '/enviar-archivo', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contacto: contactoActual, telefono: telefonoActual, base64: base64, mimetype: file.type || 'application/octet-stream', filename: file.name })
-        }).then(function(r) { return r.json(); })
+        fetch(BRIDGE_URL + '/enviar-archivo', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contacto: contactoActual, telefono: telefonoActual, base64: base64, mimetype: file.type || 'application/octet-stream', filename: file.name }) })
+        .then(function(r) { return r.json(); })
         .then(function(data) {
           if (data.status === 'ok') {
             mostrarToast('✓ ' + file.name + ' enviado');
-            var ct = document.getElementById('chatMessages'), ah = new Date();
-            var hr = ah.getHours().toString().padStart(2,'0') + ':' + ah.getMinutes().toString().padStart(2,'0');
+            var ct = document.getElementById('chatMessages'), ah = new Date(), hr = ah.getHours().toString().padStart(2,'0') + ':' + ah.getMinutes().toString().padStart(2,'0');
             var d = document.createElement('div');
             d.innerHTML = '<div class="message-bubble message-outgoing"><div class="message-text" style="color:#99BEB7;font-size:12px;">📎 ' + file.name + ' ✓ ' + hr + '</div></div><div class="clearfix"></div>';
             ct.appendChild(d); ct.scrollTop = ct.scrollHeight;
@@ -788,7 +791,7 @@
       reader.onerror = function() { mostrarToast('❌ Error leyendo el archivo'); input.value = ''; };
       reader.readAsDataURL(file);
     }
-    
+
     function pedirIA() {
       if (!contactoActual) return;
       var btn = document.getElementById('btnIA'); btn.textContent = '⏳'; btn.disabled = true;
@@ -800,10 +803,10 @@
         else mostrarToast('Error IA: ' + r.respuesta);
       }).catch(function() { btn.textContent = 'IA'; btn.disabled = false; mostrarToast('Error conexión'); });
     }
-    
+
     var mensajeParaGuardar = "";
     function mostrarToast(txt) { var t = document.createElement('div'); t.className='toast-notification'; t.style.background=appColor; t.textContent=txt; document.body.appendChild(t); setTimeout(function(){t.remove();},3000); }
-    
+
     function prepararGuardar(msg) {
       mensajeParaGuardar = msg;
       var o = document.createElement('div'); o.className = 'modal-overlay';
@@ -811,9 +814,9 @@
       document.body.appendChild(o); document.getElementById('modalInput').focus();
       document.getElementById('modalInput').addEventListener('keypress', function(e) { if (e.key==='Enter') confirmarGuardar(); });
     }
-    function confirmarGuardar() { var i=document.getElementById('modalInput'), r=i?i.value.trim():''; cerrarModal(); if(r) api("guardarRespuestaModelo",{mensaje:mensajeParaGuardar,respuesta:r}).then(function(x){mostrarToast('✓ Guardada ('+x.status+')');}); }
+    function confirmarGuardar() { var i=document.getElementById('modalInput'), r=i?i.value.trim():''; cerrarModal(); if(r) api("guardarRespuestaModelo",{mensaje:mensajeParaGuardar,respuesta:r}).then(function(x){mostrarToast('✓ Guardada ('+x.status+')');}) ; }
     function cerrarModal() { var o=document.querySelector('.modal-overlay'); if(o) o.remove(); }
-    
+
     var todosContactosCache = null;
     function mostrarContactosNuevo() {
       var o=document.querySelector('.modal-overlay'); if(o){o.remove();return;}
@@ -823,13 +826,9 @@
       if(todosContactosCache) renderContactosNuevo(todosContactosCache); else api("getTodosContactos").then(function(d){todosContactosCache=d;renderContactosNuevo(d);});
       document.getElementById('buscarContactoNuevo').focus();
     }
-    function renderContactosNuevo(cs) {
-      var l=document.getElementById('listaContactosNuevo'); if(!l)return; var h='';
-      cs.forEach(function(c){ h+='<div class="contactos-panel-item" onclick="iniciarChatNuevo(\''+c.nombre.replace(/'/g,"\\'")+'\',\''+(c.telefono||'').replace(/'/g,"\\'")+'\')"><div><div class="contactos-panel-nombre">'+c.alias+'</div>'+(c.telefono?'<span class="contactos-panel-tel">'+c.telefono+'</span>':'<span class="contactos-panel-sin-tel">Sin tel</span>')+'</div></div>'; });
-      l.innerHTML = h || '<div class="loading">No hay contactos</div>';
-    }
+    function renderContactosNuevo(cs) { var l=document.getElementById('listaContactosNuevo'); if(!l)return; var h=''; cs.forEach(function(c){ h+='<div class="contactos-panel-item" onclick="iniciarChatNuevo(\''+c.nombre.replace(/'/g,"\\'")+'\',\''+(c.telefono||'').replace(/'/g,"\\'")+'\')"><div><div class="contactos-panel-nombre">'+c.alias+'</div>'+(c.telefono?'<span class="contactos-panel-tel">'+c.telefono+'</span>':'<span class="contactos-panel-sin-tel">Sin tel</span>')+'</div></div>'; }); l.innerHTML = h || '<div class="loading">No hay contactos</div>'; }
     function filtrarContactosNuevo() { if(!todosContactosCache)return; var f=document.getElementById('buscarContactoNuevo').value.toLowerCase(); renderContactosNuevo(todosContactosCache.filter(function(c){return c.nombre.toLowerCase().indexOf(f)>-1||c.alias.toLowerCase().indexOf(f)>-1||c.telefono.indexOf(f)>-1;})); }
-    
+
     function iniciarChatNuevo(contacto, telefono) {
       cerrarModal(); if(!telefono){mostrarToast('Sin teléfono');return;}
       contactoActual=contacto; telefonoActual=telefono;
@@ -841,37 +840,35 @@
       document.getElementById('chatAvatar').textContent=(c?c.alias:contacto).charAt(0).toUpperCase();
       document.getElementById('chatStatus').textContent='Nueva conversación';
       document.getElementById('chatPhone').textContent=telefono;
-      estadoActual = "Nuevo"; actualizarBtnEstado("Nuevo");
+      estadoActual="Nuevo"; actualizarBtnEstado("Nuevo");
       document.getElementById('chatMessages').innerHTML='<div class="loading" style="color:#8696A0;">Escribí un mensaje para iniciar la conversación</div>';
       document.getElementById('suggestionsBar').innerHTML='';
       document.getElementById('messageInput').focus();
     }
-    
+
     function toggleAutoIA() {
       autoIAactivo=!autoIAactivo; var b=document.getElementById('btnAutoIA');
       if(autoIAactivo){b.style.background='#7C3AED';b.style.color='white';b.style.borderColor='#7C3AED';mostrarToast('🤖 Auto IA activada');}
       else{b.style.background='none';b.style.color='#8696A0';b.style.borderColor='#2A3942';mostrarToast('🤖 Auto IA desactivada');}
       api("setAutoIA",{valor:autoIAactivo.toString()});
     }
-    
+
     function sincTelefonos() {
       var o=document.createElement('div'); o.className='modal-overlay';
       o.innerHTML='<div class="modal-box"><div class="modal-title">📱 Sincronizar</div><div class="modal-subtitle">Buscar teléfonos en Google Contacts.</div><div class="modal-buttons"><button class="modal-btn modal-btn-cancel" onclick="cerrarModal()">Cancelar</button><button class="modal-btn modal-btn-ok" onclick="confirmarSync()">Sincronizar</button></div></div>';
       document.body.appendChild(o);
     }
     function confirmarSync() { cerrarModal(); var b=document.getElementById('btnSync'); b.textContent='⏳'; b.disabled=true; api("sincronizarTelefonos").then(function(r){b.textContent='📱';b.disabled=false;mostrarToast(r.actualizados+' actualizados');}).catch(function(){b.textContent='📱';b.disabled=false;mostrarToast('Error');}); }
-    
+
     setInterval(function() {
       api("getContactos").then(function(d) { contactosGlobal=d; if(document.getElementById('searchInput').value==='') renderContactos(d); else filtrarContactos(); });
       if(contactoActual) api("getMensajesPorContacto",{contacto:contactoActual}).then(function(mensajes) {
-      var totalActual = document.querySelectorAll('#chatMessages .message-bubble').length;
-      if (mensajes.length !== totalActual) {
-      renderMensajes(mensajes);
-      }
-     });
+        var totalActual = document.querySelectorAll('#chatMessages .message-bubble').length;
+        if (mensajes.length !== totalActual) renderMensajes(mensajes);
+      });
       cargarAlertas();
     }, 15000);
-    
+
     function volverAContactos() { document.getElementById('appContainer').classList.remove('chat-open'); }
   </script>
 </body>
