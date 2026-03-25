@@ -865,7 +865,8 @@
     function colorFecha(fechaStr) {
   if (!fechaStr) return '#8696A0';
   var hoy = new Date(); hoy.setHours(0,0,0,0);
-  var f = new Date(fechaStr); f.setHours(0,0,0,0);
+  var p = fechaStr.split('-');
+  var f = new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2]));
   if (f < hoy) return '#E74C3C';
   if (f.getTime() === hoy.getTime()) return '#F39C12';
   return '#00A884';
@@ -873,8 +874,8 @@
 
 function formatFechaCorta(fechaStr) {
   if (!fechaStr) return '';
-  var f = new Date(fechaStr);
-  return f.getDate().toString().padStart(2,'0') + '/' + (f.getMonth()+1).toString().padStart(2,'0') + '/' + f.getFullYear();
+  var p = fechaStr.split('-');
+  return p[2] + '/' + p[1] + '/' + p[0];
 }
 
     setInterval(function() {
