@@ -835,26 +835,45 @@
     function renderContactosNuevo(cs) { var l=document.getElementById('listaContactosNuevo'); if(!l)return; var h=''; cs.forEach(function(c){ h+='<div class="contactos-panel-item" onclick="iniciarChatNuevo(\''+c.nombre.replace(/'/g,"\\'")+'\',\''+(c.telefono||'').replace(/'/g,"\\'")+'\')"><div><div class="contactos-panel-nombre">'+c.alias+'</div>'+(c.telefono?'<span class="contactos-panel-tel">'+c.telefono+'</span>':'<span class="contactos-panel-sin-tel">Sin tel</span>')+'</div></div>'; }); l.innerHTML = h || '<div class="loading">No hay contactos</div>'; }
     function filtrarContactosNuevo() { if(!todosContactosCache)return; var f=document.getElementById('buscarContactoNuevo').value.toLowerCase(); renderContactosNuevo(todosContactosCache.filter(function(c){return c.nombre.toLowerCase().indexOf(f)>-1||c.alias.toLowerCase().indexOf(f)>-1||c.telefono.indexOf(f)>-1;})); }
 
-    function iniciarChatNuevo(contacto, telefono) {
-      cerrarModal(); if(!telefono){mostrarToast('Sin teléfono');return;}
-      contactoActual=contacto; telefonoActual=telefono;
-      document.getElementById('welcomeScreen').style.display='none';
-      document.getElementById('activeChat').style.display='flex';
-      document.getElementById('appContainer').classList.add('chat-open');
-      var c=todosContactosCache?todosContactosCache.find(function(x){return x.nombre===contacto;}):null;
-      document.getElementById('chatName').textContent=c?c.alias:contacto;
-      document.getElementById('chatAvatar').textContent=(c?c.alias:contacto).charAt(0).toUpperCase();
-      document.getElementById('chatStatus').textContent='Nueva conversación';
-      document.getElementById('chatPhone').textContent=telefono;
-      estadoActual="Nuevo"; actualizarBtnEstado("Nuevo");
-      document.getElementById('chatMessages').innerHTML='<div class="loading"><div class="spinner"></div>Cargando...</div>';
-      document.getElementById('suggestionsBar').innerHTML='';
-      document.getElementById('messageInput').focus();
-      api("getMensajesPorContacto", { contacto: contacto }).then(function(msgs) {
-      if (msgs.length > 0) renderMensajes(msgs);
-       else document.getElementById('chatMessages').innerHTML='<div class="loading" style="color:#8696A0;">Escribí un mensaje para iniciar la conversación</div>';
-      });
-    }
+function iniciarChatNuevo(contacto, telefono) {
+  cerrarModal(); if(!telefono){mostrarToast('Sin teléfono');return;}
+  contactoActual=contacto; telefonoActual=telefono;
+  document.getElementById('welcomeScreen').style.display='none';
+  document.getElementById('activeChat').style.display='flex';
+  document.getElementById('appContainer').classList.add('chat-open');
+  var c=todosContactosCache?todosContactosCache.find(function(x){return x.nombre===contacto;}):null;
+  document.getElementById('chatName').textContent=c?c.alias:contacto;
+  document.getElementById('chatAvatar').textContent=(c?c.alias:contacto).charAt(0).toUpperCase();
+  document.getElementById('chatStatus').textContent='Nueva conversación';
+  document.getElementById('chatPhone').textContent=telefono;
+  estadoActual="Nuevo"; actualizarBtnEstado("Nuevo");
+
+  // Agregar a contactosGlobal si no existe
+  if (!contactosGlobal.find(function(x){return x.nombre===contacto;})) {
+    contactosGlobal.unshift({
+      nombre: contacto,
+      alias: c ? c.alias : contacto,
+      telefono: telefono,
+      ultimoMensaje: '',
+      ultimaFecha: '',
+      timestamp: Date.now(),
+      totalMensajes: 0,
+      archivado: false,
+      fijado: false,
+      estado: 'Nuevo',
+      fechaProxContacto: ''
+    });
+    renderContactos(contactosGlobal);
+  }
+
+  document.getElementById('chatMessages').innerHTML='<div class="loading"><div class="spinner"></div>Cargando...</div>';
+  document.getElementById('suggestionsBar').innerHTML='';
+  document.getElementById('messageInput').focus();
+  api("getMensajesPorContacto", { contacto: contacto }).then(function(msgs) {
+    if (msgs.length > 0) renderMensajes(msgs);
+    else document.getElementById('chatMessages').innerHTML='<div class="loading" style="color:#8696A0;">Escribí un mensaje para iniciar la conversación</div>';
+  });
+}
 
     function toggleAutoIA() {
       autoIAactivo=!autoIAactivo; var b=document.getElementById('btnAutoIA');
