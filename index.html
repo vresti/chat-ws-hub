@@ -7,7 +7,6 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #111B21; height: 100%; overflow: hidden; width: 100%; }
 
-    /* ── LOGIN ── */
     .login-screen { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #111B21; display: flex; align-items: center; justify-content: center; z-index: 9999; }
     .login-box { background: #202C33; border-radius: 16px; padding: 40px; width: 360px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); text-align: center; }
     .login-icon { font-size: 48px; margin-bottom: 16px; }
@@ -29,7 +28,7 @@
     .sidebar-header .badge { border-radius: 20px; padding: 2px 10px; font-size: 12px; font-weight: 600; color: white; }
     .sidebar-empresa { color: #8696A0; font-size: 11px; margin-top: 2px; white-space: nowrap; }
     .sidebar-header-right { display: flex; align-items: center; gap: 2px; }
-    .btn-sync, .btn-clean { background: none; border: 1px solid #2A3942; color: #8696A0; border-radius: 6px; padding: 2px 4px; font-size: 12px; cursor: pointer; transition: all 0.2s; min-width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; } 
+    .btn-sync, .btn-clean { background: none; border: 1px solid #2A3942; color: #8696A0; border-radius: 6px; padding: 2px 4px; font-size: 12px; cursor: pointer; transition: all 0.2s; min-width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
     .btn-sync:hover, .btn-clean:hover { background: #2A3942; color: #E9EDEF; }
     .btn-alertas { background: none; border: 1px solid #2A3942; color: #8696A0; border-radius: 6px; padding: 2px 4px; font-size: 12px; cursor: pointer; transition: all 0.2s; min-width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; position: relative; }
     .btn-alertas:hover { background: #2A3942; color: #E9EDEF; }
@@ -70,7 +69,6 @@
     .estado-selector { background: none; border: 1px solid #2A3942; color: #8696A0; border-radius: 12px; padding: 3px 8px; font-size: 11px; cursor: pointer; margin-left: 8px; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; }
     .estado-selector:hover { background: #2A3942; }
 
-    /* ── FICHA DEL CONTACTO ── */
     .ficha-panel { position: fixed; top: 0; right: 0; width: 360px; height: 100%; background: #111B21; border-left: 1px solid #2A3942; z-index: 500; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.3s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.4); }
     .ficha-panel.open { transform: translateX(0); }
     .ficha-header { background: #202C33; padding: 16px; border-bottom: 1px solid #2A3942; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
@@ -98,7 +96,6 @@
     .ficha-row { display: flex; gap: 8px; }
     .ficha-row .ficha-field { flex: 1; }
 
-    /* ── PANEL ALERTAS ── */
     .alertas-panel { position: fixed; top: 0; right: 0; width: 320px; height: 100%; background: #202C33; border-left: 1px solid #2A3942; z-index: 500; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.3s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.3); }
     .alertas-panel.open { transform: translateX(0); }
     .alertas-header { padding: 16px; border-bottom: 1px solid #2A3942; display: flex; align-items: center; justify-content: space-between; }
@@ -123,14 +120,13 @@
     .message-bubble { max-width: 65%; padding: 6px 8px 6px 9px; margin-bottom: 3px; border-radius: 8px; position: relative; word-wrap: break-word; line-height: 1.4; clear: both; }
     .message-incoming { background: #202C33; float: left; border-top-left-radius: 0; }
     .message-outgoing { background: #005C4B; float: right; border-top-right-radius: 0; }
-    .message-text { color: #E9EDEF; font-size: 14px; }
+    .message-text { color: #E9EDEF; font-size: 14px; white-space: pre-wrap; }
     .message-time { color: #8696A0; font-size: 11px; float: right; margin-left: 12px; margin-top: 4px; }
     .message-outgoing .message-time { color: #99BEB7; }
     .message-app { font-size: 11px; font-weight: 600; margin-bottom: 2px; }
     .message-header-row { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
     .message-header-row .message-app { margin-bottom: 0; display: inline; }
     .message-header-row .message-time { float: none; margin: 0; }
-    .message-header-row .btn-save-response { margin-top: 0; }
     .message-response { background: #1A3A2A; border-left: 3px solid #00A884; padding: 6px 10px; margin-top: 4px; border-radius: 4px; font-size: 13px; color: #82E0AA; }
     .message-response-label { font-size: 11px; color: #00A884; font-weight: 600; margin-bottom: 2px; }
     .message-response-ia { background: #2A1A3A; border-left: 3px solid #7C3AED; padding: 6px 10px; margin-top: 4px; border-radius: 4px; font-size: 13px; color: #C4A8E0; }
@@ -205,7 +201,7 @@
       .sidebar-empresa { font-size: 9px; }
       .sidebar-header-right { position: absolute; right: 8px; top: 4px; gap: 2px; }
       .sidebar-title-block { max-width: 55%; }
-      .btn-sync, .btn-clean, .btn-alertas { min-width: 26px; height: 26px; font-size: 10px; padding: 2px 4px; }
+      .btn-sync, .btn-clean, .btn-alertas { min-width: 24px; height: 24px; font-size: 10px; padding: 1px 3px; }
       .search-box { padding: 4px 8px; }
       .search-box input { font-size: 15px; padding: 8px 12px; }
       .contact-item { padding: 8px 12px; min-height: 56px; }
@@ -253,7 +249,6 @@
 </head>
 <body>
 
-  <!-- LOGIN -->
   <div class="login-screen" id="loginScreen">
     <div class="login-box">
       <div class="login-icon">💬</div>
@@ -265,7 +260,6 @@
     </div>
   </div>
 
-  <!-- APP -->
   <div class="app-container" id="appContainer">
     <div class="sidebar">
       <div class="sidebar-header">
@@ -279,7 +273,7 @@
           </div>
         </div>
         <div class="sidebar-header-right">
-          <button class="btn-alertas" id="btnAlertas" onclick="toggleAlertas()" title="Alertas de seguimiento">
+          <button class="btn-alertas" id="btnAlertas" onclick="toggleAlertas()" title="Alertas">
             🔔<span class="alertas-count" id="alertasCount" style="display:none">0</span>
           </button>
           <button class="btn-clean" id="btnClean" onclick="limpiarHistorial()">🧹</button>
@@ -305,7 +299,7 @@
       <div id="activeChat" style="display:none; flex-direction:column; flex:1; overflow:hidden; min-height:0;">
         <div class="chat-header">
           <button class="btn-back" onclick="volverAContactos()">←</button>
-          <div class="contact-avatar" id="chatAvatar" onclick="abrirFichaActual()" style="cursor:pointer;" title="Ver ficha del contacto">V</div>
+          <div class="contact-avatar" id="chatAvatar" onclick="abrirFichaActual()" style="cursor:pointer;" title="Ver ficha">V</div>
           <div class="chat-header-info">
             <div class="chat-header-name" id="chatName">Contacto</div>
             <div class="chat-header-status" id="chatStatus">mensajes</div>
@@ -326,7 +320,6 @@
     </div>
   </div>
 
-  <!-- FICHA DEL CONTACTO -->
   <div class="ficha-panel" id="fichaPanel">
     <div class="ficha-header">
       <div class="ficha-avatar" id="fichaAvatar">V</div>
@@ -344,7 +337,6 @@
     </div>
   </div>
 
-  <!-- PANEL ALERTAS -->
   <div class="alertas-panel" id="alertasPanel">
     <div class="alertas-header">
       <span class="alertas-title">🔔 Seguimiento pendiente</span>
@@ -368,9 +360,7 @@
     var contactosGlobal = [], contactoActual = "", telefonoActual = "", timestampActual = 0;
     var mostrarArchivados = false, mensajesVistos = {}, appColor = "#00A884", configData = {}, autoIAactivo = false;
     var mediaCache = {}, usuarioActual = { email: "", nombre: "", rol: "" }, estadoActual = "Nuevo";
-    var fichaContactoActual = "";
-    var enviandoMensaje = false;
-
+    var fichaContactoActual = "", enviandoMensaje = false;
 
     var ESTADOS = [
       { valor: "Nuevo",            color: "#8696A0", emoji: "⚪" },
@@ -381,17 +371,28 @@
       { valor: "Compra",           color: "#00A884", emoji: "🟢" },
       { valor: "Perdido",          color: "#374045", emoji: "⚫" }
     ];
-
     var TIPO_PROP = ["", "Lote", "Departamento", "Macrolote", "Casa", "PH", "Casa con pileta", "Otro"];
     var ORIGENES  = ["", "WhatsApp", "Instagram", "Referido", "Web", "Otro"];
 
-    function getEstadoInfo(valor) {
-      return ESTADOS.find(function(e) { return e.valor === valor; }) || ESTADOS[0];
+    function getEstadoInfo(valor) { return ESTADOS.find(function(e) { return e.valor === valor; }) || ESTADOS[0]; }
+
+    function colorFecha(fechaStr) {
+      if (!fechaStr) return '#8696A0';
+      var hoy = new Date(); hoy.setHours(0,0,0,0);
+      var p = fechaStr.split('-');
+      var f = new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2]));
+      if (f < hoy) return '#E74C3C';
+      if (f.getTime() === hoy.getTime()) return '#F39C12';
+      return '#00A884';
+    }
+    function formatFechaCorta(fechaStr) {
+      if (!fechaStr) return '';
+      var p = fechaStr.split('-');
+      return p[2] + '/' + p[1] + '/' + p[0];
     }
 
     // ── LOGIN ──
     document.getElementById('loginEmail').addEventListener('keypress', function(e) { if (e.key === 'Enter') hacerLogin(); });
-
     function hacerLogin() {
       var email = document.getElementById('loginEmail').value.trim();
       if (!email) { document.getElementById('loginError').textContent = 'Ingresá tu email'; return; }
@@ -401,9 +402,7 @@
           usuarioActual = { email: email, nombre: data.nombre, rol: data.rol };
           document.getElementById('loginScreen').style.display = 'none';
           iniciarApp();
-        } else {
-          document.getElementById('loginError').textContent = '❌ Email no autorizado';
-        }
+        } else { document.getElementById('loginError').textContent = '❌ Email no autorizado'; }
       }).catch(function() { document.getElementById('loginError').textContent = '❌ Error de conexión'; });
     }
 
@@ -425,6 +424,25 @@
       cargarAlertas();
     }
 
+    // ── HISTORIAL ──
+    function cargarHistorial(telefono, contacto, callback) {
+      if (!telefono) { callback(null); return; }
+      fetch(BRIDGE_URL + '/get-historial?telefono=' + encodeURIComponent(telefono))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.status === 'ok' && data.mensajes.length > 0) {
+          // Enriquecer con propuestas del Sheet
+          api("getMensajesPorContacto", { contacto: contacto }).then(function(sheetMsgs) {
+            var sheetMap = {};
+            sheetMsgs.forEach(function(m) { if (m.respuestaPropuesta) sheetMap[m.mensaje] = m.respuestaPropuesta; });
+            data.mensajes.forEach(function(m) { m.respuestaPropuesta = sheetMap[m.mensaje] || ''; });
+            callback(data.mensajes);
+          }).catch(function() { callback(data.mensajes); });
+        } else { callback(null); }
+      })
+      .catch(function() { callback(null); });
+    }
+
     // ── FICHA ──
     function abrirFicha(contacto) {
       event && event.stopPropagation();
@@ -443,55 +461,29 @@
         else document.getElementById('fichaBody').innerHTML = '<div class="loading" style="color:#ff6b6b;">Error al cargar</div>';
       });
     }
-
-    function abrirFichaActual() {
-      if (contactoActual) abrirFicha(contactoActual);
-    }
-
-    function cerrarFicha() {
-      document.getElementById('fichaPanel').classList.remove('open');
-    }
+    function abrirFichaActual() { if (contactoActual) abrirFicha(contactoActual); }
+    function cerrarFicha() { document.getElementById('fichaPanel').classList.remove('open'); }
 
     function renderFicha(d) {
       var html = '';
-
-      // Datos básicos
-      html += '<div class="ficha-section">';
-      html += '<div class="ficha-section-title">👤 Datos básicos</div>';
+      html += '<div class="ficha-section"><div class="ficha-section-title">👤 Datos básicos</div>';
       html += '<div class="ficha-field"><div class="ficha-label">Alias / Nombre de trato</div><input class="ficha-input" id="f_alias" value="' + esc(d.alias) + '" placeholder="Como lo llamás..."></div>';
-      html += '<div class="ficha-field"><div class="ficha-label">Email</div><input class="ficha-input" id="f_email" type="email" value="' + esc(d.email) + '" placeholder="email@..."></div>';
-      html += '</div>';
-
-      // Perfil comercial
-      html += '<div class="ficha-section">';
-      html += '<div class="ficha-section-title">🏡 Perfil comercial</div>';
-
+      html += '<div class="ficha-field"><div class="ficha-label">Email</div><input class="ficha-input" id="f_email" type="email" value="' + esc(d.email) + '" placeholder="email@..."></div></div>';
+      html += '<div class="ficha-section"><div class="ficha-section-title">🏡 Perfil comercial</div>';
       html += '<div class="ficha-field"><div class="ficha-label">Tipo de propiedad</div><select class="ficha-select" id="f_tipoProp">';
       TIPO_PROP.forEach(function(t) { html += '<option value="' + t + '"' + (d.tipoProp === t ? ' selected' : '') + '>' + (t || '— Seleccionar —') + '</option>'; });
       html += '</select></div>';
-
       html += '<div class="ficha-field"><div class="ficha-label">Qué está buscando</div><input class="ficha-input" id="f_buscando" value="' + esc(d.buscando) + '" placeholder="Ej: lote con frente al río..."></div>';
-
-      html += '<div class="ficha-row">';
-      html += '<div class="ficha-field"><div class="ficha-label">Superficie (m²)</div><input class="ficha-input" id="f_superficie" value="' + esc(d.superficie) + '" placeholder="Ej: 600-900"></div>';
-      html += '<div class="ficha-field"><div class="ficha-label">Presupuesto (USD)</div><input class="ficha-input" id="f_presupuesto" value="' + esc(d.presupuesto) + '" placeholder="Ej: 80.000"></div>';
-      html += '</div>';
-
-      html += '<div class="ficha-field"><div class="ficha-label">Ubicación de interés</div><input class="ficha-input" id="f_ubicacion" value="' + esc(d.ubicacion) + '" placeholder="Ej: frente al lago, zona norte..."></div>';
-
+      html += '<div class="ficha-row"><div class="ficha-field"><div class="ficha-label">Superficie (m²)</div><input class="ficha-input" id="f_superficie" value="' + esc(d.superficie) + '" placeholder="Ej: 600-900"></div>';
+      html += '<div class="ficha-field"><div class="ficha-label">Presupuesto (USD)</div><input class="ficha-input" id="f_presupuesto" value="' + esc(d.presupuesto) + '" placeholder="Ej: 80.000"></div></div>';
+      html += '<div class="ficha-field"><div class="ficha-label">Ubicación de interés</div><input class="ficha-input" id="f_ubicacion" value="' + esc(d.ubicacion) + '" placeholder="Ej: frente al lago..."></div>';
       html += '<div class="ficha-field"><div class="ficha-label">Cómo llegó</div><select class="ficha-select" id="f_origen">';
       ORIGENES.forEach(function(o) { html += '<option value="' + o + '"' + (d.origen === o ? ' selected' : '') + '>' + (o || '— Seleccionar —') + '</option>'; });
-      html += '</select></div>';
-      html += '</div>';
-
-      // Seguimiento
-      html += '<div class="ficha-section">';
-      html += '<div class="ficha-section-title">📅 Seguimiento</div>';
+      html += '</select></div></div>';
+      html += '<div class="ficha-section"><div class="ficha-section-title">📅 Seguimiento</div>';
       html += '<div class="ficha-field"><div class="ficha-label">Próxima acción</div><input class="ficha-input" id="f_proxAccion" value="' + esc(d.proxAccion) + '" placeholder="Ej: Llamar para coordinar visita..."></div>';
       html += '<div class="ficha-field"><div class="ficha-label">Fecha próximo contacto</div><input class="ficha-input" id="f_fecha" type="date" value="' + esc(d.fechaProxContacto) + '"></div>';
-      html += '<div class="ficha-field"><div class="ficha-label">Notas internas</div><textarea class="ficha-textarea" id="f_notas" placeholder="Observaciones, detalles de la conversación...">' + esc(d.notas) + '</textarea></div>';
-      html += '</div>';
-
+      html += '<div class="ficha-field"><div class="ficha-label">Notas internas</div><textarea class="ficha-textarea" id="f_notas" placeholder="Observaciones...">' + esc(d.notas) + '</textarea></div></div>';
       document.getElementById('fichaBody').innerHTML = html;
     }
 
@@ -500,17 +492,17 @@
     function guardarFicha() {
       if (!fichaContactoActual) return;
       var datos = {
-        alias:             document.getElementById('f_alias').value.trim(),
-        email:             document.getElementById('f_email').value.trim(),
-        tipoProp:          document.getElementById('f_tipoProp').value,
-        buscando:          document.getElementById('f_buscando').value.trim(),
-        superficie:        document.getElementById('f_superficie').value.trim(),
-        presupuesto:       document.getElementById('f_presupuesto').value.trim(),
-        ubicacion:         document.getElementById('f_ubicacion').value.trim(),
-        origen:            document.getElementById('f_origen').value,
-        proxAccion:        document.getElementById('f_proxAccion').value.trim(),
+        alias: document.getElementById('f_alias').value.trim(),
+        email: document.getElementById('f_email').value.trim(),
+        tipoProp: document.getElementById('f_tipoProp').value,
+        buscando: document.getElementById('f_buscando').value.trim(),
+        superficie: document.getElementById('f_superficie').value.trim(),
+        presupuesto: document.getElementById('f_presupuesto').value.trim(),
+        ubicacion: document.getElementById('f_ubicacion').value.trim(),
+        origen: document.getElementById('f_origen').value,
+        proxAccion: document.getElementById('f_proxAccion').value.trim(),
         fechaProxContacto: document.getElementById('f_fecha').value,
-        notas:             document.getElementById('f_notas').value.trim()
+        notas: document.getElementById('f_notas').value.trim()
       };
       var btn = document.querySelector('.ficha-save-btn');
       btn.textContent = '⏳ Guardando...'; btn.disabled = true;
@@ -518,7 +510,6 @@
         btn.textContent = '💾 Guardar ficha'; btn.disabled = false;
         if (r.status === 'ok') {
           mostrarToast('✓ Ficha guardada');
-          // Actualizar alias en la lista
           var c = contactosGlobal.find(function(x) { return x.nombre === fichaContactoActual; });
           if (c && datos.alias) { c.alias = datos.alias; renderContactos(contactosGlobal); }
           document.getElementById('fichaNombre').textContent = datos.alias || fichaContactoActual;
@@ -536,7 +527,6 @@
         renderAlertas(alertas);
       });
     }
-
     function renderAlertas(alertas) {
       var html = '';
       if (!alertas.length) { html = '<div class="loading" style="color:#00A884;">✓ Todo al día</div>'; }
@@ -549,14 +539,12 @@
       }); }
       document.getElementById('alertasList').innerHTML = html;
     }
-
     function toggleAlertas() {
       var panel = document.getElementById('alertasPanel');
       cerrarFicha();
       panel.classList.toggle('open');
       if (panel.classList.contains('open')) cargarAlertas();
     }
-
     function abrirChatDesdeAlerta(nombre) { toggleAlertas(); abrirChat(nombre); }
 
     // ── CONTACTOS ──
@@ -588,15 +576,15 @@
           '<div class="contact-info" onclick="abrirChat(\'' + esc2 + '\')">' +
             '<div class="contact-name">' + (c.alias || c.nombre) + '</div>' +
             '<div class="contact-last-msg">' + formatUltimoMensaje(c.ultimoMensaje) + '</div></div>' +
-       '<div class="contact-meta"><div class="contact-time">' + c.ultimaFecha + '</div>' +
-       '<div class="contact-meta-row">' +
-       '<div class="estado-dot" style="background:' + ei.color + '" title="' + ei.valor + '"></div>' +
-       '<div class="contact-count" style="background:' + appColor + '">' + c.totalMensajes + '</div>' +
-        (esNuevo ? '<div class="contact-new"></div>' : '') +
-       '<button class="' + (c.fijado ? 'btn-pin btn-pin-active' : 'btn-pin') + '" onclick="togglePin(\'' + esc2 + '\')">' + (c.fijado ? '📌' : '📍') + '</button>' +
-       '</div>' +
-       (c.fechaProxContacto ? '<div style="font-size:10px;color:' + colorFecha(c.fechaProxContacto) + ';margin-top:2px;">P.A.: ' + formatFechaCorta(c.fechaProxContacto) + '</div>' : '') +
-       '</div></div>';
+          '<div class="contact-meta"><div class="contact-time">' + c.ultimaFecha + '</div>' +
+          '<div class="contact-meta-row">' +
+          '<div class="estado-dot" style="background:' + ei.color + '" title="' + ei.valor + '"></div>' +
+          '<div class="contact-count" style="background:' + appColor + '">' + c.totalMensajes + '</div>' +
+          (esNuevo ? '<div class="contact-new"></div>' : '') +
+          '<button class="' + (c.fijado ? 'btn-pin btn-pin-active' : 'btn-pin') + '" onclick="togglePin(\'' + esc2 + '\')">' + (c.fijado ? '📌' : '📍') + '</button>' +
+          '</div>' +
+          (c.fechaProxContacto ? '<div style="font-size:10px;color:' + colorFecha(c.fechaProxContacto) + ';margin-top:2px;">P.A.: ' + formatFechaCorta(c.fechaProxContacto) + '</div>' : '') +
+          '</div></div>';
       });
       document.getElementById('contactsList').innerHTML = html || '<div class="loading">No hay contactos</div>';
       document.getElementById('totalContactos').textContent = totalActivos;
@@ -607,13 +595,11 @@
       var f = document.getElementById('searchInput').value.toLowerCase();
       renderContactos(contactosGlobal.filter(function(c) { return c.nombre.toLowerCase().indexOf(f) > -1 || c.alias.toLowerCase().indexOf(f) > -1; }));
     }
-
     function togglePin(contacto) {
       event.stopPropagation();
       var c = contactosGlobal.find(function(x) { return x.nombre === contacto; });
       if (c) api(c.fijado ? "desfijarContacto" : "fijarContacto", { contacto: contacto }).then(recargarContactos);
     }
-
     function limpiarHistorial() {
       var n = contactosGlobal.filter(function(c) { return c.fijado; }).length;
       var o = document.createElement('div'); o.className = 'modal-overlay';
@@ -645,7 +631,11 @@
       }
       document.getElementById('chatMessages').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando...</div>';
       document.getElementById('suggestionsBar').innerHTML = '';
-      api("getMensajesPorContacto", { contacto: contacto }).then(renderMensajes);
+      // Usar historial real de WhatsApp
+      cargarHistorial(telefonoActual, contacto, function(msgs) {
+        if (msgs) renderMensajes(msgs);
+        else api("getMensajesPorContacto", { contacto: contacto }).then(renderMensajes);
+      });
     }
 
     // ── PIPELINE ──
@@ -655,7 +645,6 @@
       btn.textContent = ei.emoji + ' ' + estado + ' ▾';
       btn.style.color = ei.color; btn.style.borderColor = ei.color;
     }
-
     function mostrarEstadoDropdown(event) {
       event.stopPropagation();
       var existing = document.querySelector('.estado-dropdown');
@@ -676,7 +665,6 @@
       document.body.appendChild(dd);
       setTimeout(function() { document.addEventListener('click', function handler() { dd.remove(); document.removeEventListener('click', handler); }); }, 10);
     }
-
     function cambiarEstado(nuevoEstado) {
       if (!contactoActual) return;
       api("setEstado", { contacto: contactoActual, estado: nuevoEstado }).then(function(r) {
@@ -700,7 +688,6 @@
       if (mediaCache[fileId]) return renderMediaHtml(tipo, fileId, mediaCache[fileId]);
       return '<div class="media-placeholder" data-fileid="' + fileId + '" data-mediatype="' + tipo + '">' + icons[tipo] + ' Cargando...</div>';
     }
-
     function renderMediaHtml(tipo, fileId, cacheData) {
       var src = 'data:' + cacheData.mimetype + ';base64,' + cacheData.base64;
       if (tipo === 'audio') return '<div class="media-audio"><audio controls src="' + src + '"></audio></div>';
@@ -708,7 +695,6 @@
       else if (tipo === 'video') return '<div class="media-audio"><video controls src="' + src + '" style="max-width:240px;border-radius:8px;"></video></div>';
       else return '<div class="media-doc"><a href="' + src + '" download="' + (cacheData.filename || 'archivo') + '">📄 ' + (cacheData.filename || 'Descargar documento') + '</a></div>';
     }
-
     function cargarMediaPendiente() {
       document.querySelectorAll('.media-placeholder').forEach(function(el) {
         var fileId = el.getAttribute('data-fileid'); var tipo = el.getAttribute('data-mediatype');
@@ -757,21 +743,21 @@
     function usarSugerencia(t) { document.getElementById('messageInput').value = t; document.getElementById('messageInput').focus(); }
 
     function enviarMensaje() {
-  var inp = document.getElementById('messageInput'), msg = inp.value.trim();
-  if (!msg || !contactoActual) return;
-  enviandoMensaje = true;
-  setTimeout(function() { enviandoMensaje = false; }, 20000);
-  var ct = document.getElementById('chatMessages'), ah = new Date();
-  var hr = ah.getHours().toString().padStart(2,'0') + ':' + ah.getMinutes().toString().padStart(2,'0');
-  var d = document.createElement('div');
-  d.innerHTML = '<div class="message-bubble message-outgoing"><div class="message-text">' + msg + '</div><div class="message-time">' + hr + ' ⏳</div></div><div class="clearfix"></div>';
-  ct.appendChild(d); ct.scrollTop = ct.scrollHeight; inp.value = '';
-  api("guardarRespuestaEnviada", { contacto: contactoActual, mensaje: msg }).then(function(r) {
-    var bs = ct.querySelectorAll('.message-outgoing'), u = bs[bs.length-1];
-    if (u) { var t = u.querySelector('.message-time'); if (t) t.textContent = hr + ' ✓ vía ' + r.app; }
-  });
-  mensajesVistos[contactoActual] = (mensajesVistos[contactoActual]||0) + 1;
-  }
+      var inp = document.getElementById('messageInput'), msg = inp.value.trim();
+      if (!msg || !contactoActual) return;
+      enviandoMensaje = true;
+      setTimeout(function() { enviandoMensaje = false; }, 20000);
+      var ct = document.getElementById('chatMessages'), ah = new Date();
+      var hr = ah.getHours().toString().padStart(2,'0') + ':' + ah.getMinutes().toString().padStart(2,'0');
+      var d = document.createElement('div');
+      d.innerHTML = '<div class="message-bubble message-outgoing"><div class="message-text">' + msg + '</div><div class="message-time">' + hr + ' ⏳</div></div><div class="clearfix"></div>';
+      ct.appendChild(d); ct.scrollTop = ct.scrollHeight; inp.value = '';
+      api("guardarRespuestaEnviada", { contacto: contactoActual, mensaje: msg }).then(function(r) {
+        var bs = ct.querySelectorAll('.message-outgoing'), u = bs[bs.length-1];
+        if (u) { var t = u.querySelector('.message-time'); if (t) t.textContent = hr + ' ✓ vía ' + r.app; }
+      });
+      mensajesVistos[contactoActual] = (mensajesVistos[contactoActual]||0) + 1;
+    }
 
     function enviarArchivo(input) {
       var file = input.files[0]; if (!file) return;
@@ -829,51 +815,52 @@
       o=document.createElement('div'); o.className='modal-overlay';
       o.innerHTML='<div class="contactos-panel"><button class="contactos-panel-close" onclick="cerrarModal()">✕</button><div class="contactos-panel-header"><div class="contactos-panel-title">📞 Iniciar conversación</div><input type="text" class="contactos-panel-search" id="buscarContactoNuevo" placeholder="Buscar..." oninput="filtrarContactosNuevo()"></div><div class="contactos-panel-list" id="listaContactosNuevo"><div class="loading"><div class="spinner"></div>Cargando...</div></div></div>';
       document.body.appendChild(o);
-      if(todosContactosCache) renderContactosNuevo(todosContactosCache); else api("getTodosContactos").then(function(d){todosContactosCache=d;renderContactosNuevo(d);});
+      if(todosContactosCache) {
+        renderContactosNuevo(todosContactosCache);
+      } else {
+        setTimeout(function() {
+          var l=document.getElementById('listaContactosNuevo');
+          if(l && l.innerHTML.indexOf('spinner') > -1) { l.innerHTML='<div class="loading" style="color:#8696A0;">Tocá de nuevo para reintentar</div>'; todosContactosCache=null; }
+        }, 10000);
+        api("getTodosContactos").then(function(d){ todosContactosCache=d; renderContactosNuevo(d); })
+        .catch(function() { var l=document.getElementById('listaContactosNuevo'); if(l) l.innerHTML='<div class="loading" style="color:#ff6b6b;">Error al cargar</div>'; });
+      }
       document.getElementById('buscarContactoNuevo').focus();
     }
     function renderContactosNuevo(cs) { var l=document.getElementById('listaContactosNuevo'); if(!l)return; var h=''; cs.forEach(function(c){ h+='<div class="contactos-panel-item" onclick="iniciarChatNuevo(\''+c.nombre.replace(/'/g,"\\'")+'\',\''+(c.telefono||'').replace(/'/g,"\\'")+'\')"><div><div class="contactos-panel-nombre">'+c.alias+'</div>'+(c.telefono?'<span class="contactos-panel-tel">'+c.telefono+'</span>':'<span class="contactos-panel-sin-tel">Sin tel</span>')+'</div></div>'; }); l.innerHTML = h || '<div class="loading">No hay contactos</div>'; }
     function filtrarContactosNuevo() { if(!todosContactosCache)return; var f=document.getElementById('buscarContactoNuevo').value.toLowerCase(); renderContactosNuevo(todosContactosCache.filter(function(c){return c.nombre.toLowerCase().indexOf(f)>-1||c.alias.toLowerCase().indexOf(f)>-1||c.telefono.indexOf(f)>-1;})); }
 
-function iniciarChatNuevo(contacto, telefono) {
-  cerrarModal(); if(!telefono){mostrarToast('Sin teléfono');return;}
-  contactoActual=contacto; telefonoActual=telefono;
-  document.getElementById('welcomeScreen').style.display='none';
-  document.getElementById('activeChat').style.display='flex';
-  document.getElementById('appContainer').classList.add('chat-open');
-  var c=todosContactosCache?todosContactosCache.find(function(x){return x.nombre===contacto;}):null;
-  document.getElementById('chatName').textContent=c?c.alias:contacto;
-  document.getElementById('chatAvatar').textContent=(c?c.alias:contacto).charAt(0).toUpperCase();
-  document.getElementById('chatStatus').textContent='Nueva conversación';
-  document.getElementById('chatPhone').textContent=telefono;
-  estadoActual="Nuevo"; actualizarBtnEstado("Nuevo");
+    function iniciarChatNuevo(contacto, telefono) {
+      cerrarModal(); if(!telefono){mostrarToast('Sin teléfono');return;}
+      contactoActual=contacto; telefonoActual=telefono;
+      document.getElementById('welcomeScreen').style.display='none';
+      document.getElementById('activeChat').style.display='flex';
+      document.getElementById('appContainer').classList.add('chat-open');
+      var c=todosContactosCache?todosContactosCache.find(function(x){return x.nombre===contacto;}):null;
+      document.getElementById('chatName').textContent=c?c.alias:contacto;
+      document.getElementById('chatAvatar').textContent=(c?c.alias:contacto).charAt(0).toUpperCase();
+      document.getElementById('chatStatus').textContent='Cargando...';
+      document.getElementById('chatPhone').textContent=telefono;
+      estadoActual="Nuevo"; actualizarBtnEstado("Nuevo");
 
-  // Agregar a contactosGlobal si no existe
-  if (!contactosGlobal.find(function(x){return x.nombre===contacto;})) {
-    contactosGlobal.unshift({
-      nombre: contacto,
-      alias: c ? c.alias : contacto,
-      telefono: telefono,
-      ultimoMensaje: '',
-      ultimaFecha: '',
-      timestamp: Date.now(),
-      totalMensajes: 0,
-      archivado: false,
-      fijado: false,
-      estado: 'Nuevo',
-      fechaProxContacto: ''
-    });
-    renderContactos(contactosGlobal);
-  }
+      if (!contactosGlobal.find(function(x){return x.nombre===contacto;})) {
+        contactosGlobal.unshift({ nombre: contacto, alias: c ? c.alias : contacto, telefono: telefono, ultimoMensaje: '', ultimaFecha: '', timestamp: Date.now(), totalMensajes: 0, archivado: false, fijado: false, estado: 'Nuevo', fechaProxContacto: '' });
+        renderContactos(contactosGlobal);
+      }
 
-  document.getElementById('chatMessages').innerHTML='<div class="loading"><div class="spinner"></div>Cargando...</div>';
-  document.getElementById('suggestionsBar').innerHTML='';
-  document.getElementById('messageInput').focus();
-  api("getMensajesPorContacto", { contacto: contacto }).then(function(msgs) {
-    if (msgs.length > 0) renderMensajes(msgs);
-    else document.getElementById('chatMessages').innerHTML='<div class="loading" style="color:#8696A0;">Escribí un mensaje para iniciar la conversación</div>';
-  });
-}
+      document.getElementById('chatMessages').innerHTML='<div class="loading"><div class="spinner"></div>Cargando...</div>';
+      document.getElementById('suggestionsBar').innerHTML='';
+      document.getElementById('messageInput').focus();
+      cargarHistorial(telefono, contacto, function(msgs) {
+        if (msgs && msgs.length > 0) {
+          renderMensajes(msgs);
+          document.getElementById('chatStatus').textContent = msgs.length + ' msgs';
+        } else {
+          document.getElementById('chatMessages').innerHTML='<div class="loading" style="color:#8696A0;">Escribí un mensaje para iniciar la conversación</div>';
+          document.getElementById('chatStatus').textContent='Nueva conversación';
+        }
+      });
+    }
 
     function toggleAutoIA() {
       autoIAactivo=!autoIAactivo; var b=document.getElementById('btnAutoIA');
@@ -888,29 +875,17 @@ function iniciarChatNuevo(contacto, telefono) {
       document.body.appendChild(o);
     }
     function confirmarSync() { cerrarModal(); var b=document.getElementById('btnSync'); b.textContent='⏳'; b.disabled=true; api("sincronizarTelefonos").then(function(r){b.textContent='📱';b.disabled=false;mostrarToast(r.actualizados+' actualizados');}).catch(function(){b.textContent='📱';b.disabled=false;mostrarToast('Error');}); }
-    
-    function colorFecha(fechaStr) {
-  if (!fechaStr) return '#8696A0';
-  var hoy = new Date(); hoy.setHours(0,0,0,0);
-  var p = fechaStr.split('-');
-  var f = new Date(parseInt(p[0]), parseInt(p[1])-1, parseInt(p[2]));
-  if (f < hoy) return '#E74C3C';
-  if (f.getTime() === hoy.getTime()) return '#F39C12';
-  return '#00A884';
-}
-
-function formatFechaCorta(fechaStr) {
-  if (!fechaStr) return '';
-  var p = fechaStr.split('-');
-  return p[2] + '/' + p[1] + '/' + p[0];
-}
 
     setInterval(function() {
       api("getContactos").then(function(d) { contactosGlobal=d; if(document.getElementById('searchInput').value==='') renderContactos(d); else filtrarContactos(); });
-      if(contactoActual) api("getMensajesPorContacto",{contacto:contactoActual}).then(function(mensajes) {
-        var totalActual = document.querySelectorAll('#chatMessages .message-bubble').length;
-        if (!enviandoMensaje && mensajes.length > totalActual) renderMensajes(mensajes);
-      });
+      if(contactoActual && !enviandoMensaje) {
+        cargarHistorial(telefonoActual, contactoActual, function(msgs) {
+          if (msgs) {
+            var totalActual = document.querySelectorAll('#chatMessages .message-bubble').length;
+            if (msgs.length > totalActual) renderMensajes(msgs);
+          }
+        });
+      }
       cargarAlertas();
     }, 15000);
 
