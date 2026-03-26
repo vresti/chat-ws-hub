@@ -369,6 +369,8 @@
     var mostrarArchivados = false, mensajesVistos = {}, appColor = "#00A884", configData = {}, autoIAactivo = false;
     var mediaCache = {}, usuarioActual = { email: "", nombre: "", rol: "" }, estadoActual = "Nuevo";
     var fichaContactoActual = "";
+    var enviandoMensaje = false;
+
 
     var ESTADOS = [
       { valor: "Nuevo",            color: "#8696A0", emoji: "⚪" },
@@ -755,19 +757,21 @@
     function usarSugerencia(t) { document.getElementById('messageInput').value = t; document.getElementById('messageInput').focus(); }
 
     function enviarMensaje() {
-      var inp = document.getElementById('messageInput'), msg = inp.value.trim();
-      if (!msg || !contactoActual) return;
-      var ct = document.getElementById('chatMessages'), ah = new Date();
-      var hr = ah.getHours().toString().padStart(2,'0') + ':' + ah.getMinutes().toString().padStart(2,'0');
-      var d = document.createElement('div');
-      d.innerHTML = '<div class="message-bubble message-outgoing"><div class="message-text">' + msg + '</div><div class="message-time">' + hr + ' ⏳</div></div><div class="clearfix"></div>';
-      ct.appendChild(d); ct.scrollTop = ct.scrollHeight; inp.value = '';
-      api("guardarRespuestaEnviada", { contacto: contactoActual, mensaje: msg }).then(function(r) {
-        var bs = ct.querySelectorAll('.message-outgoing'), u = bs[bs.length-1];
-        if (u) { var t = u.querySelector('.message-time'); if (t) t.textContent = hr + ' ✓ vía ' + r.app; }
-      });
-      mensajesVistos[contactoActual] = (mensajesVistos[contactoActual]||0) + 1;
-    }
+  var inp = document.getElementById('messageInput'), msg = inp.value.trim();
+  if (!msg || !contactoActual) return;
+  enviandoMensaje = true;
+  setTimeout(function() { enviandoMensaje = false; }, 20000);
+  var ct = document.getElementById('chatMessages'), ah = new Date();
+  var hr = ah.getHours().toString().padStart(2,'0') + ':' + ah.getMinutes().toString().padStart(2,'0');
+  var d = document.createElement('div');
+  d.innerHTML = '<div class="message-bubble message-outgoing"><div class="message-text">' + msg + '</div><div class="message-time">' + hr + ' ⏳</div></div><div class="clearfix"></div>';
+  ct.appendChild(d); ct.scrollTop = ct.scrollHeight; inp.value = '';
+  api("guardarRespuestaEnviada", { contacto: contactoActual, mensaje: msg }).then(function(r) {
+    var bs = ct.querySelectorAll('.message-outgoing'), u = bs[bs.length-1];
+    if (u) { var t = u.querySelector('.message-time'); if (t) t.textContent = hr + ' ✓ vía ' + r.app; }
+  });
+  mensajesVistos[contactoActual] = (mensajesVistos[contactoActual]||0) + 1;
+  }
 
     function enviarArchivo(input) {
       var file = input.files[0]; if (!file) return;
@@ -886,7 +890,7 @@ function formatFechaCorta(fechaStr) {
       api("getContactos").then(function(d) { contactosGlobal=d; if(document.getElementById('searchInput').value==='') renderContactos(d); else filtrarContactos(); });
       if(contactoActual) api("getMensajesPorContacto",{contacto:contactoActual}).then(function(mensajes) {
         var totalActual = document.querySelectorAll('#chatMessages .message-bubble').length;
-        if (mensajes.length > totalActual) renderMensajes(mensajes);
+        if (!enviandoMensaje && mensajes.length > totalActual) renderMensajes(mensajes);
       });
       cargarAlertas();
     }, 15000);
