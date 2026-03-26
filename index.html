@@ -69,6 +69,42 @@
     .estado-selector { background: none; border: 1px solid #2A3942; color: #8696A0; border-radius: 12px; padding: 3px 8px; font-size: 11px; cursor: pointer; margin-left: 8px; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; }
     .estado-selector:hover { background: #2A3942; }
 
+    /* ── BOTÓN STK ── */
+    .btn-stk { background: none; border: 1px solid #c9a227; color: #c9a227; border-radius: 6px; padding: 3px 6px; font-size: 10px; font-weight: 700; cursor: pointer; margin-left: 6px; transition: all 0.2s; flex-shrink: 0; white-space: nowrap; }
+    .btn-stk:hover { background: #c9a227; color: #111B21; }
+
+    /* ── PANEL STK ── */
+    .stk-panel { position: fixed; top: 60px; right: 0; width: 380px; height: calc(100% - 60px); background: #111B21; border-left: 1px solid #2A3942; z-index: 490; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.3s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.4); }
+    .stk-panel.open { transform: translateX(0); }
+    .stk-header { background: #202C33; padding: 12px 16px; border-bottom: 1px solid #2A3942; flex-shrink: 0; }
+    .stk-header-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .stk-title { color: #E9EDEF; font-size: 15px; font-weight: 500; }
+    .stk-close { background: none; border: none; color: #8696A0; font-size: 20px; cursor: pointer; }
+    .stk-search { width: 100%; padding: 8px 12px; border-radius: 8px; border: none; background: #2A3942; color: #E9EDEF; font-size: 13px; outline: none; }
+    .stk-search::placeholder { color: #8696A0; }
+    .stk-count { color: #8696A0; font-size: 11px; margin-top: 6px; }
+    .stk-list { flex: 1; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #374045 transparent; }
+    .stk-list::-webkit-scrollbar { width: 6px; }
+    .stk-list::-webkit-scrollbar-thumb { background: #374045; border-radius: 3px; }
+    .stk-item { padding: 12px 16px; border-bottom: 1px solid #202C33; cursor: pointer; transition: background 0.15s; }
+    .stk-item:hover { background: #202C33; }
+    .stk-item-titulo { color: #E9EDEF; font-size: 13px; font-weight: 500; }
+    .stk-item-precio { color: #c9a227; font-size: 13px; font-weight: 600; margin-top: 2px; }
+    .stk-item-detalle { color: #8696A0; font-size: 11px; margin-top: 3px; }
+
+    /* ── MODAL STK ── */
+    .stk-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #202C33; border-radius: 12px; width: 420px; max-width: 95vw; box-shadow: 0 8px 32px rgba(0,0,0,0.5); z-index: 1002; display: flex; flex-direction: column; max-height: 80vh; }
+    .stk-modal-header { padding: 16px; border-bottom: 1px solid #2A3942; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .stk-modal-title { color: #E9EDEF; font-size: 15px; font-weight: 500; }
+    .stk-modal-close { background: none; border: none; color: #8696A0; font-size: 20px; cursor: pointer; }
+    .stk-modal-body { padding: 16px; overflow-y: auto; flex: 1; }
+    .stk-ficha { background: #111B21; border-radius: 8px; padding: 14px; color: #E9EDEF; font-size: 13px; line-height: 1.8; white-space: pre-wrap; font-family: inherit; }
+    .stk-modal-footer { padding: 12px 16px; border-top: 1px solid #2A3942; display: flex; gap: 10px; flex-shrink: 0; }
+    .stk-btn-copiar { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #00A884; background: none; color: #00A884; font-size: 14px; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+    .stk-btn-copiar:hover { background: #00A884; color: white; }
+    .stk-btn-pegar { flex: 1; padding: 10px; border-radius: 8px; border: none; background: #00A884; color: white; font-size: 14px; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+    .stk-btn-pegar:hover { background: #02B898; }
+
     .ficha-panel { position: fixed; top: 0; right: 0; width: 360px; height: 100%; background: #111B21; border-left: 1px solid #2A3942; z-index: 500; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.3s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.4); }
     .ficha-panel.open { transform: translateX(0); }
     .ficha-header { background: #202C33; padding: 16px; border-bottom: 1px solid #2A3942; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
@@ -116,7 +152,7 @@
     .welcome-screen h2 { color: #E9EDEF; font-size: 28px; font-weight: 300; margin-bottom: 10px; }
     .welcome-screen p { color: #8696A0; font-size: 14px; text-align: center; max-width: 400px; line-height: 1.5; }
     .date-separator { text-align: center; margin: 16px 0; }
-    .date-separator span { background: #182229; color: #8696A0; padding: 5px 12px; border-radius: 8px; font-size: 12px; box-shadow: 0 1px 1px rgba(0,0,0,0.2); }
+    .date-separator span { background: #182229; color: #8696A0; padding: 5px 12px; border-radius: 8px; font-size: 12px; }
     .message-bubble { max-width: 65%; padding: 6px 8px 6px 9px; margin-bottom: 3px; border-radius: 8px; position: relative; word-wrap: break-word; line-height: 1.4; clear: both; }
     .message-incoming { background: #202C33; float: left; border-top-left-radius: 0; }
     .message-outgoing { background: #005C4B; float: right; border-top-right-radius: 0; }
@@ -137,7 +173,7 @@
     .media-doc a { color: #00A884; text-decoration: none; display: flex; align-items: center; gap: 6px; font-size: 13px; padding: 4px 0; }
     .media-doc a:hover { text-decoration: underline; }
     .clearfix { clear: both; }
-    .chat-input-area { background: #202C33; padding: 8px 10px; display: flex; align-items: center; gap: 6px; flex-shrink: 0; position: relative; }
+    .chat-input-area { background: #202C33; padding: 8px 10px; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
     .chat-input { flex: 1; padding: 10px 14px; border-radius: 8px; border: none; background: #2A3942; color: #E9EDEF; font-size: 14px; outline: none; font-family: inherit; min-width: 0; }
     .chat-input::placeholder { color: #8696A0; }
     .btn-send { width: 40px; height: 40px; border-radius: 50%; border: none; background: #00A884; color: white; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; flex-shrink: 0; }
@@ -216,14 +252,14 @@
       .chat-header-phone { font-size: 10px; margin-left: 4px; }
       .chat-header .contact-avatar { width: 28px; height: 28px; font-size: 12px; margin-right: 4px; }
       .chat-header-info { min-width: 0; }
-      .btn-back { width: 24px; height: 24px; font-size: 16px; margin-right: 0px; margin-left: -2px; }
+      .btn-back { width: 24px; height: 24px; font-size: 16px; margin-right: 0; margin-left: -2px; }
       .estado-selector { display: none; }
+      .btn-stk { font-size: 9px; padding: 2px 4px; }
       .chat-messages { padding: 6px 6px; }
       .message-bubble { max-width: 90%; padding: 4px 6px 4px 7px; margin-bottom: 2px; }
       .message-text { font-size: 13px; }
       .message-time { font-size: 10px; margin-top: 2px; }
       .message-app { font-size: 10px; }
-      .message-header-row { gap: 4px; }
       .message-response { font-size: 12px; padding: 4px 8px; margin-top: 3px; }
       .message-response-ia { font-size: 12px; padding: 4px 8px; margin-top: 3px; }
       .message-response-label { font-size: 9px; }
@@ -236,12 +272,13 @@
       .suggestions-bar { padding: 4px 8px; }
       .btn-suggestion { font-size: 11px; padding: 4px 10px; }
       .welcome-screen h2 { font-size: 22px; }
-      .welcome-screen p { font-size: 14px; }
       .media-audio audio { max-width: 100%; }
       .media-imagen img { max-width: 180px; }
       .contactos-panel { width: 90%; max-height: 80vh; }
       .alertas-panel { width: 100%; }
       .ficha-panel { width: 100%; }
+      .stk-panel { width: 100%; top: 0; height: 100%; }
+      .stk-modal { width: 95vw; }
     }
 
     .btn-back { display: none; width: 36px; height: 36px; border: none; background: none; color: #E9EDEF; font-size: 22px; cursor: pointer; margin-right: 4px; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -306,6 +343,7 @@
           </div>
           <div class="chat-header-phone" id="chatPhone"></div>
           <button class="estado-selector" id="btnEstado" onclick="mostrarEstadoDropdown(event)">● Nuevo ▾</button>
+          <button class="btn-stk" onclick="toggleStk()">STK</button>
         </div>
         <div class="chat-messages" id="chatMessages"></div>
         <div class="suggestions-bar" id="suggestionsBar"></div>
@@ -316,6 +354,39 @@
           <button class="btn-send" style="background:#E67E22;font-size:16px;" onclick="document.getElementById('fileInput').click()" title="Enviar archivo">📎</button>
           <button class="btn-send" style="background:#7C3AED;font-size:11px;" id="btnIA" onclick="pedirIA()">IA</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL STK -->
+  <div class="stk-panel" id="stkPanel">
+    <div class="stk-header">
+      <div class="stk-header-row">
+        <span class="stk-title">🏡 Stock de propiedades</span>
+        <button class="stk-close" onclick="toggleStk()">✕</button>
+      </div>
+      <input type="text" class="stk-search" id="stkSearch" placeholder="Buscar por precio, emprendimiento..." oninput="filtrarStk()">
+      <div class="stk-count" id="stkCount"></div>
+    </div>
+    <div class="stk-list" id="stkList">
+      <div class="loading"><div class="spinner"></div>Cargando...</div>
+    </div>
+  </div>
+
+  <!-- MODAL STK -->
+  <div id="stkModal" style="display:none;">
+    <div class="modal-overlay" onclick="cerrarStkModal()"></div>
+    <div class="stk-modal">
+      <div class="stk-modal-header">
+        <span class="stk-modal-title">🏡 Ficha de propiedad</span>
+        <button class="stk-modal-close" onclick="cerrarStkModal()">✕</button>
+      </div>
+      <div class="stk-modal-body">
+        <div class="stk-ficha" id="stkFichaTexto"></div>
+      </div>
+      <div class="stk-modal-footer">
+        <button class="stk-btn-copiar" onclick="copiarFicha()">📋 Copiar</button>
+        <button class="stk-btn-pegar" onclick="pegarFicha()">💬 Pegar en chat</button>
       </div>
     </div>
   </div>
@@ -358,9 +429,10 @@
     }
 
     var contactosGlobal = [], contactoActual = "", telefonoActual = "", timestampActual = 0;
-    var mostrarArchivados = false, mensajesVistos = {}, appColor = "#00A884", configData = {}, autoIAactivo = false;
+    var mensajesVistos = {}, appColor = "#00A884", configData = {}, autoIAactivo = false;
     var mediaCache = {}, usuarioActual = { email: "", nombre: "", rol: "" }, estadoActual = "Nuevo";
     var fichaContactoActual = "", enviandoMensaje = false;
+    var stockCache = [], stockFichaActual = "";
 
     var ESTADOS = [
       { valor: "Nuevo",            color: "#8696A0", emoji: "⚪" },
@@ -424,6 +496,117 @@
       cargarAlertas();
     }
 
+    // ── STK ──
+    function toggleStk() {
+      var panel = document.getElementById('stkPanel');
+      panel.classList.toggle('open');
+      if (panel.classList.contains('open')) cargarStock();
+    }
+
+    function cargarStock() {
+      api("getStock").then(function(data) {
+        stockCache = data;
+        renderStk(data);
+      }).catch(function() {
+        document.getElementById('stkList').innerHTML = '<div class="loading" style="color:#ff6b6b;">Error al cargar</div>';
+      });
+    }
+
+    function renderStk(props) {
+      var html = '';
+      document.getElementById('stkCount').textContent = props.length + ' propiedad' + (props.length !== 1 ? 'es' : '');
+      if (!props.length) {
+        html = '<div class="loading" style="color:#8696A0;">Sin resultados</div>';
+      } else {
+        props.forEach(function(p, idx) {
+          var detalles = [];
+          if (p.superficie) detalles.push(p.superficie + 'm²');
+          if (p.casa && p.casa.toUpperCase() === 'SI') detalles.push('Casa');
+          if (p.pileta && p.pileta.toUpperCase() === 'SI') detalles.push('Pileta');
+          if (p.muelle && p.muelle.toUpperCase() === 'SI') detalles.push('Muelle');
+          html += '<div class="stk-item" onclick="verFichaStk(' + idx + ')">' +
+            '<div class="stk-item-titulo">' + p.emprendimiento + (p.ubicacion ? ' — ' + p.ubicacion : '') + '</div>' +
+            (p.precio ? '<div class="stk-item-precio">💵 ' + p.precio + (p.comision ? ' · Com: ' + p.comision : '') + '</div>' : '') +
+            (detalles.length ? '<div class="stk-item-detalle">' + detalles.join(' | ') + '</div>' : '') +
+          '</div>';
+        });
+      }
+      document.getElementById('stkList').innerHTML = html;
+    }
+
+    function filtrarStk() {
+      var f = document.getElementById('stkSearch').value.toLowerCase().trim();
+      if (!f) { renderStk(stockCache); return; }
+      var filtrado = stockCache.filter(function(p) {
+        return p.precio.toLowerCase().indexOf(f) > -1 ||
+               p.emprendimiento.toLowerCase().indexOf(f) > -1 ||
+               p.ubicacion.toLowerCase().indexOf(f) > -1;
+      });
+      renderStk(filtrado);
+    }
+
+    function armarFichaStk(p) {
+      var lineas = [];
+      lineas.push('🏡 ' + p.emprendimiento + (p.superficie ? ' — ' + p.superficie + 'm²' : ''));
+      if (p.ubicacion) lineas.push('📍 ' + p.ubicacion);
+      var amenities = [];
+      if (p.casa) amenities.push('🏠 Casa: ' + p.casa.toUpperCase());
+      if (p.pileta) amenities.push('🏊 Pileta: ' + p.pileta.toUpperCase());
+      if (p.muelle) amenities.push('⚓ Muelle: ' + p.muelle.toUpperCase());
+      if (amenities.length) lineas.push(amenities.join(' | '));
+      if (p.expensas) {
+        var expStr = '💰 Expensas: ' + p.expensas.toUpperCase();
+        if (p.montoExpensas && p.expensas.toUpperCase() === 'SI') expStr += ' ($' + p.montoExpensas + ')';
+        lineas.push(expStr);
+      }
+      var docs = [];
+      if (p.escritura) docs.push('Escritura: ' + p.escritura.toUpperCase());
+      if (p.boleto) docs.push('Boleto: ' + p.boleto.toUpperCase());
+      if (docs.length) lineas.push('📋 ' + docs.join(' | '));
+      if (p.instrumento) lineas.push('📄 Instrumento: ' + p.instrumento);
+      if (p.comision) lineas.push('💼 Comisión: ' + p.comision);
+      if (p.precio) lineas.push('💵 Precio: ' + p.precio);
+      return lineas.join('\n');
+    }
+
+    function verFichaStk(idx) {
+      var filtrado = stockCache;
+      var f = document.getElementById('stkSearch').value.toLowerCase().trim();
+      if (f) {
+        filtrado = stockCache.filter(function(p) {
+          return p.precio.toLowerCase().indexOf(f) > -1 ||
+                 p.emprendimiento.toLowerCase().indexOf(f) > -1 ||
+                 p.ubicacion.toLowerCase().indexOf(f) > -1;
+        });
+      }
+      var p = filtrado[idx];
+      if (!p) return;
+      stockFichaActual = armarFichaStk(p);
+      document.getElementById('stkFichaTexto').textContent = stockFichaActual;
+      document.getElementById('stkModal').style.display = 'block';
+    }
+
+    function cerrarStkModal() {
+      document.getElementById('stkModal').style.display = 'none';
+    }
+
+    function copiarFicha() {
+      navigator.clipboard.writeText(stockFichaActual).then(function() {
+        mostrarToast('📋 Copiado al portapapeles');
+        cerrarStkModal();
+      }).catch(function() {
+        mostrarToast('❌ Error al copiar');
+      });
+    }
+
+    function pegarFicha() {
+      document.getElementById('messageInput').value = stockFichaActual;
+      document.getElementById('messageInput').focus();
+      cerrarStkModal();
+      document.getElementById('stkPanel').classList.remove('open');
+      mostrarToast('✓ Pegado en el chat');
+    }
+
     // ── HISTORIAL ──
     function cargarHistorial(telefono, contacto, callback) {
       if (!telefono) { callback(null); return; }
@@ -431,7 +614,6 @@
       .then(function(r) { return r.json(); })
       .then(function(data) {
         if (data.status === 'ok' && data.mensajes.length > 0) {
-          // Enriquecer con propuestas del Sheet
           api("getMensajesPorContacto", { contacto: contacto }).then(function(sheetMsgs) {
             var sheetMap = {};
             sheetMsgs.forEach(function(m) { if (m.respuestaPropuesta) sheetMap[m.mensaje] = m.respuestaPropuesta; });
@@ -631,7 +813,6 @@
       }
       document.getElementById('chatMessages').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando...</div>';
       document.getElementById('suggestionsBar').innerHTML = '';
-      // Usar historial real de WhatsApp
       cargarHistorial(telefonoActual, contacto, function(msgs) {
         if (msgs) renderMensajes(msgs);
         else api("getMensajesPorContacto", { contacto: contacto }).then(renderMensajes);
@@ -818,10 +999,7 @@
       if(todosContactosCache) {
         renderContactosNuevo(todosContactosCache);
       } else {
-        setTimeout(function() {
-          var l=document.getElementById('listaContactosNuevo');
-          if(l && l.innerHTML.indexOf('spinner') > -1) { l.innerHTML='<div class="loading" style="color:#8696A0;">Tocá de nuevo para reintentar</div>'; todosContactosCache=null; }
-        }, 10000);
+        setTimeout(function() { var l=document.getElementById('listaContactosNuevo'); if(l && l.innerHTML.indexOf('spinner') > -1) { l.innerHTML='<div class="loading" style="color:#8696A0;">Tocá de nuevo para reintentar</div>'; todosContactosCache=null; } }, 10000);
         api("getTodosContactos").then(function(d){ todosContactosCache=d; renderContactosNuevo(d); })
         .catch(function() { var l=document.getElementById('listaContactosNuevo'); if(l) l.innerHTML='<div class="loading" style="color:#ff6b6b;">Error al cargar</div>'; });
       }
@@ -842,23 +1020,16 @@
       document.getElementById('chatStatus').textContent='Cargando...';
       document.getElementById('chatPhone').textContent=telefono;
       estadoActual="Nuevo"; actualizarBtnEstado("Nuevo");
-
       if (!contactosGlobal.find(function(x){return x.nombre===contacto;})) {
         contactosGlobal.unshift({ nombre: contacto, alias: c ? c.alias : contacto, telefono: telefono, ultimoMensaje: '', ultimaFecha: '', timestamp: Date.now(), totalMensajes: 0, archivado: false, fijado: false, estado: 'Nuevo', fechaProxContacto: '' });
         renderContactos(contactosGlobal);
       }
-
       document.getElementById('chatMessages').innerHTML='<div class="loading"><div class="spinner"></div>Cargando...</div>';
       document.getElementById('suggestionsBar').innerHTML='';
       document.getElementById('messageInput').focus();
       cargarHistorial(telefono, contacto, function(msgs) {
-        if (msgs && msgs.length > 0) {
-          renderMensajes(msgs);
-          document.getElementById('chatStatus').textContent = msgs.length + ' msgs';
-        } else {
-          document.getElementById('chatMessages').innerHTML='<div class="loading" style="color:#8696A0;">Escribí un mensaje para iniciar la conversación</div>';
-          document.getElementById('chatStatus').textContent='Nueva conversación';
-        }
+        if (msgs && msgs.length > 0) { renderMensajes(msgs); document.getElementById('chatStatus').textContent = msgs.length + ' msgs'; }
+        else { document.getElementById('chatMessages').innerHTML='<div class="loading" style="color:#8696A0;">Escribí un mensaje para iniciar la conversación</div>'; document.getElementById('chatStatus').textContent='Nueva conversación'; }
       });
     }
 
@@ -880,10 +1051,7 @@
       api("getContactos").then(function(d) { contactosGlobal=d; if(document.getElementById('searchInput').value==='') renderContactos(d); else filtrarContactos(); });
       if(contactoActual && !enviandoMensaje) {
         cargarHistorial(telefonoActual, contactoActual, function(msgs) {
-          if (msgs) {
-            var totalActual = document.querySelectorAll('#chatMessages .message-bubble').length;
-            if (msgs.length > totalActual) renderMensajes(msgs);
-          }
+          if (msgs) { var totalActual = document.querySelectorAll('#chatMessages .message-bubble').length; if (msgs.length > totalActual) renderMensajes(msgs); }
         });
       }
       cargarAlertas();
