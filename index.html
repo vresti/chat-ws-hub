@@ -548,20 +548,48 @@
       renderStk(filtrado);
     }
 
-    function armarFichaStk(p) {
-      var lineas = [];
-      Object.keys(p).forEach(function(k) {
-        if (k === '_precio' || k === '_precioNombre') return;
-        var v = p[k];
-        if (!v || v === '') return;
-        lineas.push(k + ': ' + v);
-      });
-      // Agregar precio al final
-      if (p._precio && p._precioNombre) {
-        lineas.push(p._precioNombre + ': ' + p._precio);
-      }
-      return lineas.join('\n');
+function armarFichaStk(p) {
+  var emojis = {
+    'emprendimiento': '🏡', 'ubicacion': '📍', 'ubicación': '📍',
+    'superficie': '📐', 'superficie lote': '📐', 'superficie cubierta': '🏠',
+    'tipo': '🏷️', 'ambientes': '🚪', 'pileta': '🏊', 'muelle': '⚓',
+    'expensas': '💰', 'precio': '💵', 'escritura': '📋', 'boleto': '📄',
+    'instrumento': '📝', 'comision': '💼', 'comisión': '💼'
+  };
+
+  function getEmoji(campo) {
+    var c = campo.toLowerCase();
+    for (var k in emojis) { if (c.indexOf(k) > -1) return emojis[k]; }
+    return '•';
+  }
+
+  var lineas = [];
+  var siNo = [];
+
+  Object.keys(p).forEach(function(k) {
+    if (k === '_precio' || k === '_precioNombre') return;
+    var v = (p[k] || '').toString().trim();
+    if (!v || v === '') return;
+    var vLow = v.toLowerCase();
+    // Agrupar campos si/no
+    if (vLow === 'si' || vLow === 'no') {
+      if (vLow === 'si') siNo.push(getEmoji(k) + ' ' + k);
+      return;
     }
+    lineas.push(getEmoji(k) + ' ' + k + ': ' + v);
+  });
+
+  // Agregar línea de amenities si/no
+  if (siNo.length) lineas.push(siNo.join('  ·  '));
+
+  // Precio al final destacado
+  if (p._precio && p._precioNombre) {
+    lineas.push('');
+    lineas.push('💵 ' + p._precioNombre + ': ' + p._precio);
+  }
+
+  return lineas.join('\n');
+}
 
     function verFichaStk(idx) {
       var p = stockFiltrado[idx];
