@@ -71,7 +71,6 @@
     .btn-stk { background: none; border: 1px solid #c9a227; color: #c9a227; border-radius: 6px; padding: 3px 6px; font-size: 10px; font-weight: 700; cursor: pointer; margin-left: 6px; transition: all 0.2s; flex-shrink: 0; }
     .btn-stk:hover { background: #c9a227; color: #111B21; }
 
-    /* ── PANEL STK ── */
     .stk-panel { position: fixed; top: 60px; right: 0; width: 380px; height: calc(100% - 60px); background: #111B21; border-left: 1px solid #2A3942; z-index: 490; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.3s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.4); }
     .stk-panel.open { transform: translateX(0); }
     .stk-header { background: #202C33; padding: 12px 16px; border-bottom: 1px solid #2A3942; flex-shrink: 0; }
@@ -90,7 +89,6 @@
     .stk-item-precio { color: #c9a227; font-size: 13px; font-weight: 600; margin-top: 2px; }
     .stk-item-detalle { color: #8696A0; font-size: 11px; margin-top: 3px; }
 
-    /* ── MODAL STK ── */
     .stk-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #202C33; border-radius: 12px; width: 420px; max-width: 95vw; box-shadow: 0 8px 32px rgba(0,0,0,0.5); z-index: 1002; display: flex; flex-direction: column; max-height: 80vh; }
     .stk-modal-header { padding: 16px; border-bottom: 1px solid #2A3942; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
     .stk-modal-title { color: #E9EDEF; font-size: 15px; font-weight: 500; }
@@ -355,7 +353,6 @@
     </div>
   </div>
 
-  <!-- PANEL STK -->
   <div class="stk-panel" id="stkPanel">
     <div class="stk-header">
       <div class="stk-header-row">
@@ -370,7 +367,6 @@
     </div>
   </div>
 
-  <!-- MODAL STK -->
   <div id="stkModalWrap" style="display:none;">
     <div class="modal-overlay" onclick="cerrarStkModal()"></div>
     <div class="stk-modal">
@@ -503,7 +499,6 @@
       document.getElementById('stkList').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando...</div>';
       api("getStock").then(function(data) {
         stockCache = data;
-        stockFiltrado = data;
         renderStk(data);
       }).catch(function() {
         document.getElementById('stkList').innerHTML = '<div class="loading" style="color:#ff6b6b;">Error al cargar</div>';
@@ -519,12 +514,13 @@
       }
       var html = '';
       props.forEach(function(p, idx) {
-        // Campo principal: primer campo visible
-        var campos = Object.keys(p).filter(function(k) { return k !== '_precio'; });
-        var titulo = p[campos[0]] || '';
-        var segundo = campos[1] ? (p[campos[1]] || '') : '';
+        // Campos visibles (excluir internos _precio y _precioNombre)
+        var campos = Object.keys(p).filter(function(k) { return k !== '_precio' && k !== '_precioNombre'; });
+        var titulo = campos.length > 0 ? (p[campos[0]] || '') : '';
+        var segundo = campos.length > 1 ? (p[campos[1]] || '') : '';
         var precio = p._precio || '';
-        // Campos adicionales para detalle (excluir primeros 2 y precio)
+        var precioLabel = p._precioNombre || 'Precio';
+        // Detalles adicionales
         var detalles = [];
         campos.slice(2).forEach(function(k) {
           var v = p[k];
@@ -534,7 +530,7 @@
         });
         html += '<div class="stk-item" onclick="verFichaStk(' + idx + ')">' +
           '<div class="stk-item-titulo">' + titulo + (segundo ? ' — ' + segundo : '') + '</div>' +
-          (precio ? '<div class="stk-item-precio">💵 ' + precio + '</div>' : '') +
+          (precio ? '<div class="stk-item-precio">💵 ' + precioLabel + ': ' + precio + '</div>' : '') +
           (detalles.length ? '<div class="stk-item-detalle">' + detalles.slice(0,3).join(' | ') + '</div>' : '') +
         '</div>';
       });
@@ -545,8 +541,8 @@
       var f = document.getElementById('stkSearch').value.toLowerCase().trim();
       if (!f) { renderStk(stockCache); return; }
       var filtrado = stockCache.filter(function(p) {
-        return Object.values(p).some(function(v) {
-          return v.toString().toLowerCase().indexOf(f) > -1;
+        return Object.keys(p).some(function(k) {
+          return p[k].toString().toLowerCase().indexOf(f) > -1;
         });
       });
       renderStk(filtrado);
@@ -555,11 +551,15 @@
     function armarFichaStk(p) {
       var lineas = [];
       Object.keys(p).forEach(function(k) {
-        if (k === '_precio') return;
+        if (k === '_precio' || k === '_precioNombre') return;
         var v = p[k];
         if (!v || v === '') return;
         lineas.push(k + ': ' + v);
       });
+      // Agregar precio al final
+      if (p._precio && p._precioNombre) {
+        lineas.push(p._precioNombre + ': ' + p._precio);
+      }
       return lineas.join('\n');
     }
 
