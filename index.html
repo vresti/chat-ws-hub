@@ -843,9 +843,13 @@
       document.getElementById('chatStatus').textContent='Nueva conversación';
       document.getElementById('chatPhone').textContent=telefono;
       estadoActual="Nuevo"; actualizarBtnEstado("Nuevo");
-      document.getElementById('chatMessages').innerHTML='<div class="loading" style="color:#8696A0;">Escribí un mensaje para iniciar la conversación</div>';
+      document.getElementById('chatMessages').innerHTML='<div class="loading"><div class="spinner"></div>Cargando...</div>';
       document.getElementById('suggestionsBar').innerHTML='';
       document.getElementById('messageInput').focus();
+      api("getMensajesPorContacto", { contacto: contacto }).then(function(msgs) {
+      if (msgs.length > 0) renderMensajes(msgs);
+       else document.getElementById('chatMessages').innerHTML='<div class="loading" style="color:#8696A0;">Escribí un mensaje para iniciar la conversación</div>';
+      });
     }
 
     function toggleAutoIA() {
