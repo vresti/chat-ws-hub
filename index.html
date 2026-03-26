@@ -68,9 +68,7 @@
     .chat-header-phone { color: #00A884; font-size: 13px; font-weight: 500; margin-left: 8px; white-space: nowrap; }
     .estado-selector { background: none; border: 1px solid #2A3942; color: #8696A0; border-radius: 12px; padding: 3px 8px; font-size: 11px; cursor: pointer; margin-left: 8px; white-space: nowrap; transition: all 0.2s; flex-shrink: 0; }
     .estado-selector:hover { background: #2A3942; }
-
-    /* ── BOTÓN STK ── */
-    .btn-stk { background: none; border: 1px solid #c9a227; color: #c9a227; border-radius: 6px; padding: 3px 6px; font-size: 10px; font-weight: 700; cursor: pointer; margin-left: 6px; transition: all 0.2s; flex-shrink: 0; white-space: nowrap; }
+    .btn-stk { background: none; border: 1px solid #c9a227; color: #c9a227; border-radius: 6px; padding: 3px 6px; font-size: 10px; font-weight: 700; cursor: pointer; margin-left: 6px; transition: all 0.2s; flex-shrink: 0; }
     .btn-stk:hover { background: #c9a227; color: #111B21; }
 
     /* ── PANEL STK ── */
@@ -280,7 +278,6 @@
       .stk-panel { width: 100%; top: 0; height: 100%; }
       .stk-modal { width: 95vw; }
     }
-
     .btn-back { display: none; width: 36px; height: 36px; border: none; background: none; color: #E9EDEF; font-size: 22px; cursor: pointer; margin-right: 4px; align-items: center; justify-content: center; flex-shrink: 0; }
   </style>
 </head>
@@ -374,7 +371,7 @@
   </div>
 
   <!-- MODAL STK -->
-  <div id="stkModal" style="display:none;">
+  <div id="stkModalWrap" style="display:none;">
     <div class="modal-overlay" onclick="cerrarStkModal()"></div>
     <div class="stk-modal">
       <div class="stk-modal-header">
@@ -432,7 +429,7 @@
     var mensajesVistos = {}, appColor = "#00A884", configData = {}, autoIAactivo = false;
     var mediaCache = {}, usuarioActual = { email: "", nombre: "", rol: "" }, estadoActual = "Nuevo";
     var fichaContactoActual = "", enviandoMensaje = false;
-    var stockCache = [], stockFichaActual = "";
+    var stockCache = [], stockFiltrado = [], stockFichaActual = "";
 
     var ESTADOS = [
       { valor: "Nuevo",            color: "#8696A0", emoji: "⚪" },
@@ -447,7 +444,6 @@
     var ORIGENES  = ["", "WhatsApp", "Instagram", "Referido", "Web", "Otro"];
 
     function getEstadoInfo(valor) { return ESTADOS.find(function(e) { return e.valor === valor; }) || ESTADOS[0]; }
-
     function colorFecha(fechaStr) {
       if (!fechaStr) return '#8696A0';
       var hoy = new Date(); hoy.setHours(0,0,0,0);
@@ -500,12 +496,14 @@
     function toggleStk() {
       var panel = document.getElementById('stkPanel');
       panel.classList.toggle('open');
-      if (panel.classList.contains('open')) cargarStock();
+      if (panel.classList.contains('open') && stockCache.length === 0) cargarStock();
     }
 
     function cargarStock() {
+      document.getElementById('stkList').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando...</div>';
       api("getStock").then(function(data) {
         stockCache = data;
+        stockFiltrado = data;
         renderStk(data);
       }).catch(function() {
         document.getElementById('stkList').innerHTML = '<div class="loading" style="color:#ff6b6b;">Error al cargar</div>';
@@ -513,24 +511,33 @@
     }
 
     function renderStk(props) {
-      var html = '';
+      stockFiltrado = props;
       document.getElementById('stkCount').textContent = props.length + ' propiedad' + (props.length !== 1 ? 'es' : '');
       if (!props.length) {
-        html = '<div class="loading" style="color:#8696A0;">Sin resultados</div>';
-      } else {
-        props.forEach(function(p, idx) {
-          var detalles = [];
-          if (p.superficie) detalles.push(p.superficie + 'm²');
-          if (p.casa && p.casa.toUpperCase() === 'SI') detalles.push('Casa');
-          if (p.pileta && p.pileta.toUpperCase() === 'SI') detalles.push('Pileta');
-          if (p.muelle && p.muelle.toUpperCase() === 'SI') detalles.push('Muelle');
-          html += '<div class="stk-item" onclick="verFichaStk(' + idx + ')">' +
-            '<div class="stk-item-titulo">' + p.emprendimiento + (p.ubicacion ? ' — ' + p.ubicacion : '') + '</div>' +
-            (p.precio ? '<div class="stk-item-precio">💵 ' + p.precio + (p.comision ? ' · Com: ' + p.comision : '') + '</div>' : '') +
-            (detalles.length ? '<div class="stk-item-detalle">' + detalles.join(' | ') + '</div>' : '') +
-          '</div>';
-        });
+        document.getElementById('stkList').innerHTML = '<div class="loading" style="color:#8696A0;">Sin resultados</div>';
+        return;
       }
+      var html = '';
+      props.forEach(function(p, idx) {
+        // Campo principal: primer campo visible
+        var campos = Object.keys(p).filter(function(k) { return k !== '_precio'; });
+        var titulo = p[campos[0]] || '';
+        var segundo = campos[1] ? (p[campos[1]] || '') : '';
+        var precio = p._precio || '';
+        // Campos adicionales para detalle (excluir primeros 2 y precio)
+        var detalles = [];
+        campos.slice(2).forEach(function(k) {
+          var v = p[k];
+          if (v && v.toString().toLowerCase() !== 'no' && v !== '') {
+            detalles.push(k + ': ' + v);
+          }
+        });
+        html += '<div class="stk-item" onclick="verFichaStk(' + idx + ')">' +
+          '<div class="stk-item-titulo">' + titulo + (segundo ? ' — ' + segundo : '') + '</div>' +
+          (precio ? '<div class="stk-item-precio">💵 ' + precio + '</div>' : '') +
+          (detalles.length ? '<div class="stk-item-detalle">' + detalles.slice(0,3).join(' | ') + '</div>' : '') +
+        '</div>';
+      });
       document.getElementById('stkList').innerHTML = html;
     }
 
@@ -538,65 +545,39 @@
       var f = document.getElementById('stkSearch').value.toLowerCase().trim();
       if (!f) { renderStk(stockCache); return; }
       var filtrado = stockCache.filter(function(p) {
-        return p.precio.toLowerCase().indexOf(f) > -1 ||
-               p.emprendimiento.toLowerCase().indexOf(f) > -1 ||
-               p.ubicacion.toLowerCase().indexOf(f) > -1;
+        return Object.values(p).some(function(v) {
+          return v.toString().toLowerCase().indexOf(f) > -1;
+        });
       });
       renderStk(filtrado);
     }
 
     function armarFichaStk(p) {
       var lineas = [];
-      lineas.push('🏡 ' + p.emprendimiento + (p.superficie ? ' — ' + p.superficie + 'm²' : ''));
-      if (p.ubicacion) lineas.push('📍 ' + p.ubicacion);
-      var amenities = [];
-      if (p.casa) amenities.push('🏠 Casa: ' + p.casa.toUpperCase());
-      if (p.pileta) amenities.push('🏊 Pileta: ' + p.pileta.toUpperCase());
-      if (p.muelle) amenities.push('⚓ Muelle: ' + p.muelle.toUpperCase());
-      if (amenities.length) lineas.push(amenities.join(' | '));
-      if (p.expensas) {
-        var expStr = '💰 Expensas: ' + p.expensas.toUpperCase();
-        if (p.montoExpensas && p.expensas.toUpperCase() === 'SI') expStr += ' ($' + p.montoExpensas + ')';
-        lineas.push(expStr);
-      }
-      var docs = [];
-      if (p.escritura) docs.push('Escritura: ' + p.escritura.toUpperCase());
-      if (p.boleto) docs.push('Boleto: ' + p.boleto.toUpperCase());
-      if (docs.length) lineas.push('📋 ' + docs.join(' | '));
-      if (p.instrumento) lineas.push('📄 Instrumento: ' + p.instrumento);
-      if (p.comision) lineas.push('💼 Comisión: ' + p.comision);
-      if (p.precio) lineas.push('💵 Precio: ' + p.precio);
+      Object.keys(p).forEach(function(k) {
+        if (k === '_precio') return;
+        var v = p[k];
+        if (!v || v === '') return;
+        lineas.push(k + ': ' + v);
+      });
       return lineas.join('\n');
     }
 
     function verFichaStk(idx) {
-      var filtrado = stockCache;
-      var f = document.getElementById('stkSearch').value.toLowerCase().trim();
-      if (f) {
-        filtrado = stockCache.filter(function(p) {
-          return p.precio.toLowerCase().indexOf(f) > -1 ||
-                 p.emprendimiento.toLowerCase().indexOf(f) > -1 ||
-                 p.ubicacion.toLowerCase().indexOf(f) > -1;
-        });
-      }
-      var p = filtrado[idx];
+      var p = stockFiltrado[idx];
       if (!p) return;
       stockFichaActual = armarFichaStk(p);
       document.getElementById('stkFichaTexto').textContent = stockFichaActual;
-      document.getElementById('stkModal').style.display = 'block';
+      document.getElementById('stkModalWrap').style.display = 'block';
     }
 
-    function cerrarStkModal() {
-      document.getElementById('stkModal').style.display = 'none';
-    }
+    function cerrarStkModal() { document.getElementById('stkModalWrap').style.display = 'none'; }
 
     function copiarFicha() {
       navigator.clipboard.writeText(stockFichaActual).then(function() {
         mostrarToast('📋 Copiado al portapapeles');
         cerrarStkModal();
-      }).catch(function() {
-        mostrarToast('❌ Error al copiar');
-      });
+      }).catch(function() { mostrarToast('❌ Error al copiar'); });
     }
 
     function pegarFicha() {
@@ -819,7 +800,6 @@
       });
     }
 
-    // ── PIPELINE ──
     function actualizarBtnEstado(estado) {
       var ei = getEstadoInfo(estado);
       var btn = document.getElementById('btnEstado');
@@ -860,7 +840,6 @@
       });
     }
 
-    // ── MENSAJES ──
     function renderContenidoMensaje(texto) {
       var mediaMatch = texto.match(/^\[(audio|imagen|video|doc):([^\]]+)\]$/);
       if (!mediaMatch) return '<div class="message-text">' + texto + '</div>';
