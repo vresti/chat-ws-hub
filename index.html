@@ -886,7 +886,7 @@ function formatFechaCorta(fechaStr) {
       api("getContactos").then(function(d) { contactosGlobal=d; if(document.getElementById('searchInput').value==='') renderContactos(d); else filtrarContactos(); });
       if(contactoActual) api("getMensajesPorContacto",{contacto:contactoActual}).then(function(mensajes) {
         var totalActual = document.querySelectorAll('#chatMessages .message-bubble').length;
-        if (mensajes.length !== totalActual) renderMensajes(mensajes);
+        if (mensajes.length > totalActual) renderMensajes(mensajes);
       });
       cargarAlertas();
     }, 15000);
