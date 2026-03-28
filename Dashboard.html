@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Isla del Este</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0D1117;
+      --bg2: #161B22;
+      --bg3: #1C2128;
+      --border: #30363D;
+      --text: #E6EDF3;
+      --text2: #8B949E;
+      --text3: #484F58;
+      --green: #3FB950;
+      --green-bg: #0D2119;
+      --yellow: #D29922;
+      --yellow-bg: #272115;
+      --red: #F85149;
+      --red-bg: #2D1117;
+      --blue: #58A6FF;
+      --blue-bg: #0D1F33;
+      --accent: #1A3A5C;
+      --gold: #C9A227;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); height: 100%; }
+
+    /* LOGIN */
+    .login-screen { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+    .login-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 40px; width: 360px; text-align: center; }
+    .login-logo { font-size: 32px; margin-bottom: 8px; }
+    .login-title { color: var(--text); font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+    .login-sub { color: var(--text2); font-size: 13px; margin-bottom: 24px; }
+    .login-input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg3); color: var(--text); font-size: 14px; outline: none; margin-bottom: 12px; font-family: inherit; }
+    .login-input:focus { border-color: var(--blue); }
+    .login-btn { width: 100%; padding: 10px; border-radius: 8px; border: none; background: var(--blue); color: white; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; transition: opacity 0.2s; }
+    .login-btn:hover { opacity: 0.85; }
+    .login-error { color: var(--red); font-size: 12px; margin-top: 10px; }
+
+    /* LAYOUT */
+    .app { display: none; flex-direction: column; height: 100vh; }
+    .app.visible { display: flex; }
+
+    /* HEADER */
+    .header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .header-logo { font-size: 18px; font-weight: 600; color: var(--text); }
+    .header-logo span { color: var(--gold); }
+    .header-badge { background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 2px 10px; font-size: 11px; color: var(--text2); font-family: 'DM Mono', monospace; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .header-user { color: var(--text2); font-size: 13px; }
+    .header-link { color: var(--blue); font-size: 13px; text-decoration: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; transition: all 0.2s; }
+    .header-link:hover { background: var(--bg3); }
+    .btn-refresh { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--text2); padding: 4px 10px; font-size: 13px; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+    .btn-refresh:hover { background: var(--bg3); color: var(--text); }
+
+    /* MAIN */
+    .main { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 24px; }
+
+    /* SEMAFORO */
+    .semaforo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .semaforo-card { border-radius: 10px; border: 1px solid var(--border); padding: 20px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+    .semaforo-card:hover { transform: translateY(-1px); }
+    .semaforo-card.rojo { background: var(--red-bg); border-color: var(--red); }
+    .semaforo-card.amarillo { background: var(--yellow-bg); border-color: var(--yellow); }
+    .semaforo-card.verde { background: var(--green-bg); border-color: var(--green); }
+    .semaforo-card.activo { box-shadow: 0 0 0 2px rgba(255,255,255,0.1); }
+    .semaforo-icono { font-size: 28px; margin-bottom: 10px; }
+    .semaforo-titulo { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .semaforo-card.rojo .semaforo-titulo { color: var(--red); }
+    .semaforo-card.amarillo .semaforo-titulo { color: var(--yellow); }
+    .semaforo-card.verde .semaforo-titulo { color: var(--green); }
+    .semaforo-count { font-size: 40px; font-weight: 600; line-height: 1; font-family: 'DM Mono', monospace; }
+    .semaforo-card.rojo .semaforo-count { color: var(--red); }
+    .semaforo-card.amarillo .semaforo-count { color: var(--yellow); }
+    .semaforo-card.verde .semaforo-count { color: var(--green); }
+    .semaforo-sub { color: var(--text2); font-size: 12px; margin-top: 6px; }
+    .semaforo-click { position: absolute; bottom: 12px; right: 14px; font-size: 11px; color: var(--text3); }
+
+    /* DETALLE SEMAFORO */
+    .detalle-panel { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; display: none; }
+    .detalle-panel.visible { display: block; }
+    .detalle-header { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .detalle-titulo { font-size: 14px; font-weight: 500; }
+    .detalle-close { background: none; border: none; color: var(--text2); font-size: 18px; cursor: pointer; }
+    .detalle-lista { max-height: 320px; overflow-y: auto; }
+    .detalle-item { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; cursor: pointer; transition: background 0.15s; }
+    .detalle-item:hover { background: var(--bg3); }
+    .detalle-item:last-child { border-bottom: none; }
+    .detalle-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; color: white; flex-shrink: 0; }
+    .detalle-info { flex: 1; min-width: 0; }
+    .detalle-nombre { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .detalle-msg { color: var(--text2); font-size: 12px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .detalle-meta { text-align: right; flex-shrink: 0; }
+    .detalle-estado { font-size: 11px; font-weight: 500; border-radius: 4px; padding: 2px 8px; margin-bottom: 4px; display: inline-block; }
+    .detalle-dias { font-size: 11px; color: var(--text2); font-family: 'DM Mono', monospace; }
+    .detalle-fecha { font-size: 11px; color: var(--text2); }
+    .detalle-prox { font-size: 11px; color: var(--yellow); margin-top: 2px; }
+    .detalle-vacia { padding: 40px; text-align: center; color: var(--text2); font-size: 14px; }
+
+    /* CONVERSACIONES */
+    .conv-section { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    .conv-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .conv-titulo { font-size: 14px; font-weight: 500; }
+    .conv-filtros { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .conv-filtro { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg3); color: var(--text2); font-size: 12px; outline: none; font-family: inherit; cursor: pointer; }
+    .conv-filtro:focus { border-color: var(--blue); }
+    .conv-filtro-fecha { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg3); color: var(--text2); font-size: 12px; outline: none; font-family: inherit; }
+    .conv-filtro-fecha:focus { border-color: var(--blue); }
+    .btn-filtrar { padding: 6px 14px; border-radius: 6px; border: none; background: var(--blue); color: white; font-size: 12px; font-weight: 500; cursor: pointer; font-family: inherit; transition: opacity 0.2s; }
+    .btn-filtrar:hover { opacity: 0.85; }
+    .btn-limpiar { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: none; color: var(--text2); font-size: 12px; cursor: pointer; font-family: inherit; }
+    .conv-lista { }
+    .conv-item { border-bottom: 1px solid var(--border); }
+    .conv-item:last-child { border-bottom: none; }
+    .conv-item-header { padding: 14px 20px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: background 0.15s; }
+    .conv-item-header:hover { background: var(--bg3); }
+    .conv-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: white; flex-shrink: 0; }
+    .conv-info { flex: 1; min-width: 0; }
+    .conv-nombre { font-size: 14px; font-weight: 500; }
+    .conv-ultimo { color: var(--text2); font-size: 12px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .conv-meta { text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .conv-fecha { font-size: 11px; color: var(--text2); font-family: 'DM Mono', monospace; }
+    .conv-estado-badge { font-size: 10px; font-weight: 500; border-radius: 4px; padding: 2px 6px; }
+    .conv-expand { color: var(--text3); font-size: 12px; margin-left: 4px; }
+    .conv-hilo { display: none; padding: 0 20px 16px 74px; }
+    .conv-hilo.open { display: block; }
+    .conv-burbuja { max-width: 70%; padding: 8px 12px; border-radius: 8px; margin-bottom: 6px; font-size: 13px; line-height: 1.5; }
+    .conv-burbuja.entrante { background: var(--bg3); float: left; border-top-left-radius: 2px; }
+    .conv-burbuja.saliente { background: #0D3B2E; float: right; border-top-right-radius: 2px; }
+    .conv-burbuja-fecha { font-size: 10px; color: var(--text3); margin-top: 2px; text-align: right; font-family: 'DM Mono', monospace; }
+    .conv-clearfix { clear: both; }
+    .conv-loading { padding: 40px; text-align: center; color: var(--text2); font-size: 14px; }
+    .conv-vacia { padding: 60px; text-align: center; color: var(--text2); }
+    .conv-vacia-icon { font-size: 40px; margin-bottom: 12px; }
+
+    /* ESTADOS COLORES */
+    .est-nuevo { background: rgba(134,150,160,0.15); color: #8696A0; }
+    .est-informado { background: rgba(52,152,219,0.15); color: #3498DB; }
+    .est-visita { background: rgba(243,156,18,0.15); color: #F39C12; }
+    .est-realizada { background: rgba(155,89,182,0.15); color: #9B59B6; }
+    .est-seña { background: rgba(231,76,60,0.15); color: #E74C3C; }
+    .est-compra { background: rgba(0,168,132,0.15); color: #00A884; }
+    .est-perdido { background: rgba(55,64,69,0.4); color: #8696A0; }
+
+    /* SPINNER */
+    .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; margin-right: 8px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    .ultima-act { color: var(--text3); font-size: 11px; font-family: 'DM Mono', monospace; }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-box">
+      <div class="login-logo">📊</div>
+      <div class="login-title">Dashboard Gerencial</div>
+      <div class="login-sub">Isla del Este — Panel de atención</div>
+      <input type="email" class="login-input" id="loginEmail" placeholder="tu@email.com">
+      <button class="login-btn" onclick="hacerLogin()">Ingresar</button>
+      <div class="login-error" id="loginError"></div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div class="app" id="app">
+    <div class="header">
+      <div class="header-left">
+        <div class="header-logo">📊 Dashboard <span>Isla del Este</span></div>
+        <div class="header-badge" id="ultimaAct">—</div>
+      </div>
+      <div class="header-right">
+        <span class="header-user" id="headerUser"></span>
+        <button class="btn-refresh" onclick="cargarTodo()">↻ Actualizar</button>
+        <a href="index.html" class="header-link">💬 CRM</a>
+      </div>
+    </div>
+
+    <div class="main">
+
+      <!-- SEMAFORO -->
+      <div class="semaforo">
+        <div class="semaforo-card rojo" onclick="toggleDetalle('urgente')">
+          <div class="semaforo-icono">🔴</div>
+          <div class="semaforo-titulo">Atención urgente</div>
+          <div class="semaforo-count" id="countUrgente">—</div>
+          <div class="semaforo-sub">Sin actividad según estado</div>
+          <div class="semaforo-click">click para ver ▾</div>
+        </div>
+        <div class="semaforo-card amarillo" onclick="toggleDetalle('pendiente')">
+          <div class="semaforo-icono">🟡</div>
+          <div class="semaforo-titulo">Acción pendiente</div>
+          <div class="semaforo-count" id="countPendiente">—</div>
+          <div class="semaforo-sub">Próxima acción vencida</div>
+          <div class="semaforo-click">click para ver ▾</div>
+        </div>
+        <div class="semaforo-card verde" onclick="toggleDetalle('bien')">
+          <div class="semaforo-icono">🟢</div>
+          <div class="semaforo-titulo">Al día</div>
+          <div class="semaforo-count" id="countBien">—</div>
+          <div class="semaforo-sub">Seguimiento en orden</div>
+          <div class="semaforo-click">click para ver ▾</div>
+        </div>
+      </div>
+
+      <!-- DETALLE SEMAFORO -->
+      <div class="detalle-panel" id="detallePanel">
+        <div class="detalle-header">
+          <div class="detalle-titulo" id="detalleTitulo">Detalle</div>
+          <button class="detalle-close" onclick="cerrarDetalle()">✕</button>
+        </div>
+        <div class="detalle-lista" id="detalleLista"></div>
+      </div>
+
+      <!-- CONVERSACIONES -->
+      <div class="conv-section">
+        <div class="conv-header">
+          <div class="conv-titulo">💬 Conversaciones</div>
+          <div class="conv-filtros">
+            <input type="date" class="conv-filtro-fecha" id="filtroFecha" title="Desde fecha">
+            <select class="conv-filtro" id="filtroOrigen">
+              <option value="">Todos los orígenes</option>
+              <option value="WhatsApp Business">WhatsApp Business</option>
+              <option value="Chat Respuesta">Respuestas</option>
+            </select>
+            <select class="conv-filtro" id="filtroEstado">
+              <option value="">Todos los estados</option>
+              <option value="Nuevo">Nuevo</option>
+              <option value="Informado">Informado</option>
+              <option value="Visita agendada">Visita agendada</option>
+              <option value="Visita realizada">Visita realizada</option>
+              <option value="Seña">Seña</option>
+              <option value="Compra">Compra</option>
+              <option value="Perdido">Perdido</option>
+            </select>
+            <button class="btn-filtrar" onclick="cargarConversaciones()">Filtrar</button>
+            <button class="btn-limpiar" onclick="limpiarFiltros()">✕</button>
+          </div>
+        </div>
+        <div class="conv-lista" id="convLista">
+          <div class="conv-loading"><div class="spinner"></div>Cargando conversaciones...</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    var API_URL = "https://script.google.com/macros/s/AKfycbxLCyafHzG5GIHxQuo2SVUoQ4gfJOYsdvdmbXIizWOl13OJ6Mmia7Vy6Jax1kkj7OKXDQ/exec";
+    var CRM_URL = "index.html";
+
+    var usuarioActual = { email: "", nombre: "", rol: "" };
+    var datosAlertas = { urgente: [], pendiente: [], bien: [] };
+    var detalleActual = "";
+
+    function api(action, params) {
+      var url = API_URL + "?action=" + action;
+      if (params) Object.keys(params).forEach(function(k) { url += "&" + k + "=" + encodeURIComponent(params[k]); });
+      return fetch(url).then(function(r) { return r.json(); });
+    }
+
+    // ── LOGIN ──
+    document.getElementById('loginEmail').addEventListener('keypress', function(e) { if (e.key === 'Enter') hacerLogin(); });
+
+    function hacerLogin() {
+      var email = document.getElementById('loginEmail').value.trim();
+      if (!email) { document.getElementById('loginError').textContent = 'Ingresá tu email'; return; }
+      document.getElementById('loginError').textContent = '';
+      api("getUsuario", { email: email }).then(function(data) {
+        if (data.status === "ok") {
+          if (data.rol === "vendedor") {
+            document.getElementById('loginError').textContent = '❌ Sin acceso al dashboard';
+            return;
+          }
+          usuarioActual = { email: email, nombre: data.nombre, rol: data.rol };
+          document.getElementById('loginScreen').style.display = 'none';
+          document.getElementById('app').classList.add('visible');
+          document.getElementById('headerUser').textContent = data.nombre + ' · ' + data.rol;
+          cargarTodo();
+          setInterval(cargarAlertas, 60000);
+        } else {
+          document.getElementById('loginError').textContent = '❌ Email no autorizado';
+        }
+      }).catch(function() {
+        document.getElementById('loginError').textContent = '❌ Error de conexión';
+      });
+    }
+
+    function cargarTodo() {
+      cargarAlertas();
+      cargarConversaciones();
+    }
+
+    // ── SEMAFORO ──
+    function cargarAlertas() {
+      api("getDashboardAlertas").then(function(data) {
+        datosAlertas = data;
+        document.getElementById('countUrgente').textContent = data.urgente.length;
+        document.getElementById('countPendiente').textContent = data.pendiente.length;
+        document.getElementById('countBien').textContent = data.bien.length;
+        var ahora = new Date();
+        var h = ahora.getHours().toString().padStart(2,'0');
+        var m = ahora.getMinutes().toString().padStart(2,'0');
+        document.getElementById('ultimaAct').textContent = 'Actualizado ' + h + ':' + m;
+        if (detalleActual) renderDetalle(detalleActual);
+      });
+    }
+
+    function toggleDetalle(tipo) {
+      if (detalleActual === tipo) {
+        cerrarDetalle();
+        return;
+      }
+      detalleActual = tipo;
+      document.getElementById('detallePanel').classList.add('visible');
+      renderDetalle(tipo);
+    }
+
+    function cerrarDetalle() {
+      detalleActual = "";
+      document.getElementById('detallePanel').classList.remove('visible');
+    }
+
+    function renderDetalle(tipo) {
+      var titulos = { urgente: '🔴 Atención urgente', pendiente: '🟡 Acción pendiente vencida', bien: '🟢 Contactos al día' };
+      document.getElementById('detalleTitulo').textContent = titulos[tipo];
+      var lista = datosAlertas[tipo] || [];
+      if (!lista.length) {
+        document.getElementById('detalleLista').innerHTML = '<div class="detalle-vacia">✓ Sin contactos en esta categoría</div>';
+        return;
+      }
+      var html = '';
+      lista.forEach(function(c) {
+        var inicial = (c.alias || c.nombre).charAt(0).toUpperCase();
+        var colors = ['#1a3a5c','#0d3b2e','#2d1f00','#2d001f','#1f002d','#002d2d'];
+        var color = colors[c.nombre.length % colors.length];
+        var estadoClass = getEstadoClass(c.estado);
+        html += '<div class="detalle-item" onclick="abrirEnCRM(\'' + c.nombre.replace(/'/g,"\\'") + '\')">' +
+          '<div class="detalle-avatar" style="background:' + color + '">' + inicial + '</div>' +
+          '<div class="detalle-info">' +
+            '<div class="detalle-nombre">' + (c.alias || c.nombre) + '</div>' +
+            '<div class="detalle-msg">' + (c.ultimoMensaje || '').substring(0, 60) + '</div>' +
+            (c.proxAccion ? '<div class="detalle-prox">→ ' + c.proxAccion + '</div>' : '') +
+          '</div>' +
+          '<div class="detalle-meta">' +
+            '<div class="detalle-estado ' + estadoClass + '">' + c.estado + '</div>' +
+            '<div class="detalle-fecha">' + c.ultimaFecha + '</div>' +
+            (c.diasSinActividad > 0 ? '<div class="detalle-dias">' + c.diasSinActividad + 'd sin actividad</div>' : '') +
+            (c.fechaProxContacto ? '<div class="detalle-prox">PA: ' + c.fechaProxContacto + '</div>' : '') +
+          '</div>' +
+        '</div>';
+      });
+      document.getElementById('detalleLista').innerHTML = html;
+    }
+
+    function abrirEnCRM(contacto) {
+      window.open(CRM_URL + '?contacto=' + encodeURIComponent(contacto), '_blank');
+    }
+
+    // ── CONVERSACIONES ──
+    function cargarConversaciones() {
+      document.getElementById('convLista').innerHTML = '<div class="conv-loading"><div class="spinner"></div>Cargando conversaciones...</div>';
+      var fecha = document.getElementById('filtroFecha').value;
+      var origen = document.getElementById('filtroOrigen').value;
+      var estado = document.getElementById('filtroEstado').value;
+      api("getDashboardConversaciones", { fecha: fecha, origen: origen, estado: estado }).then(function(data) {
+        renderConversaciones(data);
+      }).catch(function() {
+        document.getElementById('convLista').innerHTML = '<div class="conv-loading" style="color:#F85149;">Error al cargar</div>';
+      });
+    }
+
+    function limpiarFiltros() {
+      document.getElementById('filtroFecha').value = '';
+      document.getElementById('filtroOrigen').value = '';
+      document.getElementById('filtroEstado').value = '';
+      cargarConversaciones();
+    }
+
+    function renderConversaciones(lista) {
+      if (!lista.length) {
+        document.getElementById('convLista').innerHTML = '<div class="conv-vacia"><div class="conv-vacia-icon">💬</div>Sin conversaciones para los filtros seleccionados</div>';
+        return;
+      }
+      var html = '';
+      lista.forEach(function(c, idx) {
+        var inicial = (c.alias || c.nombre).charAt(0).toUpperCase();
+        var colors = ['#1a3a5c','#0d3b2e','#2d1f00','#2d001f','#1f002d','#002d2d'];
+        var color = colors[c.nombre.length % colors.length];
+        var estadoClass = getEstadoClass(c.estado);
+        var ultimoMsg = c.mensajes.length > 0 ? c.mensajes[c.mensajes.length-1].mensaje : '';
+        html += '<div class="conv-item">' +
+          '<div class="conv-item-header" onclick="toggleHilo(' + idx + ')">' +
+            '<div class="conv-avatar" style="background:' + color + '">' + inicial + '</div>' +
+            '<div class="conv-info">' +
+              '<div class="conv-nombre">' + (c.alias || c.nombre) + '</div>' +
+              '<div class="conv-ultimo">' + ultimoMsg.substring(0, 80) + (ultimoMsg.length > 80 ? '...' : '') + '</div>' +
+            '</div>' +
+            '<div class="conv-meta">' +
+              '<div class="conv-fecha">' + c.ultimaFecha + '</div>' +
+              '<div class="conv-estado-badge ' + estadoClass + '">' + c.estado + '</div>' +
+              '<div style="font-size:11px;color:var(--text3);">' + c.mensajes.length + ' msgs</div>' +
+            '</div>' +
+            '<div class="conv-expand" id="expand-' + idx + '">▶</div>' +
+          '</div>' +
+          '<div class="conv-hilo" id="hilo-' + idx + '">' +
+            renderHilo(c.mensajes) +
+          '</div>' +
+        '</div>';
+      });
+      document.getElementById('convLista').innerHTML = html;
+    }
+
+    function renderHilo(mensajes) {
+      var html = '';
+      mensajes.forEach(function(m) {
+        var esEnviado = m.mensaje.indexOf('→ ') === 0;
+        var texto = esEnviado ? m.mensaje.substring(2) : m.mensaje;
+        html += '<div class="conv-burbuja ' + (esEnviado ? 'saliente' : 'entrante') + '">' +
+          texto +
+          '<div class="conv-burbuja-fecha">' + m.fecha + '</div>' +
+        '</div><div class="conv-clearfix"></div>';
+      });
+      return html;
+    }
+
+    function toggleHilo(idx) {
+      var hilo = document.getElementById('hilo-' + idx);
+      var expand = document.getElementById('expand-' + idx);
+      if (hilo.classList.contains('open')) {
+        hilo.classList.remove('open');
+        expand.textContent = '▶';
+      } else {
+        hilo.classList.add('open');
+        expand.textContent = '▼';
+      }
+    }
+
+    // ── HELPERS ──
+    function getEstadoClass(estado) {
+      var map = {
+        'Nuevo': 'est-nuevo', 'Informado': 'est-informado',
+        'Visita agendada': 'est-visita', 'Visita realizada': 'est-realizada',
+        'Seña': 'est-seña', 'Compra': 'est-compra', 'Perdido': 'est-perdido'
+      };
+      return map[estado] || 'est-nuevo';
+    }
+  </script>
+</body>
+</html>
