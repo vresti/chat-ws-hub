@@ -51,7 +51,8 @@
     .contact-meta { text-align: right; flex-shrink: 0; margin-left: 8px; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
     .contact-time { color: #8696A0; font-size: 12px; }
     .contact-meta-row { display: flex; align-items: center; gap: 5px; }
-    .contact-count { color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
+    .contact-count { color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+    .contact-count:hover { opacity: 0.7; }
     .estado-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
     .contact-new { width: 10px; height: 10px; border-radius: 50%; background: #FF3B30; flex-shrink: 0; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
@@ -742,7 +743,7 @@
           '<div class="contact-meta"><div class="contact-time">' + c.ultimaFecha + '</div>' +
           '<div class="contact-meta-row">' +
           '<div class="estado-dot" style="background:' + ei.color + '" title="' + ei.valor + '"></div>' +
-          '<div class="contact-count" style="background:' + appColor + '">' + c.totalMensajes + '</div>' +
+          '<div class="contact-count" style="background:' + appColor + '" onclick="limpiarContacto(\'' + esc2 + '\')" title="Limpiar historial">' + c.totalMensajes + '</div>' +
           (esNuevo ? '<div class="contact-new"></div>' : '') +
           '<button class="' + (c.fijado ? 'btn-pin btn-pin-active' : 'btn-pin') + '" onclick="togglePin(\'' + esc2 + '\')">' + (c.fijado ? '📌' : '📍') + '</button>' +
           '</div>' +
@@ -769,6 +770,29 @@
       o.innerHTML = '<div class="modal-box"><div class="modal-title">🧹 Limpiar historial</div><div class="modal-subtitle">Se borrarán todas excepto las ' + n + ' fijadas.<br><br>No se puede deshacer.</div><div class="modal-buttons"><button class="modal-btn modal-btn-cancel" onclick="cerrarModal()">Cancelar</button><button class="modal-btn modal-btn-danger" onclick="confirmarLimpiar()">Limpiar</button></div></div>';
       document.body.appendChild(o);
     }
+    function limpiarContacto(contacto) {
+      event.stopPropagation();
+      var c = contactosGlobal.find(function(x) { return x.nombre === contacto; });
+      var alias = c ? (c.alias || c.nombre) : contacto;
+      var o = document.createElement('div'); o.className = 'modal-overlay';
+      o.innerHTML = '<div class="modal-box"><div class="modal-title">🗑️ Limpiar historial</div><div class="modal-subtitle">Se borrarán todos los mensajes de <b>' + alias + '</b> del CRM.<br><br>El historial real de WhatsApp no se toca.<br>No se puede deshacer.</div><div class="modal-buttons"><button class="modal-btn modal-btn-cancel" onclick="cerrarModal()">Cancelar</button><button class="modal-btn modal-btn-danger" onclick="confirmarLimpiarContacto(\'' + contacto.replace(/'/g,"\\'") + '\')">Limpiar</button></div></div>';
+      document.body.appendChild(o);
+    }
+
+    function confirmarLimpiarContacto(contacto) {
+      cerrarModal();
+      mostrarToast('🗑️ Limpiando...');
+      api("limpiarContacto", { contacto: contacto }).then(function(r) {
+        if (r.status === 'ok') {
+          mostrarToast('✓ Historial de ' + contacto + ' limpiado (' + r.borrados + ' msgs)');
+          recargarContactos();
+          if (contactoActual === contacto) {
+            document.getElementById('chatMessages').innerHTML = '<div class="loading" style="color:#8696A0;">Historial limpiado</div>';
+          }
+        } else { mostrarToast('❌ Error al limpiar'); }
+      });
+    }
+
     function confirmarLimpiar() { cerrarModal(); mostrarToast('🧹 Limpiando...'); api("limpiarHistorial").then(function(r) { mostrarToast('✓ Limpio. ' + r.fijados + ' fijadas.'); recargarContactos(); }); }
     function recargarContactos() { api("getContactos").then(function(d) { contactosGlobal = d; renderContactos(d); }); }
 
