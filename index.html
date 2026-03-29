@@ -287,8 +287,9 @@
       <div class="login-icon">💬</div>
       <div class="login-title">Chat WS Hub</div>
       <div class="login-subtitle">Ingresá tu email para acceder</div>
-      <input type="email" class="login-input" id="loginEmail" placeholder="tu@email.com">
-      <button class="login-btn" onclick="hacerLogin()">Ingresar</button>
+      <input type="email" class="login-input" id="loginEmail" placeholder="tu@email.com" onkeypress="if(event.key==='Enter') document.getElementById('loginPass').focus()">
+      <input type="password" class="login-input" id="loginPass" placeholder="Contraseña" onkeypress="if(event.key==='Enter') hacerLogin()">
+      <button class="login-btn" id="loginBtn" onclick="hacerLogin()">Ingresar</button>
       <div class="login-error" id="loginError"></div>
     </div>
   </div>
@@ -456,19 +457,54 @@
       return p[2] + '/' + p[1] + '/' + p[0];
     }
 
+    // ── SESIÓN ──
+    var SESSION_KEY = 'chatwshub_session';
+
+    function guardarSesion(usuario) {
+      var sesion = { usuario: usuario, timestamp: Date.now(), expira: usuario.expira || 28800 };
+      try { localStorage.setItem(SESSION_KEY, JSON.stringify(sesion)); } catch(e) {}
+    }
+
+    function leerSesion() {
+      try {
+        var raw = localStorage.getItem(SESSION_KEY);
+        if (!raw) return null;
+        var s = JSON.parse(raw);
+        var edad = (Date.now() - s.timestamp) / 1000;
+        if (edad > s.expira) { localStorage.removeItem(SESSION_KEY); return null; }
+        return s.usuario;
+      } catch(e) { return null; }
+    }
+
+    function entrarConUsuario(usuario) {
+      usuarioActual = { email: usuario.email, nombre: usuario.nombre, rol: usuario.rol };
+      document.getElementById('loginScreen').style.display = 'none';
+      iniciarApp();
+    }
+
     // ── LOGIN ──
-    document.getElementById('loginEmail').addEventListener('keypress', function(e) { if (e.key === 'Enter') hacerLogin(); });
     function hacerLogin() {
-      var email = document.getElementById('loginEmail').value.trim();
-      if (!email) { document.getElementById('loginError').textContent = 'Ingresá tu email'; return; }
-      document.getElementById('loginError').textContent = '';
-      api("getUsuario", { email: email }).then(function(data) {
+      var email = document.getElementById('loginEmail').value.trim().toLowerCase();
+      var password = document.getElementById('loginPass').value.trim();
+      var errEl = document.getElementById('loginError');
+      var btn = document.getElementById('loginBtn');
+      errEl.textContent = '';
+      if (!email) { errEl.textContent = 'Ingresá tu email'; return; }
+      if (!password) { errEl.textContent = 'Ingresá tu contraseña'; return; }
+      btn.textContent = '...'; btn.disabled = true;
+      api("getUsuario", { email: email, password: password }).then(function(data) {
+        btn.textContent = 'Ingresar'; btn.disabled = false;
         if (data.status === "ok") {
-          usuarioActual = { email: email, nombre: data.nombre, rol: data.rol };
-          document.getElementById('loginScreen').style.display = 'none';
-          iniciarApp();
-        } else { document.getElementById('loginError').textContent = '❌ Email no autorizado'; }
-      }).catch(function() { document.getElementById('loginError').textContent = '❌ Error de conexión'; });
+          var usuario = { email: email, nombre: data.nombre, rol: data.rol, expira: data.expira || 28800 };
+          guardarSesion(usuario);
+          entrarConUsuario(usuario);
+        } else {
+          errEl.textContent = data.mensaje === 'password incorrecto' ? '❌ Contraseña incorrecta' : '❌ Email no autorizado';
+        }
+      }).catch(function() {
+        btn.textContent = 'Ingresar'; btn.disabled = false;
+        document.getElementById('loginError').textContent = '❌ Error de conexión';
+      });
     }
 
     function iniciarApp() {
@@ -1069,6 +1105,14 @@
     }, 15000);
 
     function volverAContactos() { document.getElementById('appContainer').classList.remove('chat-open'); }
+
+    // ── INIT — verificar sesión al arrancar ──
+    (function() {
+      var sesion = leerSesion();
+      if (sesion) {
+        entrarConUsuario(sesion);
+      }
+    })();
   </script>
 </body>
 </html>
