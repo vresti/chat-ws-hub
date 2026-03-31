@@ -1328,7 +1328,8 @@
       for (var d = 1; d <= diasMes; d++) {
         var fecha = new Date(año, mes, d);
         var esHoy = fecha.getTime() === hoy.getTime();
-        html += '<div class="alq-cal-dia' + (esHoy ? ' hoy-dia' : '') + '" onclick="alqDiaClick('' + año + '-' + String(mes+1).padStart(2,'0') + '-' + String(d).padStart(2,'0') + '')">';
+        var fechaStr = año + '-' + String(mes+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+        html += '<div class="alq-cal-dia' + (esHoy ? ' hoy-dia' : '') + '" data-f="' + fechaStr + '" onclick="alqDiaClick(this.dataset.f)">';
         html += '<div class="alq-cal-num">' + d + '</div>';
 
         // Buscar alquileres que cubren este día
