@@ -140,6 +140,77 @@
     .alerta-nombre { color: #E9EDEF; font-size: 14px; font-weight: 500; }
     .alerta-detalle { color: #8696A0; font-size: 12px; margin-top: 3px; }
     .alerta-dias { color: #E74C3C; font-size: 11px; font-weight: 600; margin-top: 2px; }
+    /* ── MÓDULO ALQUILERES ── */
+    .alq-panel { position: fixed; top: 0; right: 0; width: 520px; height: 100%; background: #111B21; border-left: 1px solid #2A3942; z-index: 510; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.3s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.4); }
+    .alq-panel.open { transform: translateX(0); }
+    .alq-header { background: #202C33; padding: 12px 16px; border-bottom: 1px solid #2A3942; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .alq-title { color: #E9EDEF; font-size: 15px; font-weight: 500; }
+    .alq-close { background: none; border: none; color: #8696A0; font-size: 20px; cursor: pointer; }
+    .alq-tabs { display: flex; gap: 0; border-bottom: 1px solid #2A3942; flex-shrink: 0; background: #202C33; }
+    .alq-tab { flex: 1; padding: 10px; background: none; border: none; color: #8696A0; font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; font-family: inherit; }
+    .alq-tab.active { color: #c9a227; border-bottom-color: #c9a227; }
+    .alq-body { flex: 1; overflow-y: auto; padding: 12px; scrollbar-width: thin; scrollbar-color: #374045 transparent; }
+    .alq-body::-webkit-scrollbar { width: 6px; }
+    .alq-body::-webkit-scrollbar-thumb { background: #374045; border-radius: 3px; }
+
+    /* Unidades */
+    .alq-unidad-card { background: #202C33; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; border-left: 3px solid #c9a227; }
+    .alq-unidad-nombre { color: #E9EDEF; font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .alq-unidad-detalle { color: #8696A0; font-size: 12px; margin-bottom: 8px; }
+    .alq-unidad-precios { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+    .alq-precio-badge { background: #1A3A2A; color: #c9a227; border-radius: 4px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+    .alq-unidad-btns { display: flex; gap: 6px; justify-content: flex-end; }
+    .btn-alq-edit { background: none; border: 1px solid #00A884; color: #00A884; border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer; font-family: inherit; }
+    .btn-alq-del { background: none; border: 1px solid #E74C3C; color: #E74C3C; border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer; font-family: inherit; }
+    .btn-alq-cal { background: none; border: 1px solid #c9a227; color: #c9a227; border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer; font-family: inherit; }
+    .btn-alq-nuevo { width: 100%; padding: 10px; border-radius: 8px; border: none; background: #c9a227; color: #111B21; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; margin-bottom: 12px; transition: opacity 0.2s; }
+    .btn-alq-nuevo:hover { opacity: 0.85; }
+
+    /* Alquileres lista */
+    .alq-filtro-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .alq-select { padding: 6px 10px; border-radius: 6px; border: 1px solid #2A3942; background: #202C33; color: #E9EDEF; font-size: 12px; outline: none; font-family: inherit; flex: 1; }
+    .alq-reserva-card { background: #202C33; border-radius: 8px; padding: 12px 14px; margin-bottom: 8px; border-left: 3px solid #00A884; }
+    .alq-reserva-card.pasado { border-left-color: #374045; opacity: 0.7; }
+    .alq-reserva-card.hoy { border-left-color: #E74C3C; }
+    .alq-reserva-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .alq-reserva-unidad { color: #c9a227; font-size: 12px; font-weight: 600; }
+    .alq-reserva-fechas { color: #E9EDEF; font-size: 13px; font-weight: 500; }
+    .alq-reserva-inquilino { color: #8696A0; font-size: 12px; margin-top: 3px; }
+    .alq-reserva-importe { color: #00A884; font-size: 12px; font-weight: 600; }
+    .alq-reserva-btns { display: flex; gap: 5px; margin-top: 8px; justify-content: flex-end; }
+
+    /* Calendario */
+    .alq-cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .alq-cal-mes { color: #E9EDEF; font-size: 15px; font-weight: 500; }
+    .alq-cal-nav { background: none; border: 1px solid #2A3942; color: #8696A0; border-radius: 6px; padding: 4px 10px; cursor: pointer; font-size: 14px; }
+    .alq-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-bottom: 16px; }
+    .alq-cal-dia-header { color: #8696A0; font-size: 10px; font-weight: 600; text-align: center; padding: 4px 0; text-transform: uppercase; }
+    .alq-cal-dia { min-height: 44px; border-radius: 4px; padding: 3px; position: relative; cursor: pointer; transition: background 0.15s; }
+    .alq-cal-dia:hover { background: #202C33; }
+    .alq-cal-dia.otro-mes { opacity: 0.3; }
+    .alq-cal-dia.hoy-dia { border: 1px solid #00A884; }
+    .alq-cal-num { font-size: 11px; color: #8696A0; text-align: center; margin-bottom: 2px; }
+    .alq-cal-dia.hoy-dia .alq-cal-num { color: #00A884; font-weight: 700; }
+    .alq-cal-bloque { height: 6px; border-radius: 2px; margin-bottom: 1px; font-size: 9px; color: white; padding: 0 2px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .alq-cal-leyenda { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .alq-ley-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #8696A0; }
+    .alq-ley-color { width: 12px; height: 12px; border-radius: 2px; }
+
+    /* Modal ABM */
+    .alq-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 600; display: flex; align-items: center; justify-content: center; }
+    .alq-modal { background: #202C33; border-radius: 12px; padding: 24px; width: 460px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+    .alq-modal h3 { color: #E9EDEF; font-size: 15px; font-weight: 500; margin-bottom: 16px; }
+    .alq-field { margin-bottom: 12px; }
+    .alq-label { color: #8696A0; font-size: 11px; margin-bottom: 4px; display: block; }
+    .alq-input { width: 100%; padding: 8px 12px; border-radius: 6px; border: 1px solid #2A3942; background: #2A3942; color: #E9EDEF; font-size: 13px; outline: none; font-family: inherit; transition: border-color 0.2s; }
+    .alq-input:focus { border-color: #c9a227; }
+    .alq-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .alq-modal-btns { display: flex; gap: 10px; margin-top: 16px; }
+    .alq-btn-guardar { flex: 1; padding: 10px; border-radius: 8px; border: none; background: #c9a227; color: #111B21; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+    .alq-btn-cancel { padding: 10px 16px; border-radius: 8px; border: none; background: #374045; color: #8696A0; font-size: 14px; cursor: pointer; font-family: inherit; }
+    .alq-conflicto { background: #2D1117; border: 1px solid #E74C3C; border-radius: 6px; padding: 10px 12px; color: #E74C3C; font-size: 13px; margin-bottom: 12px; display: none; }
+
+
 
     .chat-messages { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 20px 60px; background-color: #0B141A; background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23182229' fill-opacity='0.6'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); scrollbar-width: thin; scrollbar-color: #374045 transparent; min-height: 0; }
     .chat-messages::-webkit-scrollbar { width: 6px; }
@@ -341,6 +412,7 @@
           <div class="chat-header-phone" id="chatPhone"></div>
           <button class="estado-selector" id="btnEstado" onclick="mostrarEstadoDropdown(event)">● Nuevo ▾</button>
           <button class="btn-stk" onclick="toggleStk()">STK</button>
+          <button class="btn-stk" style="border-color:#1a6b8a;color:#1a6b8a;" onclick="toggleAlq()">🏠</button>
         </div>
         <div class="chat-messages" id="chatMessages"></div>
         <div class="suggestions-bar" id="suggestionsBar"></div>
@@ -1104,6 +1176,347 @@
       cargarAlertas();
     }, 15000);
 
+
+    // ============================================
+    // MÓDULO ALQUILERES
+    // ============================================
+    var alqTabActual = 1;
+    var alqUnidades = [];
+    var alqAlquileres = [];
+    var alqCalFecha = new Date();
+    var alqCalFecha = new Date(alqCalFecha.getFullYear(), alqCalFecha.getMonth(), 1);
+    var ALQ_COLORS = ['#1a6b8a','#c9a227','#00A884','#9B59B6','#E67E22','#E74C3C','#3498DB','#27AE60'];
+
+    function toggleAlq() {
+      var panel = document.getElementById('alqPanel');
+      panel.classList.toggle('open');
+      if (panel.classList.contains('open')) {
+        if (alqUnidades.length === 0) cargarAlqUnidades();
+        alqCambiarTab(alqTabActual);
+      }
+    }
+
+    function alqCambiarTab(n) {
+      alqTabActual = n;
+      [1,2,3].forEach(function(i) {
+        document.getElementById('alqTab'+i).classList.toggle('active', i === n);
+      });
+      if (n === 1) renderAlqUnidades();
+      if (n === 2) { if (alqAlquileres.length === 0) cargarAlqAlquileres(); else renderAlqReservas(); }
+      if (n === 3) { if (alqAlquileres.length === 0) cargarAlqAlquileres(); else renderAlqCalendario(); }
+    }
+
+    function cargarAlqUnidades() {
+      document.getElementById('alqBody').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando...</div>';
+      api('getUnidades').then(function(d) {
+        alqUnidades = d;
+        renderAlqUnidades();
+      });
+    }
+
+    function cargarAlqAlquileres() {
+      document.getElementById('alqBody').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando...</div>';
+      api('getAlquileres', {}).then(function(d) {
+        alqAlquileres = d;
+        if (alqTabActual === 2) renderAlqReservas();
+        if (alqTabActual === 3) renderAlqCalendario();
+      });
+    }
+
+    function renderAlqUnidades() {
+      var html = '<button class="btn-alq-nuevo" onclick="abrirModalUnidad(null)">➕ Nueva unidad</button>';
+      if (!alqUnidades.length) {
+        html += '<div class="loading" style="color:#8696A0;">Sin unidades cargadas</div>';
+      } else {
+        alqUnidades.forEach(function(u) {
+          html += '<div class="alq-unidad-card">' +
+            '<div class="alq-unidad-nombre">' + u.alias + ' — ' + u.nombreUnidad + '</div>' +
+            '<div class="alq-unidad-detalle">' + u.tipo + ' · ' + u.ambientes + ' amb · ' + u.capacidad + ' · ' + u.ubicacion + '</div>' +
+            '<div class="alq-unidad-precios">' +
+              (u.precioDia ? '<span class="alq-precio-badge">Día: $' + Number(u.precioDia).toLocaleString() + '</span>' : '') +
+              (u.precioVieLun ? '<span class="alq-precio-badge">Vie-Lun: $' + Number(u.precioVieLun).toLocaleString() + '</span>' : '') +
+              (u.precioSemana ? '<span class="alq-precio-badge">Semana: $' + Number(u.precioSemana).toLocaleString() + '</span>' : '') +
+            '</div>' +
+            '<div class="alq-unidad-btns">' +
+              '<button class="btn-alq-cal" onclick="verCalUnidad('' + u.nombreUnidad.replace(/'/g,"\'") + '')">📅 Ver</button>' +
+              '<button class="btn-alq-edit" onclick="abrirModalUnidad(' + JSON.stringify(u).replace(/"/g,'&quot;') + ')">✎</button>' +
+              '<button class="btn-alq-del" onclick="borrarUnidad('' + u.alias.replace(/'/g,"\'") + '')">🗑</button>' +
+            '</div>' +
+          '</div>';
+        });
+      }
+      document.getElementById('alqBody').innerHTML = html;
+    }
+
+    function renderAlqReservas(filtroUnidad) {
+      var lista = filtroUnidad ? alqAlquileres.filter(function(a) { return a.nombreUnidad === filtroUnidad; }) : alqAlquileres;
+      lista = lista.slice().sort(function(a,b) { return new Date(b.fechaIngreso) - new Date(a.fechaIngreso); });
+      var hoy = new Date(); hoy.setHours(0,0,0,0);
+      var html = '<button class="btn-alq-nuevo" onclick="abrirModalAlquiler(null)">➕ Nueva reserva</button>';
+      html += '<div class="alq-filtro-bar">';
+      html += '<select class="alq-select" onchange="renderAlqReservas(this.value||undefined)"><option value="">Todas las unidades</option>';
+      alqUnidades.forEach(function(u) { html += '<option value="' + u.nombreUnidad + '"' + (filtroUnidad===u.nombreUnidad?' selected':'') + '>' + u.nombreUnidad + '</option>'; });
+      html += '</select></div>';
+      if (!lista.length) { html += '<div class="loading" style="color:#8696A0;">Sin reservas</div>'; }
+      else {
+        lista.forEach(function(a) {
+          var ing = new Date(a.fechaIngreso); var egr = new Date(a.fechaEgreso);
+          var clase = egr < hoy ? 'pasado' : (ing <= hoy && egr >= hoy ? 'hoy' : '');
+          html += '<div class="alq-reserva-card ' + clase + '">' +
+            '<div class="alq-reserva-header">' +
+              '<span class="alq-reserva-unidad">🏠 ' + a.nombreUnidad + '</span>' +
+              '<span class="alq-reserva-importe">' + (a.importe ? '$' + Number(a.importe).toLocaleString() : '') + '</span>' +
+            '</div>' +
+            '<div class="alq-reserva-fechas">📅 ' + formatFechaAlq(a.fechaIngreso) + ' → ' + formatFechaAlq(a.fechaEgreso) + '</div>' +
+            '<div class="alq-reserva-inquilino">👤 ' + (a.nombreInquilino || '—') + (a.telefono ? ' · ' + a.telefono : '') + (a.nombreBarco ? ' 🚤 ' + a.nombreBarco : '') + '</div>' +
+            (a.notas ? '<div class="alq-reserva-inquilino" style="color:#E9EDEF;">📝 ' + a.notas + '</div>' : '') +
+            '<div class="alq-reserva-btns">' +
+              '<button class="btn-alq-edit" onclick="abrirModalAlquiler(' + JSON.stringify(a).replace(/"/g,'&quot;') + ')">✎</button>' +
+              '<button class="btn-alq-del" onclick="borrarAlquiler(' + a.id + ')">🗑</button>' +
+            '</div>' +
+          '</div>';
+        });
+      }
+      document.getElementById('alqBody').innerHTML = html;
+    }
+
+    function formatFechaAlq(str) {
+      if (!str) return '';
+      var p = str.split('-');
+      return p[2] + '/' + p[1] + '/' + p[0];
+    }
+
+    function renderAlqCalendario(filtroUnidad) {
+      var año = alqCalFecha.getFullYear();
+      var mes = alqCalFecha.getMonth();
+      var hoy = new Date(); hoy.setHours(0,0,0,0);
+      var meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+      // Armar mapa de colores por unidad
+      var colorMap = {};
+      alqUnidades.forEach(function(u, i) { colorMap[u.nombreUnidad] = ALQ_COLORS[i % ALQ_COLORS.length]; });
+
+      // Filtrar alquileres del mes visible ± buffer
+      var inicio = new Date(año, mes, 1);
+      var fin = new Date(año, mes + 1, 0);
+
+      var html = '<div class="alq-filtro-bar">';
+      html += '<select class="alq-select" onchange="renderAlqCalendario(this.value||undefined)"><option value="">Todas las unidades</option>';
+      alqUnidades.forEach(function(u) { html += '<option value="' + u.nombreUnidad + '"' + (filtroUnidad===u.nombreUnidad?' selected':'') + '>' + u.nombreUnidad + '</option>'; });
+      html += '</select></div>';
+
+      html += '<div class="alq-cal-header">' +
+        '<button class="alq-cal-nav" onclick="alqCalAnterior()">◀</button>' +
+        '<span class="alq-cal-mes">' + meses[mes] + ' ' + año + '</span>' +
+        '<button class="alq-cal-nav" onclick="alqCalSiguiente()">▶</button>' +
+      '</div>';
+
+      html += '<div class="alq-cal-grid">';
+      ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'].forEach(function(d) {
+        html += '<div class="alq-cal-dia-header">' + d + '</div>';
+      });
+
+      var primerDia = new Date(año, mes, 1).getDay();
+      var diasMes = new Date(año, mes + 1, 0).getDate();
+
+      // Días del mes anterior para completar
+      for (var i = 0; i < primerDia; i++) {
+        var dAnt = new Date(año, mes, -primerDia + i + 1);
+        html += '<div class="alq-cal-dia otro-mes"><div class="alq-cal-num">' + dAnt.getDate() + '</div></div>';
+      }
+
+      // Días del mes actual
+      for (var d = 1; d <= diasMes; d++) {
+        var fecha = new Date(año, mes, d);
+        var esHoy = fecha.getTime() === hoy.getTime();
+        html += '<div class="alq-cal-dia' + (esHoy ? ' hoy-dia' : '') + '" onclick="alqDiaClick('' + año + '-' + String(mes+1).padStart(2,'0') + '-' + String(d).padStart(2,'0') + '')">';
+        html += '<div class="alq-cal-num">' + d + '</div>';
+
+        // Buscar alquileres que cubren este día
+        var alqFiltrados = filtroUnidad ? alqAlquileres.filter(function(a) { return a.nombreUnidad === filtroUnidad; }) : alqAlquileres;
+        alqFiltrados.forEach(function(a) {
+          var aIng = new Date(a.fechaIngreso);
+          var aEgr = new Date(a.fechaEgreso);
+          if (fecha >= aIng && fecha < aEgr) {
+            var color = colorMap[a.nombreUnidad] || '#00A884';
+            var label = filtroUnidad ? (a.nombreInquilino || a.nombreUnidad) : a.nombreUnidad;
+            html += '<div class="alq-cal-bloque" style="background:' + color + '" title="' + a.nombreUnidad + ' — ' + (a.nombreInquilino||'') + '">' + label + '</div>';
+          }
+        });
+
+        html += '</div>';
+      }
+
+      // Completar última semana
+      var totalCeldas = primerDia + diasMes;
+      var restantes = (7 - (totalCeldas % 7)) % 7;
+      for (var r = 1; r <= restantes; r++) {
+        html += '<div class="alq-cal-dia otro-mes"><div class="alq-cal-num">' + r + '</div></div>';
+      }
+
+      html += '</div>';
+
+      // Leyenda
+      if (!filtroUnidad) {
+        html += '<div class="alq-cal-leyenda">';
+        alqUnidades.forEach(function(u, i) {
+          html += '<div class="alq-ley-item"><div class="alq-ley-color" style="background:' + ALQ_COLORS[i % ALQ_COLORS.length] + '"></div>' + u.nombreUnidad + '</div>';
+        });
+        html += '</div>';
+      }
+
+      html += '<button class="btn-alq-nuevo" style="margin-top:16px;" onclick="abrirModalAlquiler(null)">➕ Nueva reserva</button>';
+
+      document.getElementById('alqBody').innerHTML = html;
+    }
+
+    function alqCalAnterior() {
+      alqCalFecha = new Date(alqCalFecha.getFullYear(), alqCalFecha.getMonth() - 1, 1);
+      renderAlqCalendario();
+    }
+    function alqCalSiguiente() {
+      alqCalFecha = new Date(alqCalFecha.getFullYear(), alqCalFecha.getMonth() + 1, 1);
+      renderAlqCalendario();
+    }
+    function alqDiaClick(fechaStr) {
+      // Al hacer click en un día, abrir nueva reserva con esa fecha
+      abrirModalAlquiler(null, fechaStr);
+    }
+
+    function verCalUnidad(nombreUnidad) {
+      alqCambiarTab(3);
+      if (alqAlquileres.length === 0) {
+        cargarAlqAlquileres();
+      } else {
+        renderAlqCalendario(nombreUnidad);
+      }
+    }
+
+    // ── MODAL UNIDAD ──
+    function abrirModalUnidad(u) {
+      document.getElementById('alqModalUnidadTitulo').textContent = u ? '✎ Editar unidad' : '🏡 Nueva unidad';
+      document.getElementById('alq_alias_original').value = u ? u.alias : '';
+      document.getElementById('alq_alias').value = u ? u.alias : '';
+      document.getElementById('alq_tipo').value = u ? u.tipo : '';
+      document.getElementById('alq_ambientes').value = u ? u.ambientes : '';
+      document.getElementById('alq_capacidad').value = u ? u.capacidad : '';
+      document.getElementById('alq_ubicacion').value = u ? u.ubicacion : '';
+      document.getElementById('alq_nombreUnidad').value = u ? u.nombreUnidad : '';
+      document.getElementById('alq_precioDia').value = u ? u.precioDia : '';
+      document.getElementById('alq_precioVieLun').value = u ? u.precioVieLun : '';
+      document.getElementById('alq_precioSemana').value = u ? u.precioSemana : '';
+      document.getElementById('alqModalUnidad').style.display = 'flex';
+    }
+    function cerrarModalUnidad() { document.getElementById('alqModalUnidad').style.display = 'none'; }
+    function confirmarGuardarUnidad() {
+      var d = {
+        aliasOriginal: document.getElementById('alq_alias_original').value,
+        alias: document.getElementById('alq_alias').value.trim(),
+        tipo: document.getElementById('alq_tipo').value.trim(),
+        ambientes: document.getElementById('alq_ambientes').value.trim(),
+        capacidad: document.getElementById('alq_capacidad').value.trim(),
+        ubicacion: document.getElementById('alq_ubicacion').value.trim(),
+        nombreUnidad: document.getElementById('alq_nombreUnidad').value.trim(),
+        precioDia: document.getElementById('alq_precioDia').value.trim(),
+        precioVieLun: document.getElementById('alq_precioVieLun').value.trim(),
+        precioSemana: document.getElementById('alq_precioSemana').value.trim()
+      };
+      if (!d.alias || !d.nombreUnidad) { mostrarToast('⚠️ Alias y Nombre son obligatorios'); return; }
+      api('guardarUnidad', { datos: JSON.stringify(d) }).then(function(r) {
+        if (r.status === 'ok') {
+          mostrarToast('✓ Unidad guardada');
+          cerrarModalUnidad();
+          api('getUnidades').then(function(data) { alqUnidades = data; renderAlqUnidades(); });
+        } else { mostrarToast('❌ ' + r.mensaje); }
+      });
+    }
+    function borrarUnidad(alias) {
+      if (!confirm('¿Borrar unidad ' + alias + '?')) return;
+      api('borrarUnidad', { alias: alias }).then(function(r) {
+        if (r.status === 'ok') {
+          mostrarToast('✓ Unidad borrada');
+          api('getUnidades').then(function(data) { alqUnidades = data; renderAlqUnidades(); });
+        }
+      });
+    }
+
+    // ── MODAL ALQUILER ──
+    function abrirModalAlquiler(a, fechaSugerida) {
+      document.getElementById('alqModalAlquilerTitulo').textContent = a ? '✎ Editar reserva' : '📋 Nueva reserva';
+      document.getElementById('alqConflicto').style.display = 'none';
+      document.getElementById('alqr_id').value = a ? a.id : '';
+      // Poblar selector de unidades
+      var sel = document.getElementById('alqr_unidad');
+      sel.innerHTML = '';
+      alqUnidades.forEach(function(u) {
+        var opt = document.createElement('option');
+        opt.value = u.nombreUnidad;
+        opt.textContent = u.nombreUnidad;
+        if (a && a.nombreUnidad === u.nombreUnidad) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      document.getElementById('alqr_fechaIng').value = a ? a.fechaIngreso : (fechaSugerida || '');
+      document.getElementById('alqr_fechaEgr').value = a ? a.fechaEgreso : '';
+      document.getElementById('alqr_importe').value = a ? a.importe : '';
+      document.getElementById('alqr_nombre').value = a ? a.nombreInquilino : '';
+      document.getElementById('alqr_dni').value = a ? a.dniNro : '';
+      document.getElementById('alqr_tel').value = a ? a.telefono : '';
+      document.getElementById('alqr_mail').value = a ? a.mail : '';
+      document.getElementById('alqr_barco').value = a ? a.nombreBarco : '';
+      document.getElementById('alqr_matricula').value = a ? a.matriculaBarco : '';
+      document.getElementById('alqr_notas').value = a ? a.notas : '';
+      document.getElementById('alqModalAlquiler').style.display = 'flex';
+    }
+    function cerrarModalAlquiler() { document.getElementById('alqModalAlquiler').style.display = 'none'; }
+    function confirmarGuardarAlquiler() {
+      var d = {
+        id: document.getElementById('alqr_id').value || null,
+        nombreUnidad: document.getElementById('alqr_unidad').value,
+        fechaIngreso: document.getElementById('alqr_fechaIng').value,
+        fechaEgreso: document.getElementById('alqr_fechaEgr').value,
+        importe: document.getElementById('alqr_importe').value.trim(),
+        nombreInquilino: document.getElementById('alqr_nombre').value.trim(),
+        dniNro: document.getElementById('alqr_dni').value.trim(),
+        telefono: document.getElementById('alqr_tel').value.trim(),
+        mail: document.getElementById('alqr_mail').value.trim(),
+        nombreBarco: document.getElementById('alqr_barco').value.trim(),
+        matriculaBarco: document.getElementById('alqr_matricula').value.trim(),
+        notas: document.getElementById('alqr_notas').value.trim()
+      };
+      if (!d.nombreUnidad || !d.fechaIngreso || !d.fechaEgreso) { mostrarToast('⚠️ Unidad y fechas son obligatorias'); return; }
+      api('guardarAlquiler', { datos: JSON.stringify(d) }).then(function(r) {
+        if (r.status === 'ok') {
+          mostrarToast('✓ Reserva guardada');
+          cerrarModalAlquiler();
+          api('getAlquileres', {}).then(function(data) {
+            alqAlquileres = data;
+            if (alqTabActual === 2) renderAlqReservas();
+            if (alqTabActual === 3) renderAlqCalendario();
+          });
+        } else if (r.status === 'conflicto') {
+          var el = document.getElementById('alqConflicto');
+          el.textContent = '⚠️ ' + r.mensaje;
+          el.style.display = 'block';
+        } else {
+          mostrarToast('❌ ' + (r.mensaje || 'Error'));
+        }
+      });
+    }
+    function borrarAlquiler(id) {
+      if (!confirm('¿Borrar esta reserva?')) return;
+      api('borrarAlquiler', { id: id }).then(function(r) {
+        if (r.status === 'ok') {
+          mostrarToast('✓ Reserva borrada');
+          api('getAlquileres', {}).then(function(data) {
+            alqAlquileres = data;
+            if (alqTabActual === 2) renderAlqReservas();
+            if (alqTabActual === 3) renderAlqCalendario();
+          });
+        }
+      });
+    }
+
+
     function volverAContactos() { document.getElementById('appContainer').classList.remove('chat-open'); }
 
     // ── INIT — verificar sesión al arrancar ──
@@ -1114,5 +1527,83 @@
       }
     })();
   </script>
+
+  <!-- PANEL ALQUILERES -->
+  <div class="alq-panel" id="alqPanel">
+    <div class="alq-header">
+      <span class="alq-title">🏠 Alquileres — Isla del Este</span>
+      <button class="alq-close" onclick="toggleAlq()">✕</button>
+    </div>
+    <div class="alq-tabs">
+      <button class="alq-tab active" id="alqTab1" onclick="alqCambiarTab(1)">🏡 Unidades</button>
+      <button class="alq-tab" id="alqTab2" onclick="alqCambiarTab(2)">📋 Reservas</button>
+      <button class="alq-tab" id="alqTab3" onclick="alqCambiarTab(3)">📅 Calendario</button>
+    </div>
+    <div class="alq-body" id="alqBody">
+      <div class="loading"><div class="spinner"></div>Cargando...</div>
+    </div>
+  </div>
+
+  <!-- MODAL ABM UNIDAD -->
+  <div class="alq-modal-overlay" id="alqModalUnidad" style="display:none" onclick="if(event.target===this) cerrarModalUnidad()">
+    <div class="alq-modal">
+      <h3 id="alqModalUnidadTitulo">🏡 Nueva unidad</h3>
+      <input type="hidden" id="alq_alias_original">
+      <div class="alq-row2">
+        <div class="alq-field"><label class="alq-label">Alias (ID único)</label><input class="alq-input" id="alq_alias" placeholder="Ej: 11"></div>
+        <div class="alq-field"><label class="alq-label">Tipo</label><input class="alq-input" id="alq_tipo" placeholder="Departamento"></div>
+      </div>
+      <div class="alq-row2">
+        <div class="alq-field"><label class="alq-label">Ambientes</label><input class="alq-input" id="alq_ambientes" placeholder="2"></div>
+        <div class="alq-field"><label class="alq-label">Capacidad</label><input class="alq-input" id="alq_capacidad" placeholder="3-pax"></div>
+      </div>
+      <div class="alq-field"><label class="alq-label">Ubicación</label><input class="alq-input" id="alq_ubicacion" placeholder="Isla del Este"></div>
+      <div class="alq-field"><label class="alq-label">Nombre Unidad</label><input class="alq-input" id="alq_nombreUnidad" placeholder="Depto nro 11"></div>
+      <div class="alq-row2">
+        <div class="alq-field"><label class="alq-label">Precio día</label><input class="alq-input" id="alq_precioDia" placeholder="150000"></div>
+        <div class="alq-field"><label class="alq-label">Precio Vie-Lun</label><input class="alq-input" id="alq_precioVieLun" placeholder="525000"></div>
+      </div>
+      <div class="alq-field"><label class="alq-label">Precio semana Sab-Vie</label><input class="alq-input" id="alq_precioSemana" placeholder="900000"></div>
+      <div class="alq-modal-btns">
+        <button class="alq-btn-cancel" onclick="cerrarModalUnidad()">Cancelar</button>
+        <button class="alq-btn-guardar" onclick="confirmarGuardarUnidad()">💾 Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL ABM ALQUILER -->
+  <div class="alq-modal-overlay" id="alqModalAlquiler" style="display:none" onclick="if(event.target===this) cerrarModalAlquiler()">
+    <div class="alq-modal">
+      <h3 id="alqModalAlquilerTitulo">📋 Nueva reserva</h3>
+      <input type="hidden" id="alqr_id">
+      <div class="alq-conflicto" id="alqConflicto"></div>
+      <div class="alq-field"><label class="alq-label">Unidad</label>
+        <select class="alq-input" id="alqr_unidad"></select>
+      </div>
+      <div class="alq-row2">
+        <div class="alq-field"><label class="alq-label">Fecha ingreso</label><input class="alq-input" type="date" id="alqr_fechaIng"></div>
+        <div class="alq-field"><label class="alq-label">Fecha egreso</label><input class="alq-input" type="date" id="alqr_fechaEgr"></div>
+      </div>
+      <div class="alq-field"><label class="alq-label">Importe</label><input class="alq-input" id="alqr_importe" placeholder="525000"></div>
+      <div class="alq-row2">
+        <div class="alq-field"><label class="alq-label">Nombre inquilino</label><input class="alq-input" id="alqr_nombre" placeholder="Juan García"></div>
+        <div class="alq-field"><label class="alq-label">DNI / Nro</label><input class="alq-input" id="alqr_dni" placeholder="30123456"></div>
+      </div>
+      <div class="alq-row2">
+        <div class="alq-field"><label class="alq-label">Teléfono</label><input class="alq-input" id="alqr_tel" placeholder="5491112345678"></div>
+        <div class="alq-field"><label class="alq-label">Mail</label><input class="alq-input" type="email" id="alqr_mail" placeholder="juan@mail.com"></div>
+      </div>
+      <div class="alq-row2">
+        <div class="alq-field"><label class="alq-label">Nombre barco</label><input class="alq-input" id="alqr_barco" placeholder="Opcional"></div>
+        <div class="alq-field"><label class="alq-label">Matrícula barco</label><input class="alq-input" id="alqr_matricula" placeholder="Opcional"></div>
+      </div>
+      <div class="alq-field"><label class="alq-label">Notas</label><input class="alq-input" id="alqr_notas" placeholder="Observaciones..."></div>
+      <div class="alq-modal-btns">
+        <button class="alq-btn-cancel" onclick="cerrarModalAlquiler()">Cancelar</button>
+        <button class="alq-btn-guardar" onclick="confirmarGuardarAlquiler()">💾 Guardar</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
