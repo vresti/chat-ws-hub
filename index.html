@@ -1227,7 +1227,7 @@
       if (!alqUnidades.length) {
         html += '<div class="loading" style="color:#8696A0;">Sin unidades cargadas</div>';
       } else {
-        alqUnidades.forEach(function(u) {
+        alqUnidades.forEach(function(u, idx) {
           html += '<div class="alq-unidad-card">' +
             '<div class="alq-unidad-nombre">' + u.alias + ' — ' + u.nombreUnidad + '</div>' +
             '<div class="alq-unidad-detalle">' + u.tipo + ' · ' + u.ambientes + ' amb · ' + u.capacidad + ' · ' + u.ubicacion + '</div>' +
@@ -1237,9 +1237,9 @@
               (u.precioSemana ? '<span class="alq-precio-badge">Semana: $' + Number(u.precioSemana).toLocaleString() + '</span>' : '') +
             '</div>' +
             '<div class="alq-unidad-btns">' +
-              '<button class="btn-alq-cal" onclick="verCalUnidad('' + u.nombreUnidad.replace(/'/g,"\'") + '')">📅 Ver</button>' +
-              '<button class="btn-alq-edit" onclick="abrirModalUnidad(' + JSON.stringify(u).replace(/"/g,'&quot;') + ')">✎</button>' +
-              '<button class="btn-alq-del" onclick="borrarUnidad('' + u.alias.replace(/'/g,"\'") + '')">🗑</button>' +
+              '<button class="btn-alq-cal" data-n="' + u.nombreUnidad.replace(/"/g,'&quot;') + '" onclick="verCalUnidad(this.dataset.n)">📅 Ver</button>' +
+              '<button class="btn-alq-edit" data-i="' + idx + '" onclick="alqEditarUnidad(parseInt(this.dataset.i))">✎</button>' +
+              '<button class="btn-alq-del" data-a="' + u.alias.replace(/"/g,'&quot;') + '" onclick="alqBorrarUnidad(this.dataset.a)">🗑</button>' +
             '</div>' +
           '</div>';
         });
@@ -1429,6 +1429,8 @@
         } else { mostrarToast('❌ ' + r.mensaje); }
       });
     }
+    function alqEditarUnidad(idx) { abrirModalUnidad(alqUnidades[parseInt(idx)]); }
+    function alqBorrarUnidad(alias) { borrarUnidad(alias); }
     function borrarUnidad(alias) {
       if (!confirm('¿Borrar unidad ' + alias + '?')) return;
       api('borrarUnidad', { alias: alias }).then(function(r) {
