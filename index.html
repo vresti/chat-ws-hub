@@ -140,6 +140,45 @@
     .alerta-nombre { color: #E9EDEF; font-size: 14px; font-weight: 500; }
     .alerta-detalle { color: #8696A0; font-size: 12px; margin-top: 3px; }
     .alerta-dias { color: #E74C3C; font-size: 11px; font-weight: 600; margin-top: 2px; }
+
+    /* ── CALENDARIO v2 — disponibilidad por rango ── */
+    .alq-rango-bar { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+    .alq-rango-label { color: #8696A0; font-size: 12px; white-space: nowrap; }
+    .alq-rango-input { padding: 7px 10px; border-radius: 6px; border: 1px solid #2A3942; background: #202C33; color: #E9EDEF; font-size: 13px; outline: none; font-family: inherit; flex: 1; min-width: 120px; }
+    .alq-rango-input:focus { border-color: #c9a227; }
+    .alq-rango-btn { padding: 7px 14px; border-radius: 6px; border: none; background: #c9a227; color: #111B21; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; }
+    .alq-resumen { border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 13px; display: none; }
+    .alq-resumen.verde { background: #0D2119; border: 1px solid #3FB950; color: #3FB950; }
+    .alq-resumen.amarillo { background: #272115; border: 1px solid #D29922; color: #D29922; }
+    .alq-resumen.rojo { background: #2D1117; border: 1px solid #F85149; color: #F85149; }
+    .alq-resumen-link { color: inherit; font-weight: 600; cursor: pointer; text-decoration: underline; margin-left: 6px; }
+
+    /* Indicador en celda del calendario */
+    .alq-cal-indicador { width: 10px; height: 10px; border-radius: 50%; margin: 3px auto 0; }
+    .alq-cal-indicador.libre { background: #3FB950; }
+    .alq-cal-indicador.parcial { background: #D29922; }
+    .alq-cal-indicador.ocupado { background: #F85149; }
+    .alq-cal-dia { cursor: pointer; transition: background 0.15s; }
+    .alq-cal-dia:hover:not(.otro-mes) { background: #202C33; }
+    .alq-cal-dia.en-rango { background: rgba(201,162,39,0.08); }
+
+    /* Modal detalle del día */
+    .alq-dia-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 700; display: flex; align-items: center; justify-content: center; }
+    .alq-dia-modal { background: #202C33; border-radius: 14px; padding: 24px; width: 420px; max-width: 95vw; max-height: 80vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+    .alq-dia-modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .alq-dia-modal-titulo { color: #E9EDEF; font-size: 16px; font-weight: 600; }
+    .alq-dia-modal-close { background: none; border: none; color: #8696A0; font-size: 20px; cursor: pointer; }
+    .alq-dia-unidad-row { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #2A3942; }
+    .alq-dia-unidad-row.disponible { border-color: #3FB950; background: rgba(63,185,80,0.06); }
+    .alq-dia-unidad-row.ocupada { border-color: #F85149; background: rgba(248,81,73,0.06); }
+    .alq-dia-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .alq-dia-dot.verde { background: #3FB950; }
+    .alq-dia-dot.rojo { background: #F85149; }
+    .alq-dia-info { flex: 1; min-width: 0; }
+    .alq-dia-nombre { color: #E9EDEF; font-size: 14px; font-weight: 500; }
+    .alq-dia-detalle { color: #8696A0; font-size: 12px; margin-top: 2px; }
+    .alq-dia-btn { padding: 6px 12px; border-radius: 6px; border: none; background: #3FB950; color: #111B21; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; flex-shrink: 0; }
+
     /* ── MÓDULO ALQUILERES ── */
     .alq-panel { position: fixed; top: 0; right: 0; width: 520px; height: 100%; background: #111B21; border-left: 1px solid #2A3942; z-index: 510; display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.3s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.4); }
     .alq-panel.open { transform: translateX(0); }
@@ -1184,6 +1223,7 @@
     var alqUnidades = [];
     var alqAlquileres = [];
     var alqCalFecha = new Date(); alqCalFecha = new Date(alqCalFecha.getFullYear(), alqCalFecha.getMonth(), 1);
+    var alqRangoDesde = ""; var alqRangoHasta = "";
     var ALQ_COLORS = ['#1a6b8a','#c9a227','#00A884','#9B59B6','#E67E22','#E74C3C','#3498DB','#27AE60'];
 
     function toggleAlq() {
@@ -1285,31 +1325,58 @@
       return p[2] + '/' + p[1] + '/' + p[0];
     }
 
-    function renderAlqCalendario(filtroUnidad) {
+    function renderAlqCalendario() {
       var año = alqCalFecha.getFullYear();
       var mes = alqCalFecha.getMonth();
       var hoy = new Date(); hoy.setHours(0,0,0,0);
       var meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      var totalUnidades = alqUnidades.length;
 
-      // Armar mapa de colores por unidad
-      var colorMap = {};
-      alqUnidades.forEach(function(u, i) { colorMap[u.nombreUnidad] = ALQ_COLORS[i % ALQ_COLORS.length]; });
+      // Parsear rango seleccionado
+      var rangoDesde = alqRangoDesde ? new Date(alqRangoDesde + 'T00:00:00') : null;
+      var rangoHasta = alqRangoHasta ? new Date(alqRangoHasta + 'T00:00:00') : null;
 
-      // Filtrar alquileres del mes visible ± buffer
-      var inicio = new Date(año, mes, 1);
-      var fin = new Date(año, mes + 1, 0);
+      // Calcular resumen de disponibilidad para el rango
+      var resumenHtml = '';
+      if (rangoDesde && rangoHasta && rangoHasta > rangoDesde && totalUnidades > 0) {
+        var disponiblesRango = alqUnidades.filter(function(u) {
+          return !alqAlquileres.some(function(a) {
+            if (a.nombreUnidad !== u.nombreUnidad) return false;
+            var aIng = new Date(a.fechaIngreso + 'T00:00:00');
+            var aEgr = new Date(a.fechaEgreso + 'T00:00:00');
+            return rangoDesde < aEgr && rangoHasta > aIng;
+          });
+        });
+        var nd = disponiblesRango.length;
+        var clase = nd === totalUnidades ? 'verde' : nd === 0 ? 'rojo' : 'amarillo';
+        var msg = nd === 0
+          ? '🔴 Sin disponibilidad para el período seleccionado'
+          : nd === totalUnidades
+            ? '🟢 Todas las unidades disponibles para el período'
+            : '🟡 ' + nd + ' de ' + totalUnidades + ' unidades disponibles';
+        var linkDisp = nd > 0 ? '<span class="alq-resumen-link" onclick="alqVerDisponibles()">Ver cuáles →</span>' : '';
+        resumenHtml = '<div class="alq-resumen ' + clase + '" id="alqResumen" style="display:block">' + msg + linkDisp + '</div>';
+      }
 
-      var html = '<div class="alq-filtro-bar">';
-      html += '<select class="alq-select" onchange="renderAlqCalendario(this.value||undefined)"><option value="">Todas las unidades</option>';
-      alqUnidades.forEach(function(u) { html += '<option value="' + u.nombreUnidad + '"' + (filtroUnidad===u.nombreUnidad?' selected':'') + '>' + u.nombreUnidad + '</option>'; });
-      html += '</select></div>';
+      // Barra de rango
+      var html = '<div class="alq-rango-bar">' +
+        '<span class="alq-rango-label">Desde</span>' +
+        '<input type="date" class="alq-rango-input" id="alqDesde" value="' + alqRangoDesde + '" onchange="alqRangoDesde=this.value; renderAlqCalendario()">' +
+        '<span class="alq-rango-label">Hasta</span>' +
+        '<input type="date" class="alq-rango-input" id="alqHasta" value="' + alqRangoHasta + '" onchange="alqRangoHasta=this.value; renderAlqCalendario()">' +
+        '<button class="alq-rango-btn" onclick="alqLimpiarRango()">✕</button>' +
+      '</div>';
 
+      html += resumenHtml;
+
+      // Navegación mes
       html += '<div class="alq-cal-header">' +
         '<button class="alq-cal-nav" onclick="alqCalAnterior()">◀</button>' +
         '<span class="alq-cal-mes">' + meses[mes] + ' ' + año + '</span>' +
         '<button class="alq-cal-nav" onclick="alqCalSiguiente()">▶</button>' +
       '</div>';
 
+      // Grilla días
       html += '<div class="alq-cal-grid">';
       ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'].forEach(function(d) {
         html += '<div class="alq-cal-dia-header">' + d + '</div>';
@@ -1318,32 +1385,42 @@
       var primerDia = new Date(año, mes, 1).getDay();
       var diasMes = new Date(año, mes + 1, 0).getDate();
 
-      // Días del mes anterior para completar
+      // Días mes anterior
       for (var i = 0; i < primerDia; i++) {
         var dAnt = new Date(año, mes, -primerDia + i + 1);
         html += '<div class="alq-cal-dia otro-mes"><div class="alq-cal-num">' + dAnt.getDate() + '</div></div>';
       }
 
-      // Días del mes actual
+      // Días mes actual
       for (var d = 1; d <= diasMes; d++) {
         var fecha = new Date(año, mes, d);
+        fecha.setHours(0,0,0,0);
         var esHoy = fecha.getTime() === hoy.getTime();
         var fechaStr = año + '-' + String(mes+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
-        html += '<div class="alq-cal-dia' + (esHoy ? ' hoy-dia' : '') + '" data-f="' + fechaStr + '" onclick="alqDiaClick(this.dataset.f)">';
+
+        // Contar ocupados este día
+        var ocupadosHoy = alqAlquileres.filter(function(a) {
+          var aIng = new Date(a.fechaIngreso + 'T00:00:00');
+          var aEgr = new Date(a.fechaEgreso + 'T00:00:00');
+          return fecha >= aIng && fecha < aEgr;
+        }).length;
+
+        // Determinar indicador
+        var indicadorClass = '';
+        if (totalUnidades > 0) {
+          if (ocupadosHoy === 0) indicadorClass = 'libre';
+          else if (ocupadosHoy >= totalUnidades) indicadorClass = 'ocupado';
+          else indicadorClass = 'parcial';
+        }
+
+        // ¿Está en el rango seleccionado?
+        var enRango = rangoDesde && rangoHasta && fecha >= rangoDesde && fecha < rangoHasta;
+
+        html += '<div class="alq-cal-dia' + (esHoy ? ' hoy-dia' : '') + (enRango ? ' en-rango' : '') + '" data-f="' + fechaStr + '" onclick="alqDiaClick(this.dataset.f)">';
         html += '<div class="alq-cal-num">' + d + '</div>';
-
-        // Buscar alquileres que cubren este día
-        var alqFiltrados = filtroUnidad ? alqAlquileres.filter(function(a) { return a.nombreUnidad === filtroUnidad; }) : alqAlquileres;
-        alqFiltrados.forEach(function(a) {
-          var aIng = new Date(a.fechaIngreso);
-          var aEgr = new Date(a.fechaEgreso);
-          if (fecha >= aIng && fecha < aEgr) {
-            var color = colorMap[a.nombreUnidad] || '#00A884';
-            var label = filtroUnidad ? (a.nombreInquilino || a.nombreUnidad) : a.nombreUnidad;
-            html += '<div class="alq-cal-bloque" style="background:' + color + '" title="' + a.nombreUnidad + ' — ' + (a.nombreInquilino||'') + '">' + label + '</div>';
-          }
-        });
-
+        if (indicadorClass) {
+          html += '<div class="alq-cal-indicador ' + indicadorClass + '"></div>';
+        }
         html += '</div>';
       }
 
@@ -1353,21 +1430,38 @@
       for (var r = 1; r <= restantes; r++) {
         html += '<div class="alq-cal-dia otro-mes"><div class="alq-cal-num">' + r + '</div></div>';
       }
-
       html += '</div>';
 
-      // Leyenda
-      if (!filtroUnidad) {
-        html += '<div class="alq-cal-leyenda">';
-        alqUnidades.forEach(function(u, i) {
-          html += '<div class="alq-ley-item"><div class="alq-ley-color" style="background:' + ALQ_COLORS[i % ALQ_COLORS.length] + '"></div>' + u.nombreUnidad + '</div>';
-        });
-        html += '</div>';
-      }
+      // Leyenda indicadores
+      html += '<div class="alq-cal-leyenda" style="margin-top:12px;">' +
+        '<div class="alq-ley-item"><div class="alq-ley-color" style="background:#3FB950;border-radius:50%"></div>Libre</div>' +
+        '<div class="alq-ley-item"><div class="alq-ley-color" style="background:#D29922;border-radius:50%"></div>Parcial</div>' +
+        '<div class="alq-ley-item"><div class="alq-ley-color" style="background:#F85149;border-radius:50%"></div>Completo</div>' +
+      '</div>';
 
       html += '<button class="btn-alq-nuevo" style="margin-top:16px;" onclick="abrirModalAlquiler(null)">➕ Nueva reserva</button>';
 
       document.getElementById('alqBody').innerHTML = html;
+    }
+
+    function alqLimpiarRango() {
+      alqRangoDesde = ''; alqRangoHasta = '';
+      renderAlqCalendario();
+    }
+
+    function alqVerDisponibles() {
+      if (!alqRangoDesde || !alqRangoHasta) return;
+      var rangoDesde = new Date(alqRangoDesde + 'T00:00:00');
+      var rangoHasta = new Date(alqRangoHasta + 'T00:00:00');
+      var disponibles = alqUnidades.filter(function(u) {
+        return !alqAlquileres.some(function(a) {
+          if (a.nombreUnidad !== u.nombreUnidad) return false;
+          var aIng = new Date(a.fechaIngreso + 'T00:00:00');
+          var aEgr = new Date(a.fechaEgreso + 'T00:00:00');
+          return rangoDesde < aEgr && rangoHasta > aIng;
+        });
+      });
+      alqMostrarDetalleDia(alqRangoDesde, disponibles.map(function(u) { return u.nombreUnidad; }));
     }
 
     function alqCalAnterior() {
@@ -1378,9 +1472,88 @@
       alqCalFecha = new Date(alqCalFecha.getFullYear(), alqCalFecha.getMonth() + 1, 1);
       renderAlqCalendario();
     }
+
     function alqDiaClick(fechaStr) {
-      // Al hacer click en un día, abrir nueva reserva con esa fecha
-      abrirModalAlquiler(null, fechaStr);
+      alqMostrarDetalleDia(fechaStr, null);
+    }
+
+    function alqMostrarDetalleDia(fechaStr, soloDisponibles) {
+      var fecha = new Date(fechaStr + 'T00:00:00');
+      var rangoDesde = alqRangoDesde ? new Date(alqRangoDesde + 'T00:00:00') : fecha;
+      var rangoHasta = alqRangoHasta ? new Date(alqRangoHasta + 'T00:00:00') : null;
+
+      var meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+      var tituloFecha = fecha.getDate() + ' ' + meses[fecha.getMonth()] + ' ' + fecha.getFullYear();
+      if (alqRangoDesde && alqRangoHasta) {
+        var hD = new Date(alqRangoDesde + 'T00:00:00');
+        var hH = new Date(alqRangoHasta + 'T00:00:00');
+        tituloFecha = hD.getDate() + '/' + (hD.getMonth()+1) + ' al ' + hH.getDate() + '/' + (hH.getMonth()+1) + '/' + hH.getFullYear();
+      }
+
+      var html = '<div class="alq-dia-modal-header">' +
+        '<span class="alq-dia-modal-titulo">📅 ' + tituloFecha + '</span>' +
+        '<button class="alq-dia-modal-close" onclick="alqCerrarDetalleDia()">✕</button>' +
+      '</div>';
+
+      alqUnidades.forEach(function(u) {
+        // Buscar alquiler activo en el rango consultado
+        var alqActivo = alqAlquileres.find(function(a) {
+          if (a.nombreUnidad !== u.nombreUnidad) return false;
+          var aIng = new Date(a.fechaIngreso + 'T00:00:00');
+          var aEgr = new Date(a.fechaEgreso + 'T00:00:00');
+          var dDesde = rangoDesde; var dHasta = rangoHasta || new Date(fechaStr + 'T00:00:00');
+          if (!rangoHasta) { dDesde = fecha; dHasta = new Date(fecha.getTime() + 86400000); }
+          return dDesde < aEgr && dHasta > aIng;
+        });
+
+        if (alqActivo) {
+          html += '<div class="alq-dia-unidad-row ocupada">' +
+            '<div class="alq-dia-dot rojo"></div>' +
+            '<div class="alq-dia-info">' +
+              '<div class="alq-dia-nombre">🏠 ' + u.nombreUnidad + '</div>' +
+              '<div class="alq-dia-detalle">👤 ' + (alqActivo.nombreInquilino || 'Sin nombre') +
+                ' · ' + formatFechaAlq(alqActivo.fechaIngreso) + ' → ' + formatFechaAlq(alqActivo.fechaEgreso) +
+                (alqActivo.importe ? ' · $' + Number(alqActivo.importe).toLocaleString() : '') +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        } else {
+          html += '<div class="alq-dia-unidad-row disponible">' +
+            '<div class="alq-dia-dot verde"></div>' +
+            '<div class="alq-dia-info">' +
+              '<div class="alq-dia-nombre">🏠 ' + u.nombreUnidad + '</div>' +
+              '<div class="alq-dia-detalle" style="color:#3FB950;">Disponible</div>' +
+            '</div>' +
+            '<button class="alq-dia-btn" data-u="' + u.nombreUnidad.replace(/"/g,'&quot;') + '" onclick="alqReservarDesdeDetalle(this.dataset.u)">Reservar</button>' +
+          '</div>';
+        }
+      });
+
+      // Mostrar modal
+      var overlay = document.createElement('div');
+      overlay.className = 'alq-dia-modal-overlay';
+      overlay.id = 'alqDiaModalOverlay';
+      overlay.onclick = function(e) { if (e.target === overlay) alqCerrarDetalleDia(); };
+      var modal = document.createElement('div');
+      modal.className = 'alq-dia-modal';
+      modal.innerHTML = html;
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+    }
+
+    function alqCerrarDetalleDia() {
+      var el = document.getElementById('alqDiaModalOverlay');
+      if (el) el.remove();
+    }
+
+    function alqReservarDesdeDetalle(nombreUnidad) {
+      alqCerrarDetalleDia();
+      // Abrir modal de reserva con unidad y fechas pre-cargadas
+      var a = { nombreUnidad: nombreUnidad, fechaIngreso: alqRangoDesde || '', fechaEgreso: alqRangoHasta || '' };
+      abrirModalAlquiler(a);
+      // Limpiar el id para que sea nueva reserva
+      document.getElementById('alqr_id').value = '';
+      document.getElementById('alqModalAlquilerTitulo').textContent = '📋 Nueva reserva';
     }
 
     function verCalUnidad(nombreUnidad) {
@@ -1388,7 +1561,7 @@
       if (alqAlquileres.length === 0) {
         cargarAlqAlquileres();
       } else {
-        renderAlqCalendario(nombreUnidad);
+        renderAlqCalendario();
       }
     }
 
