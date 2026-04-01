@@ -1344,7 +1344,7 @@
             if (a.nombreUnidad !== u.nombreUnidad) return false;
             var aIng = new Date(a.fechaIngreso + 'T00:00:00');
             var aEgr = new Date(a.fechaEgreso + 'T00:00:00');
-            return rangoDesde < aEgr && rangoHasta > aIng;
+            return rangoDesde <= aEgr && rangoHasta > aIng;
           });
         });
         var nd = disponiblesRango.length;
@@ -1402,7 +1402,7 @@
         var ocupadosHoy = alqAlquileres.filter(function(a) {
           var aIng = new Date(a.fechaIngreso + 'T00:00:00');
           var aEgr = new Date(a.fechaEgreso + 'T00:00:00');
-          return fecha >= aIng && fecha < aEgr;
+          return fecha >= aIng && fecha <= aEgr;
         }).length;
 
         // Determinar indicador
@@ -1458,7 +1458,7 @@
           if (a.nombreUnidad !== u.nombreUnidad) return false;
           var aIng = new Date(a.fechaIngreso + 'T00:00:00');
           var aEgr = new Date(a.fechaEgreso + 'T00:00:00');
-          return rangoDesde < aEgr && rangoHasta > aIng;
+          return rangoDesde <= aEgr && rangoHasta > aIng;
         });
       });
       alqMostrarDetalleDia(alqRangoDesde, disponibles.map(function(u) { return u.nombreUnidad; }));
@@ -1503,7 +1503,7 @@
           var aEgr = new Date(a.fechaEgreso + 'T00:00:00');
           var dDesde = rangoDesde; var dHasta = rangoHasta || new Date(fechaStr + 'T00:00:00');
           if (!rangoHasta) { dDesde = fecha; dHasta = new Date(fecha.getTime() + 86400000); }
-          return dDesde < aEgr && dHasta > aIng;
+          return dDesde <= aEgr && dHasta > aIng;
         });
 
         if (alqActivo) {
