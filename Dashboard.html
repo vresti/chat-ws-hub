@@ -147,6 +147,27 @@
     .est-compra { background: rgba(0,168,132,0.15); color: #00A884; }
     .est-perdido { background: rgba(55,64,69,0.4); color: #8696A0; }
 
+
+    /* ── OTP 2FA ── */
+    .login-step { display: none; }
+    .login-step.active { display: block; }
+    .login-step-title { color: var(--text); font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .login-step-sub { color: var(--text2); font-size: 12px; margin-bottom: 20px; line-height: 1.5; }
+    .otp-wrap { display: flex; gap: 8px; justify-content: center; margin: 4px 0 20px; }
+    .otp-inp { width: 44px; height: 52px; background: var(--bg3); border: 2px solid var(--border);
+               border-radius: 8px; text-align: center; font-size: 22px; font-weight: 700;
+               color: var(--blue); outline: none; transition: border-color 0.15s;
+               caret-color: transparent; font-family: inherit; }
+    .otp-inp:focus { border-color: var(--blue); }
+    .otp-inp.filled { border-color: rgba(88,166,255,0.4); }
+    .btn-ghost-back { background: none; border: none; color: var(--text3); font-size: 12px; cursor: pointer;
+                      margin-top: 8px; padding: 4px; width: 100%; transition: color 0.2s; font-family: inherit; }
+    .btn-ghost-back:hover { color: var(--text2); }
+    .spin-inline { width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3);
+                   border-top-color: white; animation: spin 0.7s linear infinite; display: inline-block;
+                   vertical-align: middle; margin-right: 6px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
     /* SPINNER */
     .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; margin-right: 8px; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -167,9 +188,31 @@
       <div class="login-logo">📊</div>
       <div class="login-title">Dashboard Gerencial</div>
       <div class="login-sub">Isla del Este — Panel de atención</div>
-      <input type="email" class="login-input" id="loginEmail" placeholder="tu@email.com" onkeypress="if(event.key==='Enter') document.getElementById('loginPass').focus()">
-      <input type="password" class="login-input" id="loginPass" placeholder="Contraseña" onkeypress="if(event.key==='Enter') hacerLogin()">
-      <button class="login-btn" id="loginBtn" onclick="hacerLogin()">Ingresar</button>
+      <!-- Paso 1: email -->
+      <div class="login-step active" id="ls1">
+        <div class="login-step-title">Identificación</div>
+        <div class="login-step-sub">Ingresá tu correo para recibir el código de acceso.</div>
+        <input type="email" class="login-input" id="loginEmail" placeholder="tu@email.com"
+               onkeypress="if(event.key==='Enter') enviarCodigo()">
+        <button class="login-btn" id="btnEnviar" onclick="enviarCodigo()">Enviar código</button>
+      </div>
+
+      <!-- Paso 2: OTP -->
+      <div class="login-step" id="ls2">
+        <div class="login-step-title">Verificación</div>
+        <div class="login-step-sub" id="ls2sub">Ingresá el código de 6 dígitos enviado a tu correo.</div>
+        <div class="otp-wrap">
+          <input class="otp-inp" id="otp0" maxlength="1" type="text" inputmode="numeric">
+          <input class="otp-inp" id="otp1" maxlength="1" type="text" inputmode="numeric">
+          <input class="otp-inp" id="otp2" maxlength="1" type="text" inputmode="numeric">
+          <input class="otp-inp" id="otp3" maxlength="1" type="text" inputmode="numeric">
+          <input class="otp-inp" id="otp4" maxlength="1" type="text" inputmode="numeric">
+          <input class="otp-inp" id="otp5" maxlength="1" type="text" inputmode="numeric">
+        </div>
+        <button class="login-btn" id="btnVerificar" onclick="verificarCodigo()">Ingresar</button>
+        <button class="btn-ghost-back" onclick="volverPaso1()">← Cambiar email</button>
+      </div>
+
       <div class="login-error" id="loginError"></div>
     </div>
   </div>
@@ -299,36 +342,101 @@
       setInterval(cargarAlertas, 60000);
     }
 
-    // ── LOGIN ──
-    function hacerLogin() {
+    // ── 2FA ──
+    function initOTP() {
+      var inputs = document.querySelectorAll('.otp-inp');
+      inputs.forEach(function(inp, idx) {
+        inp.addEventListener('input', function(e) {
+          var v = e.target.value.replace(/\D/g,'');
+          e.target.value = v.slice(0,1);
+          e.target.classList.toggle('filled', v.length > 0);
+          if (v && idx < 5) inputs[idx+1].focus();
+          if (getOTP().length === 6) verificarCodigo();
+        });
+        inp.addEventListener('keydown', function(e) {
+          if (e.key==='Backspace' && !inp.value && idx>0) {
+            inputs[idx-1].focus(); inputs[idx-1].value=''; inputs[idx-1].classList.remove('filled');
+          }
+        });
+        inp.addEventListener('paste', function(e) {
+          e.preventDefault();
+          var p = (e.clipboardData.getData('text')||'').replace(/\D/g,'').slice(0,6);
+          p.split('').forEach(function(c,i){ if(inputs[i]){inputs[i].value=c;inputs[i].classList.add('filled');} });
+          if (p.length >= 6) verificarCodigo(); else if(inputs[p.length]) inputs[p.length].focus();
+        });
+      });
+    }
+
+    function getOTP() {
+      return Array.from(document.querySelectorAll('.otp-inp')).map(function(i){return i.value;}).join('');
+    }
+    function limpiarOTP() {
+      document.querySelectorAll('.otp-inp').forEach(function(i){i.value='';i.classList.remove('filled');});
+    }
+
+    function enviarCodigo() {
       var email = document.getElementById('loginEmail').value.trim().toLowerCase();
-      var password = document.getElementById('loginPass').value.trim();
       var errEl = document.getElementById('loginError');
-      var btn = document.getElementById('loginBtn');
       errEl.textContent = '';
-      if (!email) { errEl.textContent = 'Ingresá tu email'; return; }
-      if (!password) { errEl.textContent = 'Ingresá tu contraseña'; return; }
-      btn.textContent = '...'; btn.disabled = true;
-      api("getUsuario", { email: email, password: password }).then(function(data) {
-        btn.textContent = 'Ingresar'; btn.disabled = false;
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errEl.textContent = 'Ingresá un email válido'; return;
+      }
+      var btn = document.getElementById('btnEnviar');
+      btn.innerHTML = '<span class="spin-inline"></span>Enviando...'; btn.disabled = true;
+      api("sendCode", { email: email }).then(function(data) {
+        btn.innerHTML = 'Enviar código'; btn.disabled = false;
+        if (data.status === "ok") {
+          document.getElementById('ls2sub').textContent =
+            'Código enviado a ' + email + '. Ingresalo a continuación.';
+          document.getElementById('ls1').classList.remove('active');
+          document.getElementById('ls2').classList.add('active');
+          setTimeout(function(){document.getElementById('otp0').focus();},100);
+        } else if (data.status === "no-autorizado") {
+          errEl.textContent = '❌ Email no autorizado';
+        } else {
+          errEl.textContent = '❌ ' + (data.mensaje || 'Error');
+        }
+      }).catch(function() {
+        btn.innerHTML = 'Enviar código'; btn.disabled = false;
+        errEl.textContent = '❌ Error de conexión';
+      });
+    }
+
+    function verificarCodigo() {
+      var code = getOTP(); if (code.length < 6) return;
+      var email = document.getElementById('loginEmail').value.trim().toLowerCase();
+      var errEl = document.getElementById('loginError');
+      errEl.textContent = '';
+      var btn = document.getElementById('btnVerificar');
+      btn.innerHTML = '<span class="spin-inline"></span>Verificando...'; btn.disabled = true;
+      api("verifyCode", { email: email, code: code }).then(function(data) {
+        btn.innerHTML = 'Ingresar'; btn.disabled = false;
         if (data.status === "ok") {
           if (data.rol === "vendedor") {
-            errEl.textContent = '❌ Sin acceso al dashboard';
-            return;
+            errEl.textContent = '❌ Sin acceso al dashboard'; return;
           }
           var usuario = { email: email, nombre: data.nombre, rol: data.rol, expira: data.expira || 28800 };
           guardarSesion(usuario);
           entrarConUsuario(usuario);
         } else {
-          errEl.textContent = data.mensaje === 'password incorrecto' ? '❌ Contraseña incorrecta' : '❌ Email no autorizado';
+          limpiarOTP(); document.getElementById('otp0').focus();
+          errEl.textContent = '❌ ' + (data.mensaje || 'Código incorrecto');
         }
       }).catch(function() {
-        btn.textContent = 'Ingresar'; btn.disabled = false;
+        btn.innerHTML = 'Ingresar'; btn.disabled = false;
         errEl.textContent = '❌ Error de conexión';
       });
     }
 
-    // ── INIT — verificar sesión al arrancar ──
+    function volverPaso1() {
+      limpiarOTP();
+      document.getElementById('loginError').textContent = '';
+      document.getElementById('ls2').classList.remove('active');
+      document.getElementById('ls1').classList.add('active');
+    }
+
+    // ── INIT ──
+    document.addEventListener('DOMContentLoaded', function() { initOTP(); });
     (function() {
       var sesion = leerSesion();
       if (sesion) {
