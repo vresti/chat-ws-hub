@@ -55,6 +55,7 @@
     .contact-count:hover { opacity: 0.7; }
     .estado-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
     .contact-new { width: 10px; height: 10px; border-radius: 50%; background: #FF3B30; flex-shrink: 0; animation: pulse 1.5s infinite; }
+    .lamp-pendiente { font-size: 13px; animation: pulse 1s infinite; flex-shrink: 0; line-height: 1; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     .btn-archive, .btn-pin { background: none; border: none; color: #8696A0; font-size: 14px; cursor: pointer; padding: 2px; border-radius: 4px; transition: all 0.2s; line-height: 1; }
     .btn-archive:hover, .btn-pin:hover { color: #00A884; }
@@ -984,6 +985,8 @@
         var esNuevo = false;
         if (mensajesVistos[c.nombre] !== undefined && c.totalMensajes > mensajesVistos[c.nombre]) esNuevo = true;
         if (mensajesVistos[c.nombre] === undefined) mensajesVistos[c.nombre] = c.totalMensajes;
+        // Lampita: último mensaje es entrante (no comienza con "→") = sin respuesta
+        var sinResponder = c.ultimoMensaje && c.ultimoMensaje.indexOf('→') !== 0;
         var inicial = (c.alias || c.nombre).charAt(0).toUpperCase();
         var colors = ['#00A884','#25D366','#128C7E','#075E54','#34B7F1','#ECE5DD'];
         var color = colors[c.nombre.length % colors.length];
@@ -999,6 +1002,7 @@
           '<div class="estado-dot" style="background:' + ei.color + '" title="' + ei.valor + '"></div>' +
           '<div class="contact-count" style="background:' + appColor + '" onclick="limpiarContacto(\'' + esc2 + '\')" title="Limpiar historial">' + c.totalMensajes + '</div>' +
           (esNuevo ? '<div class="contact-new"></div>' : '') +
+          (sinResponder && !esNuevo ? '<span class="lamp-pendiente" title="Sin respuesta">🔴</span>' : '') +
           '<button class="' + (c.fijado ? 'btn-pin btn-pin-active' : 'btn-pin') + '" onclick="togglePin(\'' + esc2 + '\')">' + (c.fijado ? '📌' : '📍') + '</button>' +
           '</div>' +
           (c.fechaProxContacto ? '<div style="font-size:10px;color:' + colorFecha(c.fechaProxContacto) + ';margin-top:2px;">P.A.: ' + formatFechaCorta(c.fechaProxContacto) + '</div>' : '') +
@@ -1333,7 +1337,17 @@
     }
 
     setInterval(function() {
-      api("getContactos").then(function(d) { contactosGlobal=d; if(document.getElementById('searchInput').value==='') renderContactos(d); else filtrarContactos(); });
+      api("getContactos").then(function(d) {
+        var anteriorTop = contactosGlobal.length > 0 ? contactosGlobal[0].nombre : "";
+        contactosGlobal = d;
+        if(document.getElementById('searchInput').value==='') renderContactos(d); else filtrarContactos();
+        // Auto-abrir el contacto más reciente si no hay ninguno abierto
+        if (!contactoActual && d.length > 0) {
+          var activos = d.filter(function(c){ return !c.archivado; });
+          if (activos.length > 0) abrirChat(activos[0].nombre);
+        }
+        // Si hay chat abierto y llegó un mensaje nuevo de otro contacto → mostrar indicador pero no cambiar
+      });
       refrescarChatActual();
       cargarAlertas();
     }, 8000);
