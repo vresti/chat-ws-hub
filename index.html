@@ -1053,6 +1053,7 @@
     function abrirChat(contacto) {
       cerrarFicha();
       contactoActual = contacto;
+      ultimoMensajeVisto = ""; // reset para forzar refresh inmediato
       document.querySelectorAll('.contact-item').forEach(function(el) { el.classList.remove('active'); });
       document.getElementById('welcomeScreen').style.display = 'none';
       document.getElementById('activeChat').style.display = 'flex';
@@ -1306,21 +1307,36 @@
 
     var ultimoMensajeVisto = "";
 
+    function refrescarChatActual() {
+      if (!contactoActual || enviandoMensaje) return;
+      cargarHistorial(telefonoActual, contactoActual, function(msgs) {
+        if (msgs && msgs.length > 0) {
+          // Bridge OK — usar historial del bridge
+          var ultimo = msgs[msgs.length-1].fecha + msgs[msgs.length-1].mensaje;
+          if (ultimo !== ultimoMensajeVisto) {
+            ultimoMensajeVisto = ultimo;
+            renderMensajes(msgs);
+          }
+        } else {
+          // Bridge sin datos o sin teléfono — fallback directo al GAS
+          api("getMensajesPorContacto", { contacto: contactoActual }).then(function(gasMsgs) {
+            if (gasMsgs && gasMsgs.length > 0) {
+              var ultimo = gasMsgs[gasMsgs.length-1].fecha + gasMsgs[gasMsgs.length-1].mensaje;
+              if (ultimo !== ultimoMensajeVisto) {
+                ultimoMensajeVisto = ultimo;
+                renderMensajes(gasMsgs);
+              }
+            }
+          });
+        }
+      });
+    }
+
     setInterval(function() {
       api("getContactos").then(function(d) { contactosGlobal=d; if(document.getElementById('searchInput').value==='') renderContactos(d); else filtrarContactos(); });
-      if(contactoActual && !enviandoMensaje) {
-        cargarHistorial(telefonoActual, contactoActual, function(msgs) {
-          if (msgs && msgs.length > 0) {
-            var ultimo = msgs[msgs.length-1].fecha + msgs[msgs.length-1].mensaje;
-            if (ultimo !== ultimoMensajeVisto) {
-              ultimoMensajeVisto = ultimo;
-              renderMensajes(msgs);
-            }
-          }
-        });
-      }
+      refrescarChatActual();
       cargarAlertas();
-    }, 15000);
+    }, 8000);
 
 
     // ============================================
