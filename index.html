@@ -1320,6 +1320,10 @@
     function confirmarSync() { cerrarModal(); var b=document.getElementById('btnSync'); b.textContent='⏳'; b.disabled=true; api("sincronizarTelefonos").then(function(r){b.textContent='📱';b.disabled=false;mostrarToast(r.actualizados+' actualizados');}).catch(function(){b.textContent='📱';b.disabled=false;mostrarToast('Error');}); }
 
     var ultimoMensajeVisto = "";
+    var ultimoRefrescoDerecho = 0;
+    var ultimoAlertas = 0;
+    var INTERVALO_SIDEBAR = 4000;
+    var INTERVALO_DERECHO_SEGURIDAD = 8000;
 
     function refrescarChatActual() {
       if (!contactoActual || enviandoMensaje) return;
@@ -1348,7 +1352,12 @@
 
     setInterval(function() {
       api("getContactos").then(function(d) {
-        var anteriorTop = contactosGlobal.length > 0 ? contactosGlobal[0].nombre : "";
+        // Snapshot del contador del chat abierto ANTES de pisar contactosGlobal
+        var contadorAbiertoAntes = null;
+        if (contactoActual) {
+          var prevAbierto = contactosGlobal.find(function(c){ return c.nombre === contactoActual; });
+          if (prevAbierto) contadorAbiertoAntes = prevAbierto.totalMensajes;
+        }
         contactosGlobal = d;
         if(document.getElementById('searchInput').value==='') renderContactos(d); else filtrarContactos();
         // Auto-abrir el contacto más reciente si no hay ninguno abierto
@@ -1356,11 +1365,28 @@
           var activos = d.filter(function(c){ return !c.archivado; });
           if (activos.length > 0) abrirChat(activos[0].nombre);
         }
-        // Si hay chat abierto y llegó un mensaje nuevo de otro contacto → mostrar indicador pero no cambiar
+        // El izquierdo despierta al derecho: si al chat abierto le subió el contador
+        // de mensajes, refrescamos el panel derecho YA, sin esperar la red de seguridad.
+        if (contactoActual && contadorAbiertoAntes !== null) {
+          var actualAbierto = d.find(function(c){ return c.nombre === contactoActual; });
+          if (actualAbierto && actualAbierto.totalMensajes > contadorAbiertoAntes) {
+            refrescarChatActual();
+            ultimoRefrescoDerecho = Date.now();
+          }
+        }
       });
-      refrescarChatActual();
-      cargarAlertas();
-    }, 8000);
+      // Red de seguridad del panel derecho (salientes desde el celular, ediciones,
+      // media): refresco cada INTERVALO_DERECHO_SEGURIDAD aunque no se detecte cambio.
+      if (Date.now() - ultimoRefrescoDerecho >= INTERVALO_DERECHO_SEGURIDAD) {
+        refrescarChatActual();
+        ultimoRefrescoDerecho = Date.now();
+      }
+      // Alertas en su propia cadencia (~8s) para no multiplicar su carga.
+      if (Date.now() - ultimoAlertas >= INTERVALO_DERECHO_SEGURIDAD) {
+        cargarAlertas();
+        ultimoAlertas = Date.now();
+      }
+    }, INTERVALO_SIDEBAR);
 
 
     // ============================================
