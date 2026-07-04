@@ -1323,25 +1323,16 @@
 
     function refrescarChatActual() {
       if (!contactoActual || enviandoMensaje) return;
-      cargarHistorial(telefonoActual, contactoActual, function(msgs) {
+      // Refresco silencioso: leemos de la HOJA (misma fuente y velocidad que el
+      // sidebar) para que izquierda y derecha aparezcan JUNTAS, en el mismo tick.
+      // El bridge se usa sólo al ABRIR el chat (historial completo en vivo + media).
+      api("getMensajesPorContacto", { contacto: contactoActual }).then(function(msgs) {
         if (msgs && msgs.length > 0) {
-          // Bridge OK — usar historial del bridge
           var ultimo = msgs[msgs.length-1].fecha + msgs[msgs.length-1].mensaje;
           if (ultimo !== ultimoMensajeVisto) {
             ultimoMensajeVisto = ultimo;
             renderMensajes(msgs);
           }
-        } else {
-          // Bridge sin datos o sin teléfono — fallback directo al GAS
-          api("getMensajesPorContacto", { contacto: contactoActual }).then(function(gasMsgs) {
-            if (gasMsgs && gasMsgs.length > 0) {
-              var ultimo = gasMsgs[gasMsgs.length-1].fecha + gasMsgs[gasMsgs.length-1].mensaje;
-              if (ultimo !== ultimoMensajeVisto) {
-                ultimoMensajeVisto = ultimo;
-                renderMensajes(gasMsgs);
-              }
-            }
-          });
         }
       });
     }
