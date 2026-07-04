@@ -995,7 +995,7 @@
         html += '<div class="contact-item">' +
           '<div class="contact-avatar" style="background:' + color + '" onclick="abrirFicha(\'' + esc2 + '\')" title="Ver ficha">' + inicial + '</div>' +
           '<div class="contact-info" onclick="abrirChat(\'' + esc2 + '\')">' +
-            '<div class="contact-name">' + (c.alias || c.nombre) + '</div>' +
+            '<div class="contact-name">' + (c.alias || c.nombre) + (c.esMotor ? ' <span class="badge-motor" title="Suscriptor de motor (broadcast)">📢</span>' : '') + '</div>' +
             '<div class="contact-last-msg">' + formatUltimoMensaje(c.ultimoMensaje) + '</div></div>' +
           '<div class="contact-meta"><div class="contact-time">' + c.ultimaFecha + '</div>' +
           '<div class="contact-meta-row">' +
