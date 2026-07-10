@@ -938,7 +938,7 @@
 
     // ── ALERTAS ──
     function cargarAlertas() {
-      api("getAlertas").then(function(alertas) {
+      return api("getAlertas").then(function(alertas) {
         var count = alertas.length;
         var badge = document.getElementById('alertasCount');
         if (count > 0) { badge.textContent = count > 9 ? '9+' : count; badge.style.display = 'flex'; }
@@ -1322,33 +1322,51 @@
     var ultimoMensajeVisto = "";
 
     function refrescarChatActual() {
-      if (!contactoActual || enviandoMensaje) return;
-      cargarHistorial(telefonoActual, contactoActual, function(msgs) {
-        if (msgs && msgs.length > 0) {
-          // Bridge OK — usar historial del bridge
-          var ultimo = msgs[msgs.length-1].fecha + msgs[msgs.length-1].mensaje;
-          if (ultimo !== ultimoMensajeVisto) {
-            ultimoMensajeVisto = ultimo;
-            renderMensajes(msgs);
-          }
-        } else {
-          // Bridge sin datos o sin teléfono — fallback directo al GAS
-          api("getMensajesPorContacto", { contacto: contactoActual }).then(function(gasMsgs) {
-            if (gasMsgs && gasMsgs.length > 0) {
-              var ultimo = gasMsgs[gasMsgs.length-1].fecha + gasMsgs[gasMsgs.length-1].mensaje;
-              if (ultimo !== ultimoMensajeVisto) {
-                ultimoMensajeVisto = ultimo;
-                renderMensajes(gasMsgs);
-              }
+      if (!contactoActual || enviandoMensaje) return Promise.resolve();
+      return new Promise(function(resolve) {
+        cargarHistorial(telefonoActual, contactoActual, function(msgs) {
+          if (msgs && msgs.length > 0) {
+            // Bridge OK — usar historial del bridge
+            var ultimo = msgs[msgs.length-1].fecha + msgs[msgs.length-1].mensaje;
+            if (ultimo !== ultimoMensajeVisto) {
+              ultimoMensajeVisto = ultimo;
+              renderMensajes(msgs);
             }
-          });
-        }
+            resolve();
+          } else {
+            // Bridge sin datos o sin teléfono — fallback directo al GAS
+            api("getMensajesPorContacto", { contacto: contactoActual }).then(function(gasMsgs) {
+              if (gasMsgs && gasMsgs.length > 0) {
+                var ultimo = gasMsgs[gasMsgs.length-1].fecha + gasMsgs[gasMsgs.length-1].mensaje;
+                if (ultimo !== ultimoMensajeVisto) {
+                  ultimoMensajeVisto = ultimo;
+                  renderMensajes(gasMsgs);
+                }
+              }
+              resolve();
+            }).catch(function() { resolve(); });
+          }
+        });
       });
     }
 
-    setInterval(function() {
-      api("getContactos").then(function(d) {
-        var anteriorTop = contactosGlobal.length > 0 ? contactosGlobal[0].nombre : "";
+    // Refresco con freno de superposición + pausa en segundo plano.
+    // Antes: setInterval cada 8s disparaba a ciegas; ante cualquier demora del
+    // backend las tandas se apilaban (bola de nieve → tope de ejecuciones del P2).
+    // Ahora: cada tanda espera a que vuelvan TODOS sus pedidos y recién ahí agenda
+    // la próxima 8s después. Nunca hay dos tandas encimadas ni dos timers vivos.
+    // Si la pestaña no está a la vista, saltea la tanda (no golpea al P2 de fondo).
+    var REFRESCO_MS = 8000;
+    var refrescando = false;
+    var refrescoTimer = null;
+
+    function agendarRefresco(ms) {
+      if (refrescoTimer) clearTimeout(refrescoTimer);
+      refrescoTimer = setTimeout(loopRefresco, ms);
+    }
+
+    function unaTandaRefresco() {
+      var pContactos = api("getContactos").then(function(d) {
         contactosGlobal = d;
         if(document.getElementById('searchInput').value==='') renderContactos(d); else filtrarContactos();
         // Auto-abrir el contacto más reciente si no hay ninguno abierto
@@ -1356,11 +1374,27 @@
           var activos = d.filter(function(c){ return !c.archivado; });
           if (activos.length > 0) abrirChat(activos[0].nombre);
         }
-        // Si hay chat abierto y llegó un mensaje nuevo de otro contacto → mostrar indicador pero no cambiar
       });
-      refrescarChatActual();
-      cargarAlertas();
-    }, 8000);
+      return Promise.all([ pContactos, refrescarChatActual(), cargarAlertas() ]);
+    }
+
+    function loopRefresco() {
+      if (refrescoTimer) { clearTimeout(refrescoTimer); refrescoTimer = null; }
+      if (refrescando)     { agendarRefresco(REFRESCO_MS); return; }  // no encimar tandas
+      if (document.hidden) { agendarRefresco(REFRESCO_MS); return; }  // pestaña de fondo: no golpear el P2
+      refrescando = true;
+      unaTandaRefresco().catch(function(){}).then(function() {         // un pedido caído no frena el loop
+        refrescando = false;
+        agendarRefresco(REFRESCO_MS);
+      });
+    }
+
+    // Al volver a la pestaña, refrescá enseguida (sin esperar los 8s).
+    document.addEventListener('visibilitychange', function() {
+      if (!document.hidden) loopRefresco();
+    });
+
+    loopRefresco();
 
 
     // ============================================
