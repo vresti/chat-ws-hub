@@ -578,6 +578,12 @@
     }
 
     var contactosGlobal = [], contactoActual = "", telefonoActual = "", timestampActual = 0;
+    // Sello de generacion de la lista de contactos: cada pedido de getContactos se
+    // numera al salir; al volver solo se aplica si sigue siendo el mas nuevo. Evita
+    // que un refresco de 8s ya en vuelo (con la lista VIEJA) pise el resultado de un
+    // borrado/fijado recien hecho y repinte la tarjeta borrada. Usado en
+    // recargarContactos y unaTandaRefresco.
+    var refrescoGen = 0;
     var mensajesVistos = {}, appColor = "#00A884", configData = {}, autoIAactivo = false;
     var mediaCache = {}, usuarioActual = { email: "", nombre: "", rol: "" }, estadoActual = "Nuevo";
     var fichaContactoActual = "", enviandoMensaje = false;
@@ -739,7 +745,8 @@
           if (autoIAactivo) { var b = document.getElementById('btnAutoIA'); b.style.background = '#7C3AED'; b.style.color = 'white'; b.style.borderColor = '#7C3AED'; }
         });
       });
-      api("getContactos").then(function(data) { contactosGlobal = data; renderContactos(data); })
+      var genIni = ++refrescoGen;
+      api("getContactos").then(function(data) { if (genIni !== refrescoGen) return; contactosGlobal = data; renderContactos(data); })
       .catch(function() { document.getElementById('contactsList').innerHTML = '<div class="loading" style="color:#ff6b6b;">Error</div>'; });
       cargarAlertas();
     }
@@ -1052,7 +1059,7 @@
     }
 
     function confirmarLimpiar() { cerrarModal(); mostrarToast('🧹 Limpiando...'); api("limpiarHistorial").then(function(r) { mostrarToast('✓ Limpio. ' + r.fijados + ' fijadas.'); recargarContactos(); }); }
-    function recargarContactos() { api("getContactos").then(function(d) { contactosGlobal = d; renderContactos(d); }); }
+    function recargarContactos() { var gen = ++refrescoGen; return api("getContactos").then(function(d) { if (gen !== refrescoGen) return; contactosGlobal = d; renderContactos(d); }); }
 
     function abrirChat(contacto) {
       cerrarFicha();
@@ -1366,7 +1373,9 @@
     }
 
     function unaTandaRefresco() {
+      var gen = ++refrescoGen;
       var pContactos = api("getContactos").then(function(d) {
+        if (gen !== refrescoGen) return;  // una recarga/accion mas nueva ya gano: descartar esta tanda vieja
         contactosGlobal = d;
         if(document.getElementById('searchInput').value==='') renderContactos(d); else filtrarContactos();
         // Auto-abrir el contacto más reciente si no hay ninguno abierto
