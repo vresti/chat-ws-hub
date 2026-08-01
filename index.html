@@ -852,21 +852,24 @@
     }
 
     // ── HISTORIAL ──
+    // 01/08/2026: el panel derecho lee de la HOJA (getMensajesPorContacto).
+    // Antes esta función le pedía el historial en vivo al bridge (/get-historial)
+    // y, cuando eso fallaba, caía igual a la hoja. Ese endpoint dejó de servir:
+    // WhatsApp Web rompió la lectura de mensajes de la librería (error opaco "r",
+    // falla en el 100% de los chats, verificado 8/8 el 01/08). O sea que la hoja
+    // ya era la fuente real y la llamada al bridge sólo agregaba espera (hasta ~2s
+    // cuando se vencía la caché de filtros). Se saca la llamada: NO cambia de
+    // dónde salen los datos.
+    // La regla vieja "no mover el panel derecho del bridge" (04/07) se apoyaba en
+    // que el bridge era la fuente limpia y la hoja tenía duplicados; hoy las dos
+    // premisas son falsas (hoja verificada sin duplicados el 01/08).
+    // El bridge SIGUE usándose para enviar (/enviar-texto, /enviar-archivo) y para
+    // media (/get-media): eso funciona y no se toca.
     function cargarHistorial(telefono, contacto, callback) {
-      if (!telefono) { callback(null); return; }
-      fetch(BRIDGE_URL + '/get-historial?telefono=' + encodeURIComponent(telefono))
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (data.status === 'ok' && data.mensajes.length > 0) {
-          api("getMensajesPorContacto", { contacto: contacto }).then(function(sheetMsgs) {
-            var sheetMap = {};
-            sheetMsgs.forEach(function(m) { if (m.respuestaPropuesta) sheetMap[m.mensaje] = m.respuestaPropuesta; });
-            data.mensajes.forEach(function(m) { m.respuestaPropuesta = sheetMap[m.mensaje] || ''; });
-            callback(data.mensajes);
-          }).catch(function() { callback(data.mensajes); });
-        } else { callback(null); }
-      })
-      .catch(function() { callback(null); });
+      if (!contacto) { callback(null); return; }
+      api("getMensajesPorContacto", { contacto: contacto })
+        .then(function(msgs) { callback(msgs || []); })
+        .catch(function() { callback(null); });
     }
 
     // ── FICHA ──
