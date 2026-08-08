@@ -467,6 +467,7 @@
           <button class="btn-sync" id="btnSync" onclick="sincTelefonos()">📱</button>
           <button class="btn-sync" onclick="mostrarContactosNuevo()">C</button>
           <button class="btn-sync" id="btnAutoIA" onclick="toggleAutoIA()">🤖</button>
+          <button class="btn-sync" id="btnGuardia" onclick="toggleGuardia()" title="Avisos al celular">📳</button>
         </div>
       </div>
       <div class="search-box">
@@ -749,6 +750,7 @@
       api("getContactos").then(function(data) { if (genIni !== refrescoGen) return; contactosGlobal = data; renderContactos(data); })
       .catch(function() { document.getElementById('contactsList').innerHTML = '<div class="loading" style="color:#ff6b6b;">Error</div>'; });
       cargarAlertas();
+      cargarGuardia();
     }
 
     // ── STK ──
@@ -1320,6 +1322,64 @@
       if(autoIAactivo){b.style.background='#7C3AED';b.style.color='white';b.style.borderColor='#7C3AED';mostrarToast('🤖 Auto IA activada');}
       else{b.style.background='none';b.style.color='#8696A0';b.style.borderColor='#2A3942';mostrarToast('🤖 Auto IA desactivada');}
       api("setAutoIA",{valor:autoIAactivo.toString()});
+    }
+
+    // ── GUARDIA: avisos al celular cuando un chat queda sin atender ──
+    // Entrar a la app ya te pone de guardia (lo estampa verifyCode en el GAS).
+    // Este boton sirve para APAGARLO a mano; el proximo login lo vuelve a prender
+    // solo, asi que apagarlo nunca queda pegado para siempre.
+    // Tolera que el P2 todavia no conozca estas acciones (antes del redeploy): en
+    // ese caso el boton queda gris y neutro, no miente sobre el estado.
+    var guardiaActiva = null;   // null = todavia no se sabe
+
+    function pintarGuardia(estado, detalle) {
+      var b = document.getElementById('btnGuardia');
+      if (!b) return;
+      if (estado === true) {
+        b.style.background = '#00A884'; b.style.color = 'white'; b.style.borderColor = '#00A884';
+        b.title = 'Avisos al celular: ACTIVADOS' + (detalle ? '\n' + detalle : '');
+      } else if (estado === false) {
+        b.style.background = 'none'; b.style.color = '#8696A0'; b.style.borderColor = '#2A3942';
+        b.title = 'Avisos al celular: apagados' + (detalle ? '\n' + detalle : '');
+      } else {
+        b.style.background = 'none'; b.style.color = '#4A5A63'; b.style.borderColor = '#2A3942';
+        b.title = detalle || 'Avisos al celular: sin informacion';
+      }
+    }
+
+    function cargarGuardia() {
+      if (!usuarioActual.email) return;
+      api("getMiGuardia", { email: usuarioActual.email }).then(function(r) {
+        if (!r || r.status !== "ok") {
+          guardiaActiva = null; pintarGuardia(null, 'Avisos todavia no configurados en el servidor'); return;
+        }
+        if (!r.tieneCelular) {
+          guardiaActiva = null; pintarGuardia(null, 'Falta cargar tu celular en la hoja Usuarios (col G)'); return;
+        }
+        guardiaActiva = (r.avisos === "SI");
+        var det = '';
+        if (r.guardiaHasta) {
+          det = 'De guardia hasta ' + new Date(r.guardiaHasta).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+        }
+        if (guardiaActiva && !r.deGuardia) det = 'Guardia vencida: volve a entrar a la app';
+        pintarGuardia(guardiaActiva, det);
+      }).catch(function() {
+        guardiaActiva = null; pintarGuardia(null, 'Avisos: sin respuesta del servidor');
+      });
+    }
+
+    function toggleGuardia() {
+      if (guardiaActiva === null) { mostrarToast('📳 Avisos todavia no configurados'); return; }
+      var previo = guardiaActiva, nuevo = !guardiaActiva;
+      pintarGuardia(nuevo, '');   // optimista, se revierte si el servidor no acepta
+      api("setMisAvisos", { email: usuarioActual.email, valor: nuevo ? "SI" : "NO" }).then(function(r) {
+        if (!r || r.status !== "ok") { pintarGuardia(previo, ''); mostrarToast('📳 No se pudo cambiar'); return; }
+        guardiaActiva = nuevo;
+        mostrarToast(nuevo ? '📳 Avisos al celular activados' : '📳 Avisos al celular apagados');
+        cargarGuardia();
+      }).catch(function() {
+        pintarGuardia(previo, ''); mostrarToast('📳 Error de conexion');
+      });
     }
 
     function sincTelefonos() {
