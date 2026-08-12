@@ -1430,31 +1430,10 @@
     // backend las tandas se apilaban (bola de nieve → tope de ejecuciones del P2).
     // Ahora: cada tanda espera a que vuelvan TODOS sus pedidos y recién ahí agenda
     // la próxima 8s después. Nunca hay dos tandas encimadas ni dos timers vivos.
-    // Si la pestaña no está a la vista, saltea la tanda (no golpea al P2 de fondo)
-    // pero manda un pedido mínimo cada tanto — ver PING_FONDO_MS abajo.
+    // Si la pestaña no está a la vista, saltea la tanda (no golpea al P2 de fondo).
     var REFRESCO_MS = 8000;
     var refrescando = false;
     var refrescoTimer = null;
-
-    // ── Ping de fondo: que Apps Script no apague el script (11/08/2026) ──
-    // Google apaga el contenedor del P2 cuando nadie lo usa, y la primera llamada
-    // después paga levantarlo. Medido en el navegador, no deducido: con el script
-    // recién usado, abrir una ficha tarda 2,0-2,7 s; con el script quieto un minuto,
-    // de 9 a 34 s (y a veces ni devuelve JSON).
-    // Con la pestaña A LA VISTA el refresco de 8 s ya lo mantiene despierto. El
-    // problema estaba con la pestaña DE FONDO: se salteaba la tanda entera, no salía
-    // ningún pedido, el script se enfriaba, y al volver el primer clic en una ficha
-    // pagaba 40 s. Ahora, de fondo, se sigue sin hacer la tanda completa (que trae
-    // las ~185 fichas) pero cada 40 s sale un pedido mínimo: getAutoIA lee UNA celda,
-    // es lo más barato que tiene el P2.
-    // Dos límites conocidos, para no prometer de más:
-    //   - Chrome frena los timers de las pestañas de fondo a ~1 por minuto, así que
-    //     en la práctica esto sale cada ~60 s: justo en el borde del enfriamiento.
-    //   - NO cubre la primera apertura del día. Si no hay pestaña abierta, nadie
-    //     pinguea y el arranque en frío se paga igual. Eso sólo lo tapa un monitor
-    //     externo (UptimeRobot contra ?action=getConfig cada 1-2 min).
-    var PING_FONDO_MS = 40000;
-    var ultimoPing = 0;
 
     function agendarRefresco(ms) {
       if (refrescoTimer) clearTimeout(refrescoTimer);
@@ -1479,17 +1458,8 @@
     function loopRefresco() {
       if (refrescoTimer) { clearTimeout(refrescoTimer); refrescoTimer = null; }
       if (refrescando)     { agendarRefresco(REFRESCO_MS); return; }  // no encimar tandas
-      if (document.hidden) {                                          // pestaña de fondo: no golpear el P2
-        var ahora = Date.now();                                       // ...pero que no se apague el script
-        if (ahora - ultimoPing >= PING_FONDO_MS) {
-          ultimoPing = ahora;
-          api("getAutoIA").catch(function(){});                       // una celda; si falla, no importa
-        }
-        agendarRefresco(REFRESCO_MS);
-        return;
-      }
+      if (document.hidden) { agendarRefresco(REFRESCO_MS); return; }  // pestaña de fondo: no golpear el P2
       refrescando = true;
-      ultimoPing = Date.now();                                        // la tanda ya lo mantiene despierto
       unaTandaRefresco().catch(function(){}).then(function() {         // un pedido caído no frena el loop
         refrescando = false;
         agendarRefresco(REFRESCO_MS);
