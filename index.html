@@ -590,7 +590,7 @@
     var refrescoGen = 0;
     var mensajesVistos = {}, appColor = "#00A884", configData = {}, autoIAactivo = false;
     var mediaCache = {}, usuarioActual = { email: "", nombre: "", rol: "" }, estadoActual = "Nuevo";
-    var fichaContactoActual = "", enviandoMensaje = false;
+    var fichaContactoActual = "";
     var stockCache = [], stockFiltrado = [], stockFichaActual = "";
 
     var ESTADOS = [
@@ -1075,6 +1075,7 @@
       cerrarFicha();
       contactoActual = contacto;
       ultimoMensajeVisto = ""; // reset para forzar refresh inmediato
+      enviosPendientes = [];   // las burbujas en vuelo son de la conversación que dejamos
       document.querySelectorAll('.contact-item').forEach(function(el) { el.classList.remove('active'); });
       document.getElementById('welcomeScreen').style.display = 'none';
       document.getElementById('activeChat').style.display = 'flex';
@@ -1192,7 +1193,9 @@
           html += '</div><div class="clearfix"></div>';
         }
       });
-      container.innerHTML = html || '<div class="loading">No hay mensajes</div>';
+      container.innerHTML = html || (enviosPendientes.length ? '' : '<div class="loading">No hay mensajes</div>');
+      depurarPendientes(mensajes);
+      repintarPendientes();
       setTimeout(function() { container.scrollTop = container.scrollHeight; }, 100);
       setTimeout(cargarMediaPendiente, 50);
       if (tr.length > 0) { var prom = Math.round(tr.reduce(function(a,b){return a+b;},0)/tr.length); var tb=configData.tiempoBien||5, tg=configData.tiempoRegular||15; var ip=prom<=tb?(configData.textoBien||'✅'):prom<=tg?(configData.textoRegular||'⚠️'):(configData.textoMalo||'🔴'); document.getElementById('chatStatus').textContent = mensajes.length + ' msgs · Resp: ' + prom + 'm ' + ip; }
@@ -1202,29 +1205,64 @@
 
     function usarSugerencia(t) { document.getElementById('messageInput').value = t; document.getElementById('messageInput').focus(); }
 
+    // ── BURBUJAS EN VUELO ──
+    // Lo que acabás de mandar todavía no está en la hoja: el bridge contesta el ✓ en
+    // ~300 ms y el renglón en Notificaciones aterriza uno o dos segundos después
+    // (fire-and-forget desde el 04/09/2026). Hasta hoy eso se resolvía congelando el
+    // panel 20 s después de cada envío para que un refresco no borrara la burbuja —
+    // pero en esos 20 s tampoco entraban los mensajes del cliente, y contestando
+    // seguido el panel no se refrescaba casi nunca.
+    // Ahora la burbuja no vive en el DOM sino en este array: cada repintado de la hoja
+    // la vuelve a colgar al final, y se cae sola cuando el mensaje ya está en la hoja.
+    var enviosPendientes = [];   // { texto, hora, marca, t, fallo }
+
+    function repintarPendientes() {
+      var ct = document.getElementById('chatMessages');
+      if (!ct) return;
+      var viejas = ct.querySelectorAll('.burbuja-en-vuelo');
+      for (var i = 0; i < viejas.length; i++) viejas[i].parentNode.removeChild(viejas[i]);
+      enviosPendientes.forEach(function(p) {
+        var d = document.createElement('div');
+        d.className = 'burbuja-en-vuelo';
+        d.innerHTML = '<div class="message-bubble message-outgoing"><div class="message-text">' + esc(p.texto) + '</div><div class="message-time">' + p.hora + ' ' + p.marca + '</div></div><div class="clearfix"></div>';
+        ct.appendChild(d);
+      });
+      ct.scrollTop = ct.scrollHeight;
+    }
+
+    function depurarPendientes(msgs) {
+      if (!enviosPendientes.length) return;
+      var textos = (msgs || []).map(function(m) { return (m.mensaje || '').toString().replace(/^→\s*/, '').trim(); });
+      var ahora = Date.now();
+      enviosPendientes = enviosPendientes.filter(function(p) {
+        if (p.fallo) return true;                                   // se queda con la ✗ a la vista
+        if (textos.indexOf(p.texto.trim()) !== -1) return false;     // ya está en la hoja: la burbuja real ocupa su lugar
+        return (ahora - p.t) < 120000;                               // red de seguridad: si el registro nunca llega, a los 2 min la soltamos
+      });
+    }
+
     function enviarMensaje() {
       var inp = document.getElementById('messageInput'), msg = inp.value.trim();
       if (!msg || !contactoActual) return;
       if (!telefonoActual) { mostrarToast('⚠️ Sin teléfono para este contacto'); return; }
-      enviandoMensaje = true;
-      setTimeout(function() { enviandoMensaje = false; }, 20000);
-      var ct = document.getElementById('chatMessages'), ah = new Date();
+      var ah = new Date();
       var hr = ah.getHours().toString().padStart(2,'0') + ':' + ah.getMinutes().toString().padStart(2,'0');
-      var d = document.createElement('div');
-      d.innerHTML = '<div class="message-bubble message-outgoing"><div class="message-text">' + msg + '</div><div class="message-time">' + hr + ' ⏳</div></div><div class="clearfix"></div>';
-      ct.appendChild(d); ct.scrollTop = ct.scrollHeight; inp.value = '';
+      var pend = { texto: msg, hora: hr, marca: '⏳', t: Date.now(), fallo: false };
+      enviosPendientes.push(pend);
+      repintarPendientes();
+      inp.value = '';
       // Envío directo al bridge (instantáneo, sin cola). Espejo de enviarArchivo.
       fetch(BRIDGE_URL + '/enviar-texto', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contacto: contactoActual, telefono: telefonoActual, mensaje: msg }) })
       .then(function(r) { return r.json(); })
       .then(function(data) {
-        var bs = ct.querySelectorAll('.message-outgoing'), u = bs[bs.length-1];
-        if (u) { var t = u.querySelector('.message-time'); if (t) t.textContent = hr + (data.status === 'ok' ? ' ✓' : ' ✗'); }
-        if (data.status !== 'ok') mostrarToast('❌ ' + (data.mensaje || 'no se pudo enviar'));
+        pend.marca = (data.status === 'ok' ? '✓' : '✗');
+        if (data.status !== 'ok') { pend.fallo = true; mostrarToast('❌ ' + (data.mensaje || 'no se pudo enviar')); }
+        repintarPendientes();
       })
       .catch(function() {
-        var bs = ct.querySelectorAll('.message-outgoing'), u = bs[bs.length-1];
-        if (u) { var t = u.querySelector('.message-time'); if (t) t.textContent = hr + ' ✗'; }
+        pend.marca = '✗'; pend.fallo = true;
         mostrarToast('❌ No se pudo conectar con el bridge');
+        repintarPendientes();
       });
       mensajesVistos[contactoActual] = (mensajesVistos[contactoActual]||0) + 1;
     }
@@ -1300,6 +1338,7 @@
     function iniciarChatNuevo(contacto, telefono) {
       cerrarModal(); if(!telefono){mostrarToast('Sin teléfono');return;}
       contactoActual=contacto; telefonoActual=telefono;
+      ultimoMensajeVisto = ""; enviosPendientes = [];
       document.getElementById('welcomeScreen').style.display='none';
       document.getElementById('activeChat').style.display='flex';
       document.getElementById('appContainer').classList.add('chat-open');
@@ -1397,7 +1436,7 @@
     var ultimoMensajeVisto = "";
 
     function refrescarChatActual() {
-      if (!contactoActual || enviandoMensaje) return Promise.resolve();
+      if (!contactoActual) return Promise.resolve();
       return new Promise(function(resolve) {
         cargarHistorial(telefonoActual, contactoActual, function(msgs) {
           if (msgs && msgs.length > 0) {
@@ -1425,13 +1464,47 @@
       });
     }
 
-    // Refresco con freno de superposición + pausa en segundo plano.
+    // ── REENGANCHE DE LA FICHA POR TELÉFONO ──
+    // Un chat abierto desde el boton "Iniciar conversación" arranca con el nombre de Google
+    // Contacts ("Juan Pérez Interesado En Lotes"). En cuanto el P1 crea la ficha, la
+    // planilla pasa a usar el nombre de ficha (WB-NNNN-...) y el panel se queda pidiendo
+    // los mensajes de un nombre que la hoja ya no usa: no vuelve a actualizarse nunca,
+    // hasta que recargás y entrás por la lista de la izquierda.
+    // Acá lo reenganchamos por TELÉFONO (últimos 8 dígitos), que es la llave real de una
+    // conversación desde el 09/08/2026. Sirve igual si a una ficha le cambia el nombre.
+    function u8tel(t) { var x = (t || '').toString().replace(/\D/g, ''); return x.length >= 8 ? x.slice(-8) : ''; }
+
+    function reengancharFicha(lista) {
+      if (!contactoActual || !telefonoActual || !lista || !lista.length) return false;
+      for (var i = 0; i < lista.length; i++) if (lista[i].nombre === contactoActual) return false;  // el nombre sigue vivo
+      var tel = u8tel(telefonoActual);
+      if (!tel) return false;
+      var candidatas = lista.filter(function(c) { return u8tel(c.telefono) === tel; });
+      if (!candidatas.length) return false;
+      candidatas.sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); });
+      var real = candidatas[0];
+      if (real.nombre === contactoActual) return false;
+      contactoActual   = real.nombre;
+      telefonoActual   = real.telefono || telefonoActual;
+      ultimoMensajeVisto = "";   // forzar repintado con los datos de la ficha real
+      document.getElementById('chatName').textContent = real.alias || real.nombre;
+      document.getElementById('chatPhone').textContent = real.telefono || '';
+      return true;
+    }
+
+    // Refresco con freno de superposición + modo de fondo.
     // Antes: setInterval cada 8s disparaba a ciegas; ante cualquier demora del
     // backend las tandas se apilaban (bola de nieve → tope de ejecuciones del P2).
     // Ahora: cada tanda espera a que vuelvan TODOS sus pedidos y recién ahí agenda
-    // la próxima 8s después. Nunca hay dos tandas encimadas ni dos timers vivos.
-    // Si la pestaña no está a la vista, saltea la tanda (no golpea al P2 de fondo).
+    // la próxima. Nunca hay dos tandas encimadas ni dos timers vivos.
+    // Con la pestaña de fondo NO se saltea la tanda (04/09/2026): hasta hoy no se pedía
+    // nada, y un mensaje que entraba a la planilla no aparecía en pantalla hasta que
+    // volvías a la pestaña. Ahora se pide sólo la lista (una llamada, ~4 s) cada 30 s,
+    // que sale más barato para el P2 que la tanda de tres cada 8 s de una pestaña a la
+    // vista. Ojo: el navegador estira los timers de las pestañas de fondo, así que en la
+    // práctica pueden ser 60 s — igual, al volver ya está todo cargado.
     var REFRESCO_MS = 8000;
+    var REFRESCO_FONDO_MS = 30000;
     var refrescando = false;
     var refrescoTimer = null;
 
@@ -1440,29 +1513,32 @@
       refrescoTimer = setTimeout(loopRefresco, ms);
     }
 
-    function unaTandaRefresco() {
+    function unaTandaRefresco(soloLista) {
       var gen = ++refrescoGen;
       var pContactos = api("getContactos").then(function(d) {
         if (gen !== refrescoGen) return;  // una recarga/accion mas nueva ya gano: descartar esta tanda vieja
         contactosGlobal = d;
         if(document.getElementById('searchInput').value==='') renderContactos(d); else filtrarContactos();
         // Auto-abrir el contacto más reciente si no hay ninguno abierto
-        if (!contactoActual && d.length > 0) {
+        if (!soloLista && !contactoActual && d.length > 0) {
           var activos = d.filter(function(c){ return !c.archivado; });
           if (activos.length > 0) abrirChat(activos[0].nombre);
         }
+        // Si la ficha cambió de nombre, seguirla: el panel pide con el nombre nuevo
+        if (reengancharFicha(d) && !soloLista) return refrescarChatActual();
       });
+      if (soloLista) return pContactos;   // pestaña de fondo: sólo la lista
       return Promise.all([ pContactos, refrescarChatActual(), cargarAlertas() ]);
     }
 
     function loopRefresco() {
       if (refrescoTimer) { clearTimeout(refrescoTimer); refrescoTimer = null; }
-      if (refrescando)     { agendarRefresco(REFRESCO_MS); return; }  // no encimar tandas
-      if (document.hidden) { agendarRefresco(REFRESCO_MS); return; }  // pestaña de fondo: no golpear el P2
+      if (refrescando) { agendarRefresco(REFRESCO_MS); return; }  // no encimar tandas
+      var deFondo = document.hidden;
       refrescando = true;
-      unaTandaRefresco().catch(function(){}).then(function() {         // un pedido caído no frena el loop
+      unaTandaRefresco(deFondo).catch(function(){}).then(function() {  // un pedido caído no frena el loop
         refrescando = false;
-        agendarRefresco(REFRESCO_MS);
+        agendarRefresco(document.hidden ? REFRESCO_FONDO_MS : REFRESCO_MS);
       });
     }
 
