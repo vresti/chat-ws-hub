@@ -1521,6 +1521,66 @@
     var refrescando = false;
     var refrescoTimer = null;
 
+    // ============================================
+    // SALTO AUTOMATICO AL CHAT QUE TRAE ALGO NUEVO (05/09/2026)
+    // ============================================
+    // Pedido de Victor: que el panel derecho se abra solo cuando entra un mensaje,
+    // sin tener que hacer click en la ficha del sidebar.
+    //
+    // 🔴 EL RIESGO QUE OBLIGA A LOS CANDADOS: cambiar de chat NO limpia el cuadro de
+    // respuesta. Si te salta el chat con medio mensaje tipeado, el texto se queda en el
+    // cuadro y el destinatario cambio abajo tuyo: apretas Enter y le llega a otro
+    // cliente. Por eso la primera guarda no es negociable.
+    //
+    // Se eligio la variante conservadora ("opcion B"): si estas trabajando adentro de
+    // una ficha, la pantalla no se mueve. Solo salta cuando hace rato que no tocas nada.
+    var INACTIVIDAD_MS = 30000;      // 30 s sin teclas ni clicks = no estas en el medio de algo
+    var ultimaInteraccion = Date.now();
+    var fotoContactos = null;        // null = todavia no hay foto previa con que comparar
+    var saltoPendiente = "";         // detectado con la pestana de fondo, se hace al volver
+
+    function marcarInteraccion() { ultimaInteraccion = Date.now(); }
+    document.addEventListener('keydown', marcarInteraccion, true);
+    document.addEventListener('mousedown', marcarInteraccion, true);
+
+    // Devuelve el nombre de la ficha que trajo novedad (la mas reciente si hay varias),
+    // o "" si no cambio nada. Compara contra la vuelta anterior, NO contra
+    // mensajesVistos: ese lo toca renderContactos y se pierde el caso de la ficha
+    // recien nacida, que es justo el del cliente que escribe por primera vez.
+    function detectarNovedad(lista) {
+      var previa = fotoContactos, foto = {};
+      lista.forEach(function(c) {
+        if (!c.archivado) foto[c.nombre] = (c.timestamp || 0) + '/' + (c.totalMensajes || 0);
+      });
+      fotoContactos = foto;
+      if (!previa) return "";        // primera vuelta: no hay con que comparar, no se salta
+      var cual = "", mejorTs = -1;
+      lista.forEach(function(c) {
+        if (c.archivado) return;
+        if (previa[c.nombre] === foto[c.nombre]) return;   // sin cambios (o ficha nueva: undefined !== algo)
+        var ts = c.timestamp || 0;
+        if (ts >= mejorTs) { mejorTs = ts; cual = c.nombre; }
+      });
+      return cual;
+    }
+
+    // Los tres candados.
+    function sePuedeSaltar() {
+      var inp = document.getElementById('messageInput');
+      if (inp && inp.value.trim() !== '') return false;   // hay algo escrito: NO se toca
+      if (document.hidden) return false;                  // de fondo se anota, no se salta
+      return (Date.now() - ultimaInteraccion) > INACTIVIDAD_MS;
+    }
+
+    function saltarSiCorresponde(cual) {
+      if (!cual || cual === contactoActual) return false;
+      if (document.hidden) { saltoPendiente = cual; return false; }   // se hace al volver
+      if (!sePuedeSaltar()) return false;
+      saltoPendiente = "";
+      abrirChat(cual);
+      return true;
+    }
+
     function agendarRefresco(ms) {
       if (refrescoTimer) clearTimeout(refrescoTimer);
       refrescoTimer = setTimeout(loopRefresco, ms);
@@ -1531,6 +1591,9 @@
       var pContactos = api("getContactos").then(function(d) {
         if (gen !== refrescoGen) return;  // una recarga/accion mas nueva ya gano: descartar esta tanda vieja
         contactosGlobal = d;
+        // Antes de repintar: renderContactos toca mensajesVistos y borraria la pista
+        // de una ficha recien nacida.
+        var novedad = detectarNovedad(d);
         if(document.getElementById('searchInput').value==='') renderContactos(d); else filtrarContactos();
         // Auto-abrir el contacto más reciente si no hay ninguno abierto
         if (!soloLista && !contactoActual && d.length > 0) {
@@ -1539,6 +1602,9 @@
         }
         // Si la ficha cambió de nombre, seguirla: el panel pide con el nombre nuevo
         if (reengancharFicha(d) && !soloLista) return refrescarChatActual();
+        // Y recién ahora, con la lista ya pintada: abrir solo el chat que trajo algo
+        // nuevo. abrirChat se trae su propio historial, así que corta acá.
+        if (saltarSiCorresponde(novedad)) return;
       });
       if (soloLista) return pContactos;   // pestaña de fondo: sólo la lista
       // En serie, no en paralelo: Apps Script ejecuta de a UNA por usuario, así que
@@ -1591,7 +1657,16 @@
 
     // Al volver a la pestaña, refrescá enseguida (sin esperar los 8s).
     document.addEventListener('visibilitychange', function() {
-      if (!document.hidden) loopRefresco();
+      if (document.hidden) return;
+      marcarInteraccion();
+      // El salto que quedó anotado mientras la pestaña estaba de fondo. Se respeta
+      // igual el cuadro de respuesta: si dejaste algo escrito, no se toca nada.
+      if (saltoPendiente) {
+        var cual = saltoPendiente; saltoPendiente = "";
+        var inp = document.getElementById('messageInput');
+        if (cual !== contactoActual && !(inp && inp.value.trim() !== '')) { abrirChat(cual); return; }
+      }
+      loopRefresco();
     });
 
     loopRefresco();
