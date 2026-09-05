@@ -1497,14 +1497,27 @@
     // backend las tandas se apilaban (bola de nieve → tope de ejecuciones del P2).
     // Ahora: cada tanda espera a que vuelvan TODOS sus pedidos y recién ahí agenda
     // la próxima. Nunca hay dos tandas encimadas ni dos timers vivos.
-    // Con la pestaña de fondo NO se saltea la tanda (04/09/2026): hasta hoy no se pedía
-    // nada, y un mensaje que entraba a la planilla no aparecía en pantalla hasta que
-    // volvías a la pestaña. Ahora se pide sólo la lista (una llamada, ~4 s) cada 30 s,
-    // que sale más barato para el P2 que la tanda de tres cada 8 s de una pestaña a la
-    // vista. Ojo: el navegador estira los timers de las pestañas de fondo, así que en la
-    // práctica pueden ser 60 s — igual, al volver ya está todo cargado.
-    var REFRESCO_MS = 8000;
-    var REFRESCO_FONDO_MS = 30000;
+    // Con la pestaña de fondo NO se saltea el ciclo (04/09/2026): hasta ese día no se
+    // pedía nada, y un mensaje que entraba a la planilla no aparecía hasta que volvías
+    // a la pestaña. De fondo se pregunta sólo el sello, y la lista sólo si cambió.
+    // EL SELLO (05/09/2026). Antes el panel pedía las TRES cosas pesadas cada 8 s
+    // aunque no hubiera pasado nada, y como Apps Script ejecuta de a una por usuario,
+    // la ronda entera daba 11 a 16 s: eso tardaba un mensaje en aparecer (cronometrado).
+    // Ahora se pregunta primero un "sello" (cuántas filas tiene la planilla y de
+    // cuándo es la última) y sólo si cambió se pide el resto.
+    // OJO con la intuición fácil: el sello NO es rápido por ser chico. Medido el
+    // 05/09, una llamada al P2 cuesta 2,3 a 3,5 s devuelva 36 bytes o 76 KB: el peaje
+    // es la llamada, no los datos. Lo que se gana es hacer UNA llamada en vez de tres.
+    // Por eso tampoco sirve bajar la espera a cero: el piso lo pone el viaje.
+    var SELLO_MS = 1500;             // a la vista: ciclo real ~4,5 s (3 de llamada + 1,5)
+    var SELLO_FONDO_MS = 30000;      // de fondo: el navegador igual lo estira a ~60 s
+    var TANDA_FORZADA_MS = 60000;    // red de seguridad: el sello no ve que editen una
+                                     // ficha que ya existe (archivar, alias, estado),
+                                     // así que igual se refresca todo cada minuto.
+    var selloVisto = "";             // "n/c/t" de la última foto ya aplicada en pantalla
+    var selloN = "";                 // sólo el n: es lo que el P2 compara para decidir
+                                     // si nos manda los mensajes del chat abierto
+    var ultimaTandaCompleta = 0;
     var refrescando = false;
     var refrescoTimer = null;
 
@@ -1513,7 +1526,7 @@
       refrescoTimer = setTimeout(loopRefresco, ms);
     }
 
-    function unaTandaRefresco(soloLista) {
+    function unaTandaRefresco(soloLista, chatYaPintado) {
       var gen = ++refrescoGen;
       var pContactos = api("getContactos").then(function(d) {
         if (gen !== refrescoGen) return;  // una recarga/accion mas nueva ya gano: descartar esta tanda vieja
@@ -1528,17 +1541,51 @@
         if (reengancharFicha(d) && !soloLista) return refrescarChatActual();
       });
       if (soloLista) return pContactos;   // pestaña de fondo: sólo la lista
-      return Promise.all([ pContactos, refrescarChatActual(), cargarAlertas() ]);
+      // En serie, no en paralelo: Apps Script ejecuta de a UNA por usuario, así que
+      // pedirlas juntas no las apura, sólo hace impredecible cuál llega última.
+      // Y si el chat abierto ya vino con el sello, no se vuelve a pedir: cada llamada
+      // al P2 cuesta ~3 s (medido el 05/09), o sea que una llamada de menos son 3 s menos.
+      return pContactos
+        .then(function() { return chatYaPintado ? null : refrescarChatActual(); })
+        .then(function() { return cargarAlertas(); });
     }
 
     function loopRefresco() {
       if (refrescoTimer) { clearTimeout(refrescoTimer); refrescoTimer = null; }
-      if (refrescando) { agendarRefresco(REFRESCO_MS); return; }  // no encimar tandas
+      if (refrescando) { agendarRefresco(SELLO_MS); return; }  // no encimar tandas
       var deFondo = document.hidden;
       refrescando = true;
-      unaTandaRefresco(deFondo).catch(function(){}).then(function() {  // un pedido caído no frena el loop
+
+      // Paso 1: preguntar el sello. Le mandamos el chat abierto y la foto que ya
+      // tenemos, así el P2 nos devuelve los mensajes de una si algo cambió.
+      var params = { desde: selloN };
+      if (contactoActual && !deFondo) params.contacto = contactoActual;
+
+      api("getSello", params).then(function(sel) {
+        if (!sel || typeof sel.n === 'undefined') return;   // respuesta rara: se reintenta sola
+        var sello = sel.n + '/' + sel.c + '/' + sel.t;
+        var cambio  = (sello !== selloVisto);
+        var vencida = (Date.now() - ultimaTandaCompleta) > TANDA_FORZADA_MS;
+        // Nada nuevo en la planilla: la pantalla ya está al día, no se pide nada más.
+        // Esto es todo el ahorro: antes se pedían tres cosas pesadas igual.
+        if (!cambio && !vencida) { selloVisto = sello; selloN = sel.n; return; }
+
+        // Paso 2: pintar YA el chat abierto, que es lo que se está mirando. Vino en
+        // esta misma respuesta, sin pagar una segunda vuelta.
+        var pintado = false;
+        if (sel.msgs && sel.msgs.length && contactoActual) {
+          var u = sel.msgs[sel.msgs.length-1].fecha + sel.msgs[sel.msgs.length-1].mensaje;
+          if (u !== ultimoMensajeVisto) { ultimoMensajeVisto = u; renderMensajes(sel.msgs); }
+          pintado = true;
+        }
+
+        // Paso 3: la lista y las alertas, detrás, sin que el usuario las espere.
+        return unaTandaRefresco(deFondo, pintado).then(function() {
+          selloVisto = sello; selloN = sel.n; ultimaTandaCompleta = Date.now();
+        });
+      }).catch(function(){}).then(function() {  // un pedido caído no frena el loop
         refrescando = false;
-        agendarRefresco(document.hidden ? REFRESCO_FONDO_MS : REFRESCO_MS);
+        agendarRefresco(document.hidden ? SELLO_FONDO_MS : SELLO_MS);
       });
     }
 
