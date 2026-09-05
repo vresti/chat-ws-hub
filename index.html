@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Chat WS Hub</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #111B21; height: 100%; overflow: hidden; width: 100%; }
@@ -999,9 +1000,11 @@
       contactos.forEach(function(c) {
         if (c.archivado) return;
         totalActivos++;
-        var esNuevo = false;
-        if (mensajesVistos[c.nombre] !== undefined && c.totalMensajes > mensajesVistos[c.nombre]) esNuevo = true;
-        if (mensajesVistos[c.nombre] === undefined) mensajesVistos[c.nombre] = c.totalMensajes;
+        // Ficha que aparece por primera vez: si la lista YA se habia cargado alguna
+        // vez, es alguien escribiendo por primera vez y cuenta como no leida. En la
+        // primera carga de la sesion no, o arrancarias con las 221 marcadas.
+        if (mensajesVistos[c.nombre] === undefined) mensajesVistos[c.nombre] = yaHuboPrimerRender ? 0 : c.totalMensajes;
+        var esNuevo = c.totalMensajes > mensajesVistos[c.nombre];
         // Lampita: último mensaje es entrante (no comienza con "→") = sin respuesta
         var sinResponder = c.ultimoMensaje && c.ultimoMensaje.indexOf('→') !== 0;
         var inicial = (c.alias || c.nombre).charAt(0).toUpperCase();
@@ -1028,6 +1031,31 @@
       document.getElementById('contactsList').innerHTML = html || '<div class="loading">No hay contactos</div>';
       document.getElementById('totalContactos').textContent = totalActivos;
       document.getElementById('totalContactos').style.background = appColor;
+      yaHuboPrimerRender = true;
+      // Sobre contactosGlobal, no sobre el argumento: con una busqueda escrita acá
+      // llega la lista FILTRADA, y el titulo tiene que contar todo igual.
+      actualizarTitulo();
+    }
+
+    // EL CONTADOR DEL TITULO (05/09/2026): "(2) Chat WS Hub" en la solapa del
+    // navegador. Complemento del refresco de fondo: desde el 04/09 la pestana
+    // escondida se entera de que entro un mensaje, pero no tenia como avisarte.
+    // Cuenta CONVERSACIONES esperando, no mensajes sueltos, y usa exactamente el
+    // mismo criterio que la marca del sidebar (mensajesVistos), para que el numero
+    // de la solapa NO PUEDA DISCREPAR CON LO QUE VES. Es la leccion del 08/08 con
+    // los avisos de "sin atender": el aviso le pide la lista a la misma fuente que
+    // la pantalla, en vez de contar por su cuenta.
+    var TITULO_BASE = 'Chat WS Hub';
+    var yaHuboPrimerRender = false;
+
+    function actualizarTitulo() {
+      var n = 0;
+      (contactosGlobal || []).forEach(function(c) {
+        if (c.archivado) return;
+        if (mensajesVistos[c.nombre] !== undefined && c.totalMensajes > mensajesVistos[c.nombre]) n++;
+      });
+      var nuevo = n > 0 ? '(' + n + ') ' + TITULO_BASE : TITULO_BASE;
+      if (document.title !== nuevo) document.title = nuevo;   // no tocar el DOM al pedo
     }
 
     function filtrarContactos() {
