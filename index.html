@@ -1538,7 +1538,16 @@
     // es la llamada, no los datos. Lo que se gana es hacer UNA llamada en vez de tres.
     // Por eso tampoco sirve bajar la espera a cero: el piso lo pone el viaje.
     var SELLO_MS = 1500;             // a la vista: ciclo real ~4,5 s (3 de llamada + 1,5)
-    var SELLO_FONDO_MS = 30000;      // de fondo: el navegador igual lo estira a ~60 s
+    // De fondo: 5 minutos. MEDIDO EL 11/09/2026: con la pestaña escondida y el sello
+    // cada 30 s, más la tanda forzada de 60 s que además pide la lista, son ~180
+    // llamadas por hora — unas 2.880 en una noche. Ese día quedó claro que el CRM
+    // abierto todo el día le pega MÁS al P2 que el bridge (~5.500 diarias contra
+    // 4.320), y que la mitad de los timeouts de 6 min no tienen marca del bridge:
+    // salen de esta pestaña. A 5 min quedan ~24 por hora. Al volver a la pestaña se
+    // refresca al instante igual (visibilitychange), así que lo único que se paga es
+    // que el contador de la solapa avisa más tarde MIENTRAS está escondida. A la
+    // vista no cambia nada.
+    var SELLO_FONDO_MS = 300000;
     var TANDA_FORZADA_MS = 60000;    // red de seguridad: el sello no ve que editen una
                                      // ficha que ya existe (archivar, alias, estado),
                                      // así que igual se refresca todo cada minuto.
