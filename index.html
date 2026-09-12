@@ -1548,7 +1548,11 @@
     // número, es la llamada (3 de cada 10 tardaban 33 s). Bajar la presión sobre la
     // cola puede hacer que los mensajes aparezcan ANTES, no después.
     // Ya estaba escrito el 04/09: "más frecuencia = más cola = más lento".
-    var SELLO_MS = 5000;             // a la vista: ciclo real ~7 s (2 de llamada + 5)
+    // BAJADO OTRA VEZ A 2 s EL 12/09, y esta vez sin costo: desde el paso 0 la vuelta
+    // normal ya no le pregunta a Google sino al bridge, que contesta en ~0,2 s. O sea
+    // que preguntar seguido volvió a ser barato. Quedó MEJOR que el 1,5 s original
+    // (ciclo real ~2,2 s contra ~3,5) y encima con una fracción de las llamadas al P2.
+    var SELLO_MS = 2000;             // a la vista: ciclo real ~2,2 s (0,2 del bridge + 2)
     // De fondo: 5 minutos. MEDIDO EL 11/09/2026: con la pestaña escondida y el sello
     // cada 30 s, más la tanda forzada de 60 s que además pide la lista, son ~180
     // llamadas por hora — unas 2.880 en una noche. Ese día quedó claro que el CRM
@@ -1664,18 +1668,60 @@
         .then(function() { return cargarAlertas(); });
     }
 
+    // ── PASO 0: preguntarle al BRIDGE, no a Google (12/09/2026) ──
+    // POR QUE: ese día se midió el desglose de una llamada lenta al P2 — DNS 0,07 s,
+    // conectar 0,11 s, TLS 0,22 s... y 33 SEGUNDOS esperando que Google empiece a
+    // contestar. El tiempo no se pierde en la red: se pierde haciendo COLA DE
+    // ADMISIÓN, y ese cupo es fijo. Con 4 o 5 operadores (que es a donde va esto) el
+    // diseño anterior no llegaba: un solo CRM abierto hacía ~1.000 llamadas por hora.
+    // El bridge YA SABE si entró o salió algo por WhatsApp —es quien lo recibe— y
+    // contesta en ~0,2 s por el túnel, sin cupo. Así que se le pregunta a él, y al P2
+    // se lo llama SÓLO cuando de verdad cambió algo.
+    var selloBridgeN = -1;                  // -1 = todavía no sabemos nada
+    var BRIDGE_SELLO_MS = 4000;             // si no contesta en 4 s, se sigue sin él
+
+    function preguntarSelloBridge() {
+      var ctrl = new AbortController();
+      var t = setTimeout(function() { ctrl.abort(); }, BRIDGE_SELLO_MS);
+      return fetch(BRIDGE_URL + '/sello', { signal: ctrl.signal })
+        .then(function(r) { clearTimeout(t); return r.json(); })
+        .catch(function() { clearTimeout(t); return null; });   // null = no se pudo
+    }
+
     function loopRefresco() {
       if (refrescoTimer) { clearTimeout(refrescoTimer); refrescoTimer = null; }
       if (refrescando) { agendarRefresco(SELLO_MS); return; }  // no encimar tandas
       var deFondo = document.hidden;
       refrescando = true;
 
-      // Paso 1: preguntar el sello. Le mandamos el chat abierto y la foto que ya
-      // tenemos, así el P2 nos devuelve los mensajes de una si algo cambió.
+      preguntarSelloBridge().then(function(sb) {
+        var vencida = (Date.now() - ultimaTandaCompleta) > TANDA_FORZADA_MS;
+        if (sb && typeof sb.n !== 'undefined') {
+          var conocido = (selloBridgeN !== -1);
+          var igual = (sb.n === selloBridgeN);
+          selloBridgeN = sb.n;
+          // Se compara POR IGUALDAD, no por "mayor". Si el bridge se reinicia su
+          // contador vuelve a 0: eso se lee como "cambió algo" y se pide una tanda de
+          // más. Inofensivo, y por eso no hace falta persistir el contador.
+          if (conocido && igual && !vencida) return;   // nada que pedirle a Google
+        }
+        // El bridge no contestó (está caído, o el túnel), o cambió algo: se sigue
+        // como siempre. RED DE SEGURIDAD: el panel nunca queda ciego por esto.
+        return tandaConP2(deFondo);
+      }).catch(function(){}).then(function() {   // un pedido caído no frena el loop
+        refrescando = false;
+        agendarRefresco(document.hidden ? SELLO_FONDO_MS : SELLO_MS);
+      });
+    }
+
+    // La tanda contra el P2, la de siempre. Ahora se llama sólo cuando hace falta.
+    // Le mandamos el chat abierto y la foto que ya tenemos, así el P2 nos devuelve
+    // los mensajes de una si algo cambió.
+    function tandaConP2(deFondo) {
       var params = { desde: selloN };
       if (contactoActual && !deFondo) params.contacto = contactoActual;
 
-      api("getSello", params).then(function(sel) {
+      return api("getSello", params).then(function(sel) {
         if (!sel || typeof sel.n === 'undefined') return;   // respuesta rara: se reintenta sola
         var sello = sel.n + '/' + sel.c + '/' + sel.t;
         var cambio  = (sello !== selloVisto);
@@ -1697,9 +1743,6 @@
         return unaTandaRefresco(deFondo, pintado).then(function() {
           selloVisto = sello; selloN = sel.n; ultimaTandaCompleta = Date.now();
         });
-      }).catch(function(){}).then(function() {  // un pedido caído no frena el loop
-        refrescando = false;
-        agendarRefresco(document.hidden ? SELLO_FONDO_MS : SELLO_MS);
       });
     }
 
