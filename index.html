@@ -1696,18 +1696,32 @@
 
       preguntarSelloBridge().then(function(sb) {
         var vencida = (Date.now() - ultimaTandaCompleta) > TANDA_FORZADA_MS;
-        if (sb && typeof sb.n !== 'undefined') {
-          var conocido = (selloBridgeN !== -1);
-          var igual = (sb.n === selloBridgeN);
-          selloBridgeN = sb.n;
-          // Se compara POR IGUALDAD, no por "mayor". Si el bridge se reinicia su
-          // contador vuelve a 0: eso se lee como "cambió algo" y se pide una tanda de
-          // más. Inofensivo, y por eso no hace falta persistir el contador.
-          if (conocido && igual && !vencida) return;   // nada que pedirle a Google
+        var nuevoN = (sb && typeof sb.n !== 'undefined') ? sb.n : null;
+
+        // Se compara POR IGUALDAD, no por "mayor". Si el bridge se reinicia su
+        // contador vuelve a 0: eso se lee como "cambió algo" y se pide una tanda de
+        // más. Inofensivo, y por eso no hace falta persistir el contador.
+        if (nuevoN !== null && selloBridgeN !== -1 && nuevoN === selloBridgeN && !vencida) {
+          return;   // nada que pedirle a Google
         }
+
         // El bridge no contestó (está caído, o el túnel), o cambió algo: se sigue
         // como siempre. RED DE SEGURIDAD: el panel nunca queda ciego por esto.
-        return tandaConP2(deFondo);
+        return tandaConP2(deFondo).then(function(ok) {
+          // 🔴 EL NUMERO SE DA POR VISTO RECIEN ACA, Y SOLO SI LA TANDA SALIO BIEN.
+          // BUG DEL 12/09 (arreglado el mismo dia): antes se guardaba ANTES de pedir
+          // los datos. Si la tanda fallaba a mitad de camino -- por ejemplo
+          // getContactos volvia (y el sidebar se actualizaba) pero la llamada
+          // siguiente no -- el numero YA estaba marcado como visto, asi que la
+          // vuelta siguiente tomaba el atajo y NO reintentaba. Sintoma exacto que
+          // reporto Victor: "entra un mensaje, queda en la izquierda y no lo
+          // incorpora a la derecha". Se destrababa recien con la red de 60 s.
+          // El codigo que ya estaba lo hacia bien (selloVisto/selloN se guardan
+          // dentro del .then de la tanda exitosa); el paso 0 se agrego sin copiar
+          // esa precaucion. Si la tanda falla, el numero NO se guarda y la proxima
+          // vuelta reintenta sola, a los 2 s en vez de a los 60.
+          if (ok && nuevoN !== null) selloBridgeN = nuevoN;
+        });
       }).catch(function(){}).then(function() {   // un pedido caído no frena el loop
         refrescando = false;
         agendarRefresco(document.hidden ? SELLO_FONDO_MS : SELLO_MS);
@@ -1721,14 +1735,16 @@
       var params = { desde: selloN };
       if (contactoActual && !deFondo) params.contacto = contactoActual;
 
+      // Devuelve TRUE sólo si la vuelta se completó y la pantalla quedó al día.
+      // Ese booleano es el que decide si el sello del bridge se da por visto.
       return api("getSello", params).then(function(sel) {
-        if (!sel || typeof sel.n === 'undefined') return;   // respuesta rara: se reintenta sola
+        if (!sel || typeof sel.n === 'undefined') return false;   // respuesta rara: se reintenta sola
         var sello = sel.n + '/' + sel.c + '/' + sel.t;
         var cambio  = (sello !== selloVisto);
         var vencida = (Date.now() - ultimaTandaCompleta) > TANDA_FORZADA_MS;
         // Nada nuevo en la planilla: la pantalla ya está al día, no se pide nada más.
         // Esto es todo el ahorro: antes se pedían tres cosas pesadas igual.
-        if (!cambio && !vencida) { selloVisto = sello; selloN = sel.n; return; }
+        if (!cambio && !vencida) { selloVisto = sello; selloN = sel.n; return true; }
 
         // Paso 2: pintar YA el chat abierto, que es lo que se está mirando. Vino en
         // esta misma respuesta, sin pagar una segunda vuelta.
@@ -1742,6 +1758,7 @@
         // Paso 3: la lista y las alertas, detrás, sin que el usuario las espere.
         return unaTandaRefresco(deFondo, pintado).then(function() {
           selloVisto = sello; selloN = sel.n; ultimaTandaCompleta = Date.now();
+          return true;   // recién acá la pantalla quedó al día
         });
       });
     }
