@@ -1537,7 +1537,18 @@
     // 05/09, una llamada al P2 cuesta 2,3 a 3,5 s devuelva 36 bytes o 76 KB: el peaje
     // es la llamada, no los datos. Lo que se gana es hacer UNA llamada en vez de tres.
     // Por eso tampoco sirve bajar la espera a cero: el piso lo pone el viaje.
-    var SELLO_MS = 1500;             // a la vista: ciclo real ~4,5 s (3 de llamada + 1,5)
+    // A la vista: 5 segundos. SUBIDO DE 1,5 s EL 12/09/2026, y es contraintuitivo a
+    // propósito. Ese día se midió el desglose de una llamada lenta: DNS 0,07 s,
+    // conectar 0,11 s, TLS 0,22 s... y 33 SEGUNDOS esperando que Google empiece a
+    // contestar. O sea que el tiempo no se pierde en la red sino en la COLA DE
+    // ADMISIÓN de Apps Script, que tiene cupo fijo. Con 1,5 s el panel hacía ~1.030
+    // llamadas por hora — MÁS que las ~830 de antes del sello, porque el sello bajó
+    // las llamadas por vuelta pero aceleró tanto el ciclo que el total subió 24%.
+    // A 5 s son ~510 por hora. Y lo importante: lo que domina la espera NO es este
+    // número, es la llamada (3 de cada 10 tardaban 33 s). Bajar la presión sobre la
+    // cola puede hacer que los mensajes aparezcan ANTES, no después.
+    // Ya estaba escrito el 04/09: "más frecuencia = más cola = más lento".
+    var SELLO_MS = 5000;             // a la vista: ciclo real ~7 s (2 de llamada + 5)
     // De fondo: 5 minutos. MEDIDO EL 11/09/2026: con la pestaña escondida y el sello
     // cada 30 s, más la tanda forzada de 60 s que además pide la lista, son ~180
     // llamadas por hora — unas 2.880 en una noche. Ese día quedó claro que el CRM
