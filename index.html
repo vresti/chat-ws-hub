@@ -873,6 +873,31 @@
     // premisas son falsas (hoja verificada sin duplicados el 01/08).
     // El bridge SIGUE usándose para enviar (/enviar-texto, /enviar-archivo) y para
     // media (/get-media): eso funciona y no se toca.
+    // ── MEMORIA DE CONVERSACIONES (12/09/2026) ──
+    // POR QUE: el P2 contesta entre 2 y 28 s, y es ALEATORIO. Medido ese día: de tres
+    // llamadas seguidas, 2,10 s · 2,52 s · 9,48 s, y Victor vio una de 28 s al cambiar
+    // de ficha. La cola de admisión de Google no la controlamos — pero SÍ podemos dejar
+    // de esperarla: si la conversación ya se vio, se pinta al instante y la versión
+    // fresca se pide por detrás. Lo insoportable no era que tardara, era no saber si
+    // esta vez iban a ser 2 segundos o 28.
+    var histCache = {};
+
+    // Único punto de pintado de mensajes que vienen del servidor.
+    // 🔴 EL CONTROL QUE FALTABA: antes se pintaba sin verificar que los mensajes fueran
+    // del chat abierto. Con llamadas de 28 s es muy posible que el usuario ya haya
+    // cambiado de ficha mientras la respuesta viajaba, y ahí le aparecían los mensajes
+    // de OTRO cliente en la pantalla del nuevo. Mismo riesgo que obligó a los tres
+    // candados del salto automático (05/09).
+    function pintarMensajes(contacto, msgs) {
+      if (!msgs) return;
+      histCache[contacto] = msgs;                  // queda para la próxima apertura
+      if (contacto !== contactoActual) return;     // cambió de chat mientras viajaba
+      var ultimo = msgs.length ? (msgs[msgs.length-1].fecha + msgs[msgs.length-1].mensaje) : '';
+      if (ultimo && ultimo === ultimoMensajeVisto) return;   // nada nuevo: no repinta
+      ultimoMensajeVisto = ultimo;
+      renderMensajes(msgs);
+    }
+
     function cargarHistorial(telefono, contacto, callback) {
       if (!contacto) { callback(null); return; }
       api("getMensajesPorContacto", { contacto: contacto })
@@ -1121,11 +1146,21 @@
         actualizarBtnEstado(estadoActual);
         mensajesVistos[contacto] = c.totalMensajes; renderContactos(contactosGlobal);
       }
-      document.getElementById('chatMessages').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando...</div>';
+      // Si esta conversación ya se vio, se pinta AL INSTANTE y la fresca va por detrás.
+      // Sólo la primera vez se ve el spinner.
+      var enCache = histCache[contacto];
+      if (enCache && enCache.length) {
+        var u0 = enCache[enCache.length-1];
+        ultimoMensajeVisto = u0.fecha + u0.mensaje;   // así no repinta si no cambió nada
+        renderMensajes(enCache);
+      } else {
+        document.getElementById('chatMessages').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando...</div>';
+      }
       document.getElementById('suggestionsBar').innerHTML = '';
       cargarHistorial(telefonoActual, contacto, function(msgs) {
-        if (msgs) renderMensajes(msgs);
-        else api("getMensajesPorContacto", { contacto: contacto }).then(renderMensajes);
+        if (msgs) pintarMensajes(contacto, msgs);
+        else api("getMensajesPorContacto", { contacto: contacto })
+               .then(function(m) { pintarMensajes(contacto, m); });
       });
     }
 
@@ -1466,25 +1501,17 @@
     function refrescarChatActual() {
       if (!contactoActual) return Promise.resolve();
       return new Promise(function(resolve) {
-        cargarHistorial(telefonoActual, contactoActual, function(msgs) {
+        // El contacto se captura ACA: si el usuario cambia de ficha mientras la
+        // respuesta viaja, pintarMensajes lo detecta y no pinta el chat equivocado.
+        var pedidoPara = contactoActual;
+        cargarHistorial(telefonoActual, pedidoPara, function(msgs) {
           if (msgs && msgs.length > 0) {
-            // Bridge OK — usar historial del bridge
-            var ultimo = msgs[msgs.length-1].fecha + msgs[msgs.length-1].mensaje;
-            if (ultimo !== ultimoMensajeVisto) {
-              ultimoMensajeVisto = ultimo;
-              renderMensajes(msgs);
-            }
+            pintarMensajes(pedidoPara, msgs);
             resolve();
           } else {
             // Bridge sin datos o sin teléfono — fallback directo al GAS
-            api("getMensajesPorContacto", { contacto: contactoActual }).then(function(gasMsgs) {
-              if (gasMsgs && gasMsgs.length > 0) {
-                var ultimo = gasMsgs[gasMsgs.length-1].fecha + gasMsgs[gasMsgs.length-1].mensaje;
-                if (ultimo !== ultimoMensajeVisto) {
-                  ultimoMensajeVisto = ultimo;
-                  renderMensajes(gasMsgs);
-                }
-              }
+            api("getMensajesPorContacto", { contacto: pedidoPara }).then(function(gasMsgs) {
+              if (gasMsgs && gasMsgs.length > 0) pintarMensajes(pedidoPara, gasMsgs);
               resolve();
             }).catch(function() { resolve(); });
           }
@@ -1750,8 +1777,9 @@
         // esta misma respuesta, sin pagar una segunda vuelta.
         var pintado = false;
         if (sel.msgs && sel.msgs.length && contactoActual) {
-          var u = sel.msgs[sel.msgs.length-1].fecha + sel.msgs[sel.msgs.length-1].mensaje;
-          if (u !== ultimoMensajeVisto) { ultimoMensajeVisto = u; renderMensajes(sel.msgs); }
+          // params.contacto se armó con el contactoActual del momento del pedido; si
+          // cambió de ficha mientras viajaba, pintarMensajes lo descarta solo.
+          pintarMensajes(params.contacto || contactoActual, sel.msgs);
           pintado = true;
         }
 
