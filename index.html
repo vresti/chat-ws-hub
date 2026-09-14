@@ -981,6 +981,7 @@
 
     // ── ALERTAS ──
     function cargarAlertas() {
+      ultimasAlertas = Date.now();
       return api("getAlertas").then(function(alertas) {
         var count = alertas.length;
         var badge = document.getElementById('alertasCount');
@@ -1599,6 +1600,12 @@
     var ultimaTandaCompleta = 0;
     var refrescando = false;
     var refrescoTimer = null;
+    // (14/09/2026) Ver tandaConP2, loopRefresco y alertasSiToca.
+    var ALERTAS_MS = 600000;         // alertas: como mucho cada 10 min detrás de una tanda
+    var ultimasAlertas = 0;
+    var CARRERA_ESPERAS_MS = [2000, 4000, 8000, 16000];  // reintentos si el bridge se adelantó a la planilla
+    var carreraIntento = 0;
+    var proximoRefrescoMs = 0;       // 0 = la espera normal
 
     // ============================================
     // SALTO AUTOMATICO AL CHAT QUE TRAE ALGO NUEVO (05/09/2026)
@@ -1665,34 +1672,50 @@
       refrescoTimer = setTimeout(loopRefresco, ms);
     }
 
+    // Aplica una lista de contactos recién llegada. Salió de unaTandaRefresco el
+    // 14/09/2026 para que la use también la lista que viene DENTRO del sello.
+    function aplicarLista(d, soloLista, gen) {
+      if (gen !== refrescoGen) return;  // una recarga/accion mas nueva ya gano: descartar esta tanda vieja
+      contactosGlobal = d;
+      // Antes de repintar: renderContactos toca mensajesVistos y borraria la pista
+      // de una ficha recien nacida.
+      var novedad = detectarNovedad(d);
+      if(document.getElementById('searchInput').value==='') renderContactos(d); else filtrarContactos();
+      // Auto-abrir el contacto más reciente si no hay ninguno abierto
+      if (!soloLista && !contactoActual && d.length > 0) {
+        var activos = d.filter(function(c){ return !c.archivado; });
+        if (activos.length > 0) abrirChat(activos[0].nombre);
+      }
+      // Si la ficha cambió de nombre, seguirla: el panel pide con el nombre nuevo
+      if (reengancharFicha(d) && !soloLista) return refrescarChatActual();
+      // Y recién ahora, con la lista ya pintada: abrir solo el chat que trajo algo
+      // nuevo. abrirChat se trae su propio historial, así que corta acá.
+      if (saltarSiCorresponde(novedad)) return;
+    }
+
+    // El camino VIEJO de la tanda: pedir la lista aparte. Desde el 14/09 sólo se usa si
+    // el P2 no mandó la lista dentro del sello (versión anterior, o falló al armarla).
     function unaTandaRefresco(soloLista, chatYaPintado) {
       var gen = ++refrescoGen;
-      var pContactos = api("getContactos").then(function(d) {
-        if (gen !== refrescoGen) return;  // una recarga/accion mas nueva ya gano: descartar esta tanda vieja
-        contactosGlobal = d;
-        // Antes de repintar: renderContactos toca mensajesVistos y borraria la pista
-        // de una ficha recien nacida.
-        var novedad = detectarNovedad(d);
-        if(document.getElementById('searchInput').value==='') renderContactos(d); else filtrarContactos();
-        // Auto-abrir el contacto más reciente si no hay ninguno abierto
-        if (!soloLista && !contactoActual && d.length > 0) {
-          var activos = d.filter(function(c){ return !c.archivado; });
-          if (activos.length > 0) abrirChat(activos[0].nombre);
-        }
-        // Si la ficha cambió de nombre, seguirla: el panel pide con el nombre nuevo
-        if (reengancharFicha(d) && !soloLista) return refrescarChatActual();
-        // Y recién ahora, con la lista ya pintada: abrir solo el chat que trajo algo
-        // nuevo. abrirChat se trae su propio historial, así que corta acá.
-        if (saltarSiCorresponde(novedad)) return;
-      });
+      var pContactos = api("getContactos").then(function(d) { return aplicarLista(d, soloLista, gen); });
       if (soloLista) return pContactos;   // pestaña de fondo: sólo la lista
       // En serie, no en paralelo: Apps Script ejecuta de a UNA por usuario, así que
       // pedirlas juntas no las apura, sólo hace impredecible cuál llega última.
       // Y si el chat abierto ya vino con el sello, no se vuelve a pedir: cada llamada
       // al P2 cuesta ~3 s (medido el 05/09), o sea que una llamada de menos son 3 s menos.
+      // Las alertas ya no van acá (14/09): ver alertasSiToca.
       return pContactos
-        .then(function() { return chatYaPintado ? null : refrescarChatActual(); })
-        .then(function() { return cargarAlertas(); });
+        .then(function() { return chatYaPintado ? null : refrescarChatActual(); });
+    }
+
+    // Las alertas miden DÍAS sin actividad: no tiene sentido pedirlas con cada mensaje
+    // ni cada minuto, que es lo que pasaba hasta el 14/09/2026. Se piden al abrir la
+    // app, al abrir el panel de alertas, al cambiar un estado, y detrás de una tanda
+    // cada 10 minutos como mucho. Sin esperar la respuesta: no frena el ciclo.
+    function alertasSiToca(deFondo) {
+      if (deFondo) return;
+      if (Date.now() - ultimasAlertas < ALERTAS_MS) return;
+      cargarAlertas().catch(function(){});
     }
 
     // ── PASO 0: preguntarle al BRIDGE, no a Google (12/09/2026) ──
@@ -1734,7 +1757,7 @@
 
         // El bridge no contestó (está caído, o el túnel), o cambió algo: se sigue
         // como siempre. RED DE SEGURIDAD: el panel nunca queda ciego por esto.
-        return tandaConP2(deFondo).then(function(ok) {
+        return tandaConP2(deFondo).then(function(r) {
           // 🔴 EL NUMERO SE DA POR VISTO RECIEN ACA, Y SOLO SI LA TANDA SALIO BIEN.
           // BUG DEL 12/09 (arreglado el mismo dia): antes se guardaba ANTES de pedir
           // los datos. Si la tanda fallaba a mitad de camino -- por ejemplo
@@ -1747,11 +1770,32 @@
           // dentro del .then de la tanda exitosa); el paso 0 se agrego sin copiar
           // esa precaucion. Si la tanda falla, el numero NO se guarda y la proxima
           // vuelta reintenta sola, a los 2 s en vez de a los 60.
-          if (ok && nuevoN !== null) selloBridgeN = nuevoN;
+          if (!r || nuevoN === null) return;
+
+          // 🔴 LA CARRERA (encontrada leyendo el código el 14/09/2026): el bridge sube su
+          // contador APENAS le llega el mensaje, ANTES de mandárselo al P1, y el P1 tarda
+          // segundos en escribirlo (más con IA o con cola en Google). Si el panel pregunta
+          // justo en ese hueco, la planilla todavía dice "igual" — y hasta el 14/09 eso
+          // daba el número por visto: el mensaje esperaba la red de 60 s. Mismo tipo de
+          // bug que la regresión del 12/09 (dar algo por visto antes de tenerlo).
+          // Ahora: si el bridge avisó un cambio y la planilla todavía no lo tiene, NO se
+          // da por visto y se vuelve a preguntar con esperas crecientes (2, 4, 8, 16 s).
+          // El TOPE existe porque hay mensajes que el bridge cuenta y la planilla NUNCA va
+          // a tener (los filtrados, por ejemplo los celulares de la guardia): pasados los
+          // reintentos se da por visto igual y queda la red de 60 s.
+          var bridgeAvisoCambio = (selloBridgeN !== -1 && nuevoN !== selloBridgeN);
+          if (r === 'igual' && bridgeAvisoCambio && carreraIntento < CARRERA_ESPERAS_MS.length) {
+            proximoRefrescoMs = CARRERA_ESPERAS_MS[carreraIntento++];
+            return;
+          }
+          selloBridgeN = nuevoN;
+          carreraIntento = 0;
         });
       }).catch(function(){}).then(function() {   // un pedido caído no frena el loop
         refrescando = false;
-        agendarRefresco(document.hidden ? SELLO_FONDO_MS : SELLO_MS);
+        var ms = document.hidden ? SELLO_FONDO_MS : (proximoRefrescoMs || SELLO_MS);
+        proximoRefrescoMs = 0;
+        agendarRefresco(ms);
       });
     }
 
@@ -1759,22 +1803,30 @@
     // Le mandamos el chat abierto y la foto que ya tenemos, así el P2 nos devuelve
     // los mensajes de una si algo cambió.
     function tandaConP2(deFondo) {
-      var params = { desde: selloN };
+      var vencida = (Date.now() - ultimaTandaCompleta) > TANDA_FORZADA_MS;
+      // UNA SOLA LLAMADA (14/09/2026). Además del chat abierto, le pedimos al P2 que
+      // mande la LISTA en esta misma respuesta si cambió algo (la compara contra
+      // "visto") o siempre si venció la red de 60 s ("forzar"). Verificado ese día:
+      // antes eran 3 llamadas en serie (getSello → getContactos → getAlertas) y la red
+      // de 60 s disparaba las mismas 3 — un panel quieto hacía ~180 llamadas por hora.
+      var params = { desde: selloN, lista: vencida ? 'forzar' : '1', visto: selloVisto };
       if (contactoActual && !deFondo) params.contacto = contactoActual;
+      // Si mientras esto viaja una acción del usuario (archivar, fijar) pide su propia
+      // lista, la de ella es más nueva: la que venga acá se descarta.
+      var genAntes = refrescoGen;
 
-      // Devuelve TRUE sólo si la vuelta se completó y la pantalla quedó al día.
-      // Ese booleano es el que decide si el sello del bridge se da por visto.
+      // Devuelve: true = la pantalla quedó al día · 'igual' = la planilla no cambió ·
+      // false = respuesta rara (se reintenta sola). loopRefresco usa 'igual' para
+      // detectar la CARRERA con el bridge.
       return api("getSello", params).then(function(sel) {
         if (!sel || typeof sel.n === 'undefined') return false;   // respuesta rara: se reintenta sola
         var sello = sel.n + '/' + sel.c + '/' + sel.t;
         var cambio  = (sello !== selloVisto);
-        var vencida = (Date.now() - ultimaTandaCompleta) > TANDA_FORZADA_MS;
         // Nada nuevo en la planilla: la pantalla ya está al día, no se pide nada más.
-        // Esto es todo el ahorro: antes se pedían tres cosas pesadas igual.
-        if (!cambio && !vencida) { selloVisto = sello; selloN = sel.n; return true; }
+        if (!cambio && !vencida) { selloVisto = sello; selloN = sel.n; return 'igual'; }
 
-        // Paso 2: pintar YA el chat abierto, que es lo que se está mirando. Vino en
-        // esta misma respuesta, sin pagar una segunda vuelta.
+        // Pintar YA el chat abierto, que es lo que se está mirando. Vino en esta misma
+        // respuesta, sin pagar una segunda vuelta.
         var pintado = false;
         if (sel.msgs && sel.msgs.length && contactoActual) {
           // params.contacto se armó con el contactoActual del momento del pedido; si
@@ -1783,9 +1835,27 @@
           pintado = true;
         }
 
-        // Paso 3: la lista y las alertas, detrás, sin que el usuario las espere.
-        return unaTandaRefresco(deFondo, pintado).then(function() {
+        var paso;
+        if (sel.lista) {
+          // La lista vino adentro: cero llamadas más.
+          if (refrescoGen === genAntes) {
+            var gen = ++refrescoGen;
+            paso = Promise.resolve(aplicarLista(sel.lista, deFondo, gen));
+          } else {
+            paso = Promise.resolve();
+          }
+          // Si el P2 no pudo leer los mensajes del chat abierto, se piden aparte: si no,
+          // el número queda dado por visto y ese chat no se vuelve a pedir hasta el
+          // próximo cambio.
+          if (sel.err && !deFondo) paso = paso.then(function() { return refrescarChatActual(); });
+        } else {
+          // El P2 no mandó la lista (versión anterior, o falló al armarla): camino de antes.
+          paso = unaTandaRefresco(deFondo, pintado);
+        }
+
+        return paso.then(function() {
           selloVisto = sello; selloN = sel.n; ultimaTandaCompleta = Date.now();
+          alertasSiToca(deFondo);
           return true;   // recién acá la pantalla quedó al día
         });
       });
