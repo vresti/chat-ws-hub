@@ -914,6 +914,29 @@
     // esta vez iban a ser 2 segundos o 28.
     var histCache = {};
 
+    // PRECARGA (15/09/2026): al arrancar, la primera tanda le pide al P2 los últimos
+    // mensajes de las conversaciones más recientes y quedan acá, así abrirlas es
+    // instantáneo aunque nunca se hayan abierto en la sesión. Se pide UNA sola vez.
+    // 🔴 Lo precargado es PARCIAL (sólo los últimos mensajes): se marca en histParcial
+    // para que, al abrir la ficha, la versión completa que llega por detrás SIEMPRE se
+    // repinte. Sin esa marca, como el último mensaje coincide, pintarMensajes decidía
+    // "no cambió nada" y la pantalla se quedaba sin el historial más viejo.
+    var PRECARGA_FICHAS = 15;
+    var precargaHecha = false;
+    var histParcial = {};
+
+    function aplicarPrecarga(sel) {
+      precargaHecha = true;   // aunque falle o no venga: no se reintenta cada minuto
+      if (!sel || !sel.precarga) return;
+      Object.keys(sel.precarga).forEach(function(nombre) {
+        if (histCache[nombre]) return;   // lo que ya está en memoria es más completo: no se pisa
+        var msgs = sel.precarga[nombre];
+        if (!msgs || !msgs.length) return;
+        histCache[nombre] = msgs;
+        histParcial[nombre] = true;
+      });
+    }
+
     // Único punto de pintado de mensajes que vienen del servidor.
     // 🔴 EL CONTROL QUE FALTABA: antes se pintaba sin verificar que los mensajes fueran
     // del chat abierto. Con llamadas de 28 s es muy posible que el usuario ya haya
@@ -923,6 +946,7 @@
     function pintarMensajes(contacto, msgs) {
       if (!msgs) return;
       histCache[contacto] = msgs;                  // queda para la próxima apertura
+      delete histParcial[contacto];                // (15/09) ya es la versión completa
       if (contacto !== contactoActual) return;     // cambió de chat mientras viajaba
       var ultimo = msgs.length ? (msgs[msgs.length-1].fecha + msgs[msgs.length-1].mensaje) : '';
       if (ultimo && ultimo === ultimoMensajeVisto) return;   // nada nuevo: no repinta
@@ -1185,7 +1209,9 @@
       var enCache = histCache[contacto];
       if (enCache && enCache.length) {
         var u0 = enCache[enCache.length-1];
-        ultimoMensajeVisto = u0.fecha + u0.mensaje;   // así no repinta si no cambió nada
+        // así no repinta si no cambió nada — SALVO que sea precarga parcial (15/09): ahí la
+        // versión completa tiene que repintarse aunque el último mensaje coincida.
+        ultimoMensajeVisto = histParcial[contacto] ? "" : (u0.fecha + u0.mensaje);
         renderMensajes(enCache);
       } else {
         document.getElementById('chatMessages').innerHTML = '<div class="loading"><div class="spinner"></div>Cargando...</div>';
@@ -1987,6 +2013,7 @@
       // antes eran 3 llamadas en serie (getSello → getContactos → getAlertas) y la red
       // de 60 s disparaba las mismas 3 — un panel quieto hacía ~180 llamadas por hora.
       var params = { desde: selloN, lista: vencida ? 'forzar' : '1', visto: selloVisto };
+      if (!precargaHecha) params.precarga = PRECARGA_FICHAS;   // (15/09) sólo hasta que llegue la primera lista
       if (contactoActual && !deFondo) params.contacto = contactoActual;
       // Si mientras esto viaja una acción del usuario (archivar, fijar) pide su propia
       // lista, la de ella es más nueva: la que venga acá se descarta.
@@ -2015,6 +2042,7 @@
         var paso;
         if (sel.lista) {
           // La lista vino adentro: cero llamadas más.
+          if (!precargaHecha) aplicarPrecarga(sel);   // (15/09) la primera vez trae también la precarga
           if (refrescoGen === genAntes) {
             var gen = ++refrescoGen;
             paso = Promise.resolve(aplicarLista(sel.lista, deFondo, gen));
