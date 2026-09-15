@@ -1142,6 +1142,7 @@
       contactoActual = contacto;
       ultimoMensajeVisto = ""; // reset para forzar refresh inmediato
       enviosPendientes = [];   // las burbujas en vuelo son de la conversación que dejamos
+      llegadasBridge = [];     // (15/09) y las que entregó el bridge, también
       document.querySelectorAll('.contact-item').forEach(function(el) { el.classList.remove('active'); });
       document.getElementById('welcomeScreen').style.display = 'none';
       document.getElementById('activeChat').style.display = 'flex';
@@ -1271,6 +1272,8 @@
       });
       container.innerHTML = html || (enviosPendientes.length ? '' : '<div class="loading">No hay mensajes</div>');
       depurarPendientes(mensajes);
+      depurarLlegadas(mensajes);   // (15/09) las del bridge que Google ya trajo
+      repintarLlegadas();
       repintarPendientes();
       setTimeout(function() { container.scrollTop = container.scrollHeight; }, 100);
       setTimeout(cargarMediaPendiente, 50);
@@ -1414,7 +1417,7 @@
     function iniciarChatNuevo(contacto, telefono) {
       cerrarModal(); if(!telefono){mostrarToast('Sin teléfono');return;}
       contactoActual=contacto; telefonoActual=telefono;
-      ultimoMensajeVisto = ""; enviosPendientes = [];
+      ultimoMensajeVisto = ""; enviosPendientes = []; llegadasBridge = [];
       document.getElementById('welcomeScreen').style.display='none';
       document.getElementById('activeChat').style.display='flex';
       document.getElementById('appContainer').classList.add('chat-open');
@@ -1751,12 +1754,120 @@
     var selloBridgeN = -1;                  // -1 = todavía no sabemos nada
     var BRIDGE_SELLO_MS = 4000;             // si no contesta en 4 s, se sigue sin él
 
+    // ── PIEZA 3 DEL PASE SELLADO (15/09/2026): el bridge entrega los MENSAJES ──
+    // Prueba controlada de ese día: el P1 tardó 14 s en escribir un mensaje y el panel
+    // 51 s en mostrarlo, todo esperando a Google. Pero el bridge YA TIENE el mensaje
+    // cuando llega. Con pase, en vez de preguntar sólo "¿cuántos van?" (/sello), se le
+    // piden los mensajes nuevos (/mensajes) y se pintan AL INSTANTE: lista, chat abierto
+    // y salto automático. La planilla sigue mandando: la tanda contra Google corre igual
+    // (el "n" viene en la misma respuesta) y reemplaza lo provisorio.
+    // Sin pase, con el pase rechazado, o si el bridge no contesta: exactamente como antes.
+    var bitacoraDesde = 0;          // id del último mensaje del bridge ya visto
+    var bitacoraInicio = null;      // si cambia, el bridge se reinició
+    var paseRechazado = false;      // 401: no se insiste con el pase hasta volver a entrar
+    var LLEGADA_VIDA_MS = 180000;   // una burbuja del bridge que Google nunca confirma se suelta a los 3 min
+    var llegadasBridge = [];        // { tel8, texto, dir, hora, t } — sólo del chat abierto
+
     function preguntarSelloBridge() {
+      var usarPase = !!(usuarioActual && usuarioActual.pase) && !paseRechazado;
+      var url = usarPase
+        ? BRIDGE_URL + '/mensajes?pase=' + encodeURIComponent(usuarioActual.pase) + '&desde=' + bitacoraDesde
+        : BRIDGE_URL + '/sello';
       var ctrl = new AbortController();
       var t = setTimeout(function() { ctrl.abort(); }, BRIDGE_SELLO_MS);
-      return fetch(BRIDGE_URL + '/sello', { signal: ctrl.signal })
-        .then(function(r) { clearTimeout(t); return r.json(); })
+      return fetch(url, { signal: ctrl.signal })
+        .then(function(r) {
+          clearTimeout(t);
+          if (usarPase && r.status === 401) { paseRechazado = true; return null; }   // vuelve a /sello
+          return r.json();
+        })
+        .then(function(j) {
+          if (j && usarPase && j.status === 'ok') {
+            try { aplicarDelBridge(j); } catch (e) {}   // pintar nunca frena el ciclo
+          }
+          return j;
+        })
         .catch(function() { clearTimeout(t); return null; });   // null = no se pudo
+    }
+
+    function fechaCortaDe(ms) {
+      var d = new Date(ms);
+      return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + ' ' +
+             String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+    }
+
+    function aplicarDelBridge(j) {
+      if (j.inicio !== bitacoraInicio) {
+        // Primera vez en la sesión, o el bridge se reinició: lo anterior ya lo trae Google.
+        bitacoraInicio = j.inicio;
+        bitacoraDesde = j.ultimo || 0;
+        return;
+      }
+      if (!j.mensajes || !j.mensajes.length) return;
+      var cambioLista = false, saltarA = '', porTel = {};
+      j.mensajes.forEach(function(m) {
+        if (m.id > bitacoraDesde) bitacoraDesde = m.id;
+        var tel8 = u8tel(m.tel);
+        if (!tel8 || !m.texto) return;
+        // La ficha, por teléfono (la llave real). Si hay varias, la más reciente.
+        var fichas = (contactosGlobal || []).filter(function(c) { return !c.archivado && u8tel(c.telefono) === tel8; });
+        if (!fichas.length) return;   // cliente nuevo (todavía sin ficha): llega por Google como antes
+        fichas.sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); });
+        var ficha = fichas[0];
+        var abierta = contactoActual && u8tel(telefonoActual) === tel8;
+        // Lo que acabo de mandar YO desde este panel ya tiene su burbuja en vuelo.
+        var esMio = m.dir === 'out' && abierta && enviosPendientes.some(function(p) { return p.texto.trim() === m.texto.trim(); });
+        var linea = (m.dir === 'out' ? '→ ' : '') + m.texto;
+        ficha.ultimoMensaje = linea.substring(0, 50) + (linea.length > 50 ? '...' : '');
+        ficha.timestamp = m.ts;
+        ficha.ultimaFecha = fechaCortaDe(m.ts);
+        if (!esMio) ficha.totalMensajes = (ficha.totalMensajes || 0) + 1;
+        cambioLista = true;
+        if (!esMio) {
+          var llegada = { tel8: tel8, texto: m.texto, dir: m.dir, hora: fechaCortaDe(m.ts).split(' ')[1], t: Date.now() };
+          (porTel[tel8] = porTel[tel8] || []).push(llegada);
+          if (abierta) llegadasBridge.push(llegada);
+        }
+        if (m.dir === 'in' && !abierta) saltarA = ficha.nombre;
+      });
+      if (cambioLista) {
+        contactosGlobal.sort(function(a, b) { return (b.timestamp || 0) - (a.timestamp || 0); });
+        if (document.getElementById('searchInput').value === '') renderContactos(contactosGlobal); else filtrarContactos();
+      }
+      if (saltarA && saltarSiCorresponde(saltarA)) {
+        // abrirChat limpió las llegadas: colgar las de este chat, que Google todavía no tiene.
+        var tel8Abierto = u8tel(telefonoActual);
+        (porTel[tel8Abierto] || []).forEach(function(l) { llegadasBridge.push(l); });
+      }
+      repintarLlegadas();
+      repintarPendientes();   // lo mío en vuelo queda siempre al final
+    }
+
+    function repintarLlegadas() {
+      var ct = document.getElementById('chatMessages');
+      if (!ct) return;
+      var viejas = ct.querySelectorAll('.burbuja-bridge');
+      for (var i = 0; i < viejas.length; i++) viejas[i].parentNode.removeChild(viejas[i]);
+      llegadasBridge.forEach(function(p) {
+        var d = document.createElement('div');
+        d.className = 'burbuja-bridge';
+        d.innerHTML = p.dir === 'out'
+          ? '<div class="message-bubble message-outgoing"><div class="message-text">' + esc(p.texto) + '</div><div class="message-time">' + p.hora + ' ✓</div></div><div class="clearfix"></div>'
+          : '<div class="message-bubble message-incoming"><div class="message-header-row"><span class="message-app" style="color:' + appColor + '">WhatsApp</span><span class="message-time">' + p.hora + '</span></div><div class="message-text">' + esc(p.texto) + '</div></div><div class="clearfix"></div>';
+        ct.appendChild(d);
+      });
+      if (llegadasBridge.length) ct.scrollTop = ct.scrollHeight;
+    }
+
+    // Cuando Google trae la conversación, lo que ya está en la planilla ocupa su lugar.
+    function depurarLlegadas(msgs) {
+      if (!llegadasBridge.length) return;
+      var textos = (msgs || []).map(function(m) { return (m.mensaje || '').toString().replace(/^→\s*/, '').trim(); });
+      var ahora = Date.now();
+      llegadasBridge = llegadasBridge.filter(function(p) {
+        if (textos.indexOf(p.texto.trim()) !== -1) return false;
+        return (ahora - p.t) < LLEGADA_VIDA_MS;
+      });
     }
 
     function loopRefresco() {
@@ -2379,8 +2490,26 @@
 
     // ── INIT ──
     document.addEventListener('DOMContentLoaded', function() { initOTP(); });
-    (function() {
+    // PASE (15/09/2026, decisión de Victor: "el camino que conduce a la velocidad"):
+    // una sesión guardada antes de ese día no tiene pase, y sin pase el bridge no
+    // entrega los mensajes. Se pide el código del mail UNA SOLA VEZ (queda anotado en
+    // el navegador): si igual no viniera pase — por ejemplo con Config!B16 vacía — no
+    // se vuelve a pedir en cada recarga, se sigue como antes.
+    var PASE_PEDIDO_KEY = 'chatwshub_pase_pedido';
+    function sesionInicial() {
       var sesion = leerSesion();
+      if (sesion && !sesion.pase) {
+        var yaPedido = false;
+        try { yaPedido = localStorage.getItem(PASE_PEDIDO_KEY) === '1'; } catch (e) {}
+        if (!yaPedido) {
+          try { localStorage.setItem(PASE_PEDIDO_KEY, '1'); localStorage.removeItem(SESSION_KEY); } catch (e) {}
+          return null;   // muestra la pantalla de ingreso
+        }
+      }
+      return sesion;
+    }
+    (function() {
+      var sesion = sesionInicial();
       if (sesion) { entrarConUsuario(sesion); }
     })();
   </script>
