@@ -576,10 +576,19 @@
     var API_URL = "https://script.google.com/macros/s/AKfycbxCmK-VnehLyWa-ULI38WLYjMsxaBR6CS1R0IChm_l3gsPfoeh839ZjyGPv76M2kwQdIw/exec";
     var BRIDGE_URL = "https://bridge.tasks-on.com";
 
-    function api(action, params) {
+    // limiteMs (opcional, 15/09/2026): si Google no termina de contestar en ese tiempo,
+    // se corta la espera y la promesa falla. Sin limiteMs, igual que siempre.
+    // ⚠️ Cortar acá NO cancela la ejecución del lado de Google: sólo deja de esperarla.
+    function api(action, params, limiteMs) {
       var url = API_URL + "?action=" + action;
       if (params) { Object.keys(params).forEach(function(key) { url += "&" + key + "=" + encodeURIComponent(params[key]); }); }
-      return fetch(url).then(function(r) { return r.json(); });
+      if (!limiteMs) return fetch(url).then(function(r) { return r.json(); });
+      var ctrl = new AbortController();
+      var corte = setTimeout(function() { ctrl.abort(); }, limiteMs);
+      return fetch(url, { signal: ctrl.signal })
+        .then(function(r) { return r.json(); })
+        .then(function(j) { clearTimeout(corte); return j; },
+              function(e) { clearTimeout(corte); throw e; });
     }
 
     var contactosGlobal = [], contactoActual = "", telefonoActual = "", timestampActual = 0;
@@ -1604,6 +1613,15 @@
     var ALERTAS_MS = 600000;         // alertas: como mucho cada 10 min detrás de una tanda
     var ultimasAlertas = 0;
     var CARRERA_ESPERAS_MS = [2000, 4000, 8000, 16000];  // reintentos si el bridge se adelantó a la planilla
+    // TIEMPO LÍMITE DEL CICLO (15/09/2026). Prueba controlada de ese día: el P1 escribió
+    // el mensaje en 4 s y el panel tardó 2 min 14 s en mostrarlo. En el log del bridge,
+    // durante esos dos minutos el panel casi no preguntó el sello: estaba TRABADO adentro
+    // de una tanda esperando a Google, que no tenía tiempo límite, y con la bandera
+    // "refrescando" puesta no empezaba otra vuelta — no se enteraba de que el contador
+    // ya había cambiado. Medido el 12/09: ~7 de cada 10 llamadas van por la fila rápida
+    // (1,6-3,3 s) y ~3 por la lenta (33-36 s). Cortar a los 20 s y reintentar a los 2 s
+    // (lo que el ciclo ya hace ante un fallo) tiene buena chance de caer en la rápida.
+    var LIMITE_CICLO_MS = 20000;
     var carreraIntento = 0;
     var proximoRefrescoMs = 0;       // 0 = la espera normal
 
@@ -1818,7 +1836,7 @@
       // Devuelve: true = la pantalla quedó al día · 'igual' = la planilla no cambió ·
       // false = respuesta rara (se reintenta sola). loopRefresco usa 'igual' para
       // detectar la CARRERA con el bridge.
-      return api("getSello", params).then(function(sel) {
+      return api("getSello", params, LIMITE_CICLO_MS).then(function(sel) {
         if (!sel || typeof sel.n === 'undefined') return false;   // respuesta rara: se reintenta sola
         var sello = sel.n + '/' + sel.c + '/' + sel.t;
         var cambio  = (sello !== selloVisto);
