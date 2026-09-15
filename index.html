@@ -700,22 +700,41 @@
       }
       var btn = document.getElementById('btnEnviar');
       btn.innerHTML = '<span class="spin-inline"></span>Enviando...'; btn.disabled = true;
-      api("sendCode", { email: email }).then(function(data) {
+      // (15/09/2026) NO ESPERAR A GOOGLE PARA MOSTRAR LOS CASILLEROS. Ese día Victor pidió
+      // el código, el mail LLEGÓ, y la pantalla se quedó girando sin dejarle escribirlo:
+      // Google mandó el mail pero su respuesta al panel quedó trabada en la fila (la misma
+      // falla que los mensajes). A los 4 s se pasa sola a los casilleros; si después
+      // Google dice "no autorizado" o da error, vuelve al paso 1 y lo avisa.
+      var enPaso2 = false;
+      var irAPaso2 = function(texto) {
+        document.getElementById('ls2sub').textContent = texto;
+        if (enPaso2) return;
+        enPaso2 = true;
+        document.getElementById('ls1').classList.remove('active');
+        document.getElementById('ls2').classList.add('active');
+        setTimeout(function(){document.getElementById('otp0').focus();},100);
+      };
+      var adelantar = setTimeout(function() {
+        btn.innerHTML = 'Enviar código'; btn.disabled = false;
+        irAPaso2('Si ' + email + ' está autorizado, te llega un código por mail. Ingresalo a continuación.');
+      }, 4000);
+      api("sendCode", { email: email }, 90000).then(function(data) {
+        clearTimeout(adelantar);
         btn.innerHTML = 'Enviar código'; btn.disabled = false;
         if (data.status === "ok") {
-          document.getElementById('ls2sub').textContent =
-            'Código enviado a ' + email + '. Ingresalo a continuación.';
-          document.getElementById('ls1').classList.remove('active');
-          document.getElementById('ls2').classList.add('active');
-          setTimeout(function(){document.getElementById('otp0').focus();},100);
+          irAPaso2('Código enviado a ' + email + '. Ingresalo a continuación.');
         } else if (data.status === "no-autorizado") {
+          if (enPaso2) { volverPaso1(); enPaso2 = false; }
           errEl.textContent = '❌ Email no autorizado';
         } else {
+          if (enPaso2) { volverPaso1(); enPaso2 = false; }
           errEl.textContent = '❌ ' + (data.mensaje || 'Error');
         }
       }).catch(function() {
+        clearTimeout(adelantar);
         btn.innerHTML = 'Enviar código'; btn.disabled = false;
-        errEl.textContent = '❌ Error de conexión';
+        // Google pudo haber mandado el mail igual (se perdió la respuesta): se deja poner el código.
+        irAPaso2('Google no confirmó el envío a ' + email + '. Si el mail te llega, ingresá el código; si en un minuto no llega, tocá volver y pedilo de nuevo.');
       });
     }
 
@@ -726,7 +745,8 @@
       errEl.textContent = '';
       var btn = document.getElementById('btnVerificar');
       btn.innerHTML = '<span class="spin-inline"></span>Verificando...'; btn.disabled = true;
-      api("verifyCode", { email: email, code: code }).then(function(data) {
+      // (15/09) Con límite: si Google no contesta, se avisa en vez de girar para siempre.
+      api("verifyCode", { email: email, code: code }, 60000).then(function(data) {
         btn.innerHTML = 'Ingresar'; btn.disabled = false;
         if (data.status === "ok") {
           var usuario = { email: email, nombre: data.nombre, rol: data.rol, expira: data.expira || 28800, pase: data.pase || "" };
@@ -738,7 +758,7 @@
         }
       }).catch(function() {
         btn.innerHTML = 'Ingresar'; btn.disabled = false;
-        errEl.textContent = '❌ Error de conexión';
+        errEl.textContent = '❌ Google no respondió a tiempo. Tocá Ingresar para reintentar; si dice "Código incorrecto", pedí uno nuevo.';
       });
     }
 
@@ -1873,6 +1893,9 @@
     function loopRefresco() {
       if (refrescoTimer) { clearTimeout(refrescoTimer); refrescoTimer = null; }
       if (refrescando) { agendarRefresco(SELLO_MS); return; }  // no encimar tandas
+      // (15/09/2026) Sin nadie logueado no se le pregunta nada a Google: con la pantalla de
+      // ingreso abierta, el ciclo sumaba llamadas a la fila justo mientras se pedía el código.
+      if (!usuarioActual || !usuarioActual.email) { agendarRefresco(SELLO_MS); return; }
       var deFondo = document.hidden;
       refrescando = true;
 
