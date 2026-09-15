@@ -599,7 +599,7 @@
     // recargarContactos y unaTandaRefresco.
     var refrescoGen = 0;
     var mensajesVistos = {}, appColor = "#00A884", configData = {}, autoIAactivo = false;
-    var mediaCache = {}, usuarioActual = { email: "", nombre: "", rol: "" }, estadoActual = "Nuevo";
+    var mediaCache = {}, usuarioActual = { email: "", nombre: "", rol: "", pase: "" }, estadoActual = "Nuevo";
     var fichaContactoActual = "";
     var stockCache = [], stockFiltrado = [], stockFichaActual = "";
 
@@ -651,7 +651,10 @@
     }
 
     function entrarConUsuario(usuario) {
-      usuarioActual = { email: usuario.email, nombre: usuario.nombre, rol: usuario.rol };
+      // pase (15/09/2026): el pase sellado que emite verifyCode. Todavía nadie lo pide;
+      // lo va a usar el bridge para entregar los mensajes sin pasar por Google. Una
+      // sesión guardada antes de ese día no lo tiene: hay que salir y volver a entrar.
+      usuarioActual = { email: usuario.email, nombre: usuario.nombre, rol: usuario.rol, pase: usuario.pase || "" };
       document.getElementById('loginScreen').style.display = 'none';
       iniciarApp();
     }
@@ -726,7 +729,7 @@
       api("verifyCode", { email: email, code: code }).then(function(data) {
         btn.innerHTML = 'Ingresar'; btn.disabled = false;
         if (data.status === "ok") {
-          var usuario = { email: email, nombre: data.nombre, rol: data.rol, expira: data.expira || 28800 };
+          var usuario = { email: email, nombre: data.nombre, rol: data.rol, expira: data.expira || 28800, pase: data.pase || "" };
           guardarSesion(usuario);
           entrarConUsuario(usuario);
         } else {
