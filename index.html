@@ -1810,6 +1810,25 @@
         .catch(function() { clearTimeout(t); return null; });   // null = no se pudo
     }
 
+    // MIENTRAS SE ESPERA A GOOGLE, SE SIGUE MIRANDO AL BRIDGE (15/09/2026). Prueba real de
+    // ese día: el primer mensaje entró al instante ("velocidad de rayo") y los siguientes
+    // tardaron ~10 s. El log lo explicó: después del primero arranca la tanda contra Google
+    // (hasta 20 s) y durante ese tiempo el ciclo NO le preguntaba al bridge. Este vigía
+    // consulta /mensajes cada 2 s SÓLO mientras hay una tanda en vuelo, y nunca dos
+    // consultas encimadas. No toca el contador, la carrera ni la tanda: eso sigue siendo
+    // del ciclo. Si el pase no está o fue rechazado, o la pestaña está de fondo, no hace nada.
+    var vigiaTimer = null;
+    var bridgeEnVuelo = false;
+    function vigiaMientrasGoogle() {
+      vigiaTimer = null;
+      if (!refrescando) return;   // Google ya contestó: el ciclo retoma solo
+      if (!bridgeEnVuelo && usuarioActual && usuarioActual.pase && !paseRechazado && !document.hidden) {
+        bridgeEnVuelo = true;
+        preguntarSelloBridge().then(function() { bridgeEnVuelo = false; }, function() { bridgeEnVuelo = false; });
+      }
+      vigiaTimer = setTimeout(vigiaMientrasGoogle, SELLO_MS);
+    }
+
     function fechaCortaDe(ms) {
       var d = new Date(ms);
       return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + ' ' +
@@ -1826,7 +1845,9 @@
       if (!j.mensajes || !j.mensajes.length) return;
       var cambioLista = false, saltarA = '', porTel = {};
       j.mensajes.forEach(function(m) {
-        if (m.id > bitacoraDesde) bitacoraDesde = m.id;
+        // Ya aplicado: pasa si se cruzan dos respuestas (el vigía y el ciclo). No duplicar.
+        if (!(m.id > bitacoraDesde)) return;
+        bitacoraDesde = m.id;
         var tel8 = u8tel(m.tel);
         if (!tel8 || !m.texto) return;
         // La ficha, por teléfono (la llave real). Si hay varias, la más reciente.
@@ -1912,6 +1933,7 @@
 
         // El bridge no contestó (está caído, o el túnel), o cambió algo: se sigue
         // como siempre. RED DE SEGURIDAD: el panel nunca queda ciego por esto.
+        if (!vigiaTimer) vigiaTimer = setTimeout(vigiaMientrasGoogle, SELLO_MS);   // (15/09) mientras tanto, se sigue mirando al bridge
         return tandaConP2(deFondo).then(function(r) {
           // 🔴 EL NUMERO SE DA POR VISTO RECIEN ACA, Y SOLO SI LA TANDA SALIO BIEN.
           // BUG DEL 12/09 (arreglado el mismo dia): antes se guardaba ANTES de pedir
