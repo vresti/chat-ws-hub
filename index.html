@@ -769,26 +769,52 @@
       document.getElementById('ls1').classList.add('active');
     }
 
+    // ── ARRANQUE EN 3 LLAMADAS (15/09/2026) ──
+    // Antes, abrir la app eran 7 llamadas a Google: configuración, IA automática, lista,
+    // alertas, guardia, la lista OTRA VEZ (la primera vuelta del ciclo) y el primer chat.
+    // Apps Script las atiende de a una, así que pedirlas juntas no las apuraba: las
+    // encolaba. Ahora:
+    //   1) getInicio: configuración + IA + guardia + alertas, en una sola llamada;
+    //   2) la lista (con la precarga) la trae la primera vuelta del ciclo, que arranca YA;
+    //   3) el primer chat que se abre solo (ya visible al instante por la precarga).
+    // Si getInicio falla o el P2 todavía no la tiene, se vuelve solo al arranque de antes.
     function iniciarApp() {
+      ultimasAlertas = Date.now();   // las alertas vienen en getInicio: la tanda no las repite
+      api("getInicio", { email: usuarioActual.email }, 60000).then(function(ini) {
+        if (!ini || (!ini.config && !ini.errConfig)) throw new Error('el P2 no tiene getInicio');
+        if (ini.config) aplicarConfig(ini.config);
+        if (typeof ini.autoIA !== 'undefined') aplicarAutoIA(ini.autoIA);
+        if (ini.guardia) aplicarGuardia(ini.guardia);
+        else { guardiaActiva = null; pintarGuardia(null, 'Avisos: sin respuesta del servidor'); }
+        if (ini.alertas) aplicarAlertas(ini.alertas);
+      }).catch(function() { arranqueViejo(); });
+      // La lista NO se pide acá: la trae la primera vuelta del ciclo. Se arranca ya.
+      loopRefresco();
+    }
+
+    function arranqueViejo() {
       api("getConfig").then(function(cfg) {
-        configData = cfg; appColor = cfg.color || "#00A884";
-        // Sin el nombre de la empresa: ya esta en la pantalla de bienvenida y aca solo
-        // robaba ancho a los botones del header. Queda telefono · usuario.
-        document.getElementById('empresaInfo').textContent = (cfg.telefono ? cfg.telefono + ' · ' : '') + usuarioActual.nombre;
-        document.getElementById('welcomeTitle').textContent = cfg.empresa || 'Chat WS Hub';
-        document.querySelectorAll('.badge').forEach(function(el) { el.style.background = appColor; });
-        document.getElementById('welcomeIcon').style.background = appColor;
-        document.getElementById('btnSend').style.background = appColor;
-        api("getAutoIA").then(function(val) {
-          autoIAactivo = val;
-          if (autoIAactivo) { var b = document.getElementById('btnAutoIA'); b.style.background = '#7C3AED'; b.style.color = 'white'; b.style.borderColor = '#7C3AED'; }
-        });
+        aplicarConfig(cfg);
+        api("getAutoIA").then(aplicarAutoIA);
       });
-      var genIni = ++refrescoGen;
-      api("getContactos").then(function(data) { if (genIni !== refrescoGen) return; contactosGlobal = data; renderContactos(data); })
-      .catch(function() { document.getElementById('contactsList').innerHTML = '<div class="loading" style="color:#ff6b6b;">Error</div>'; });
       cargarAlertas();
       cargarGuardia();
+    }
+
+    function aplicarConfig(cfg) {
+      configData = cfg; appColor = cfg.color || "#00A884";
+      // Sin el nombre de la empresa: ya esta en la pantalla de bienvenida y aca solo
+      // robaba ancho a los botones del header. Queda telefono · usuario.
+      document.getElementById('empresaInfo').textContent = (cfg.telefono ? cfg.telefono + ' · ' : '') + usuarioActual.nombre;
+      document.getElementById('welcomeTitle').textContent = cfg.empresa || 'Chat WS Hub';
+      document.querySelectorAll('.badge').forEach(function(el) { el.style.background = appColor; });
+      document.getElementById('welcomeIcon').style.background = appColor;
+      document.getElementById('btnSend').style.background = appColor;
+    }
+
+    function aplicarAutoIA(val) {
+      autoIAactivo = val;
+      if (autoIAactivo) { var b = document.getElementById('btnAutoIA'); b.style.background = '#7C3AED'; b.style.color = 'white'; b.style.borderColor = '#7C3AED'; }
     }
 
     // ── STK ──
@@ -1038,13 +1064,14 @@
     // ── ALERTAS ──
     function cargarAlertas() {
       ultimasAlertas = Date.now();
-      return api("getAlertas").then(function(alertas) {
-        var count = alertas.length;
-        var badge = document.getElementById('alertasCount');
-        if (count > 0) { badge.textContent = count > 9 ? '9+' : count; badge.style.display = 'flex'; }
-        else { badge.style.display = 'none'; }
-        renderAlertas(alertas);
-      });
+      return api("getAlertas").then(aplicarAlertas);
+    }
+    function aplicarAlertas(alertas) {
+      var count = alertas.length;
+      var badge = document.getElementById('alertasCount');
+      if (count > 0) { badge.textContent = count > 9 ? '9+' : count; badge.style.display = 'flex'; }
+      else { badge.style.display = 'none'; }
+      renderAlertas(alertas);
     }
     function renderAlertas(alertas) {
       var html = '';
@@ -1518,23 +1545,25 @@
 
     function cargarGuardia() {
       if (!usuarioActual.email) return;
-      api("getMiGuardia", { email: usuarioActual.email }).then(function(r) {
-        if (!r || r.status !== "ok") {
-          guardiaActiva = null; pintarGuardia(null, 'Avisos todavia no configurados en el servidor'); return;
-        }
-        if (!r.tieneCelular) {
-          guardiaActiva = null; pintarGuardia(null, 'Falta cargar tu celular en la hoja Usuarios (col G)'); return;
-        }
-        guardiaActiva = (r.avisos === "SI");
-        var det = '';
-        if (r.guardiaHasta) {
-          det = 'De guardia hasta ' + new Date(r.guardiaHasta).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
-        }
-        if (guardiaActiva && !r.deGuardia) det = 'Guardia vencida: volve a entrar a la app';
-        pintarGuardia(guardiaActiva, det);
-      }).catch(function() {
+      api("getMiGuardia", { email: usuarioActual.email }).then(aplicarGuardia).catch(function() {
         guardiaActiva = null; pintarGuardia(null, 'Avisos: sin respuesta del servidor');
       });
+    }
+
+    function aplicarGuardia(r) {
+      if (!r || r.status !== "ok") {
+        guardiaActiva = null; pintarGuardia(null, 'Avisos todavia no configurados en el servidor'); return;
+      }
+      if (!r.tieneCelular) {
+        guardiaActiva = null; pintarGuardia(null, 'Falta cargar tu celular en la hoja Usuarios (col G)'); return;
+      }
+      guardiaActiva = (r.avisos === "SI");
+      var det = '';
+      if (r.guardiaHasta) {
+        det = 'De guardia hasta ' + new Date(r.guardiaHasta).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+      }
+      if (guardiaActiva && !r.deGuardia) det = 'Guardia vencida: volve a entrar a la app';
+      pintarGuardia(guardiaActiva, det);
     }
 
     function toggleGuardia() {
